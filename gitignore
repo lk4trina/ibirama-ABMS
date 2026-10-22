@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+# imagens e dados pesados gerados pelos scripts (podem ser regerados)
+dados/fundo_mapa.png
+dados/predios.*
+resultados/mapa_interativo.html
+resultados/*.csv
+resultados/analise/
+# arquivos do GAMA
+.metadata/
+*.log
+cache/
