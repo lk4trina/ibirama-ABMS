@@ -1,31 +1,22 @@
 """
-SIMULADOR (versão Python) - Tráfego e dispersão em Ibirama sob eventos adversos
-===============================================================================
+Simulador em Python do tráfego em Ibirama sob eventos adversos (alagamento, deslizamento e erosão).
 
-Para que serve
-  * Plano B / verificador do modelo GAMA: aplica as MESMAS regras (mesmos agentes, eventos,
-    parâmetros e métricas) e roda em segundos, sem instalar nada além do Python.
-  * Diferença técnica: aqui o movimento é "mesoscópico" (o agente leva um tempo para atravessar
-    cada trecho, calculado na entrada do trecho). No GAMA o agente se move passo a passo no mapa.
-    As regras de decisão são as mesmas; os números absolutos de tempo podem diferir um pouco.
+Aplica as mesmas regras do modelo GAMA (agentes, eventos, parâmetros e métricas), mas roda mais
+rápido. A diferença é o movimento: aqui o agente leva um tempo para atravessar cada trecho,
+calculado na entrada dele; no GAMA ele anda passo a passo no mapa.
 
-Como o modelo funciona (resumo)
-  1. Cada agente (carro, moto ou pedestre) tem origem, destino, horário de partida e um PERFIL de
-     risco (cauteloso / normal / arrojado) que define: quanto evita áreas de risco ao escolher a
-     rota, quanto tempo espera quando fica sem rota e se aceita atravessar um trecho perigoso.
-  2. Os polígonos do mapa de risco viram EVENTOS: cada polígono do tipo escolhido é ativado com
-     probabilidade que depende do grau (Médio/Alto/Muito Alto) e da severidade do cenário. As ruas
-     a até 40 m do polígono são afetadas:
-        alagamento : lâmina d'água sobe, fica e desce; acima de um limite por modal o trecho fecha
-        deslizamento: trecho bloqueado até o fim da simulação
-        erosão      : trecho degradado (mais lento) ou, com probabilidade, interrompido
-  3. Agentes NÃO sabem do bloqueio de antemão. Eles descobrem (a) vendo o trecho bloqueado à frente
-     ou (b) recebendo o aviso da Defesa Civil (fração do cenário "info"). Quem descobre refaz a rota.
-  4. Sem rota possível: espera; esgotada a paciência, volta para a origem. Quem nunca saiu de casa
-     "desiste" da viagem; quem parou no meio do caminho e não consegue nem voltar fica "preso".
+Resumo do modelo:
+  1. Cada agente (carro, moto ou pedestre) tem origem, destino, horário de partida e um perfil de
+     risco (cauteloso, normal ou arrojado), que define o quanto ele evita áreas de risco, quanto
+     espera quando fica sem rota e se aceita atravessar um trecho perigoso.
+  2. Cada polígono do mapa de risco pode virar um evento, com probabilidade que depende do grau e
+     da severidade. As ruas a até 40 m do polígono são afetadas.
+  3. Os agentes não sabem dos bloqueios de antemão: descobrem ao ver o trecho fechado ou ao
+     receber o aviso da Defesa Civil. Quem descobre refaz a rota.
+  4. Sem rota, o agente espera e depois volta para a origem. Se nunca saiu de casa, desiste; se
+     parou no meio do caminho, fica preso.
 
-*** TODOS os valores marcados como HIPÓTESE abaixo são pontos de partida, NÃO medidos. ***
-*** Devem ser calibrados com a Defesa Civil e a pesquisa com moradores.               ***
+Os valores marcados como HIPÓTESE ainda não foram calibrados.
 """
 from __future__ import annotations
 
@@ -45,16 +36,16 @@ from shapely import STRtree
 RAIZ = Path(__file__).resolve().parent.parent
 MODOS = ["carro", "moto", "pedestre"]
 PERFIS = ["cauteloso", "normal", "arrojado"]
-GRID = 300.0  # s: o estado do mundo é recalculado a cada 5 min
+GRID = 300.0  # s (estado das vias atualizado a cada 5 min)
 
 # ------------------------------------------------------------------ PARÂMETROS (HIPÓTESES) ---
 VEL_KMH = {"motorway": 80, "trunk": 60, "primary": 50, "secondary": 50, "tertiary": 40, "unclassified": 30,
            "residential": 30, "living_street": 20, "service": 20, "track": 20}
 VEL_PADRAO_KMH = 30
-VEL_FATOR_MODO = {"carro": 1.0, "moto": 1.1}      # moto um pouco mais rápida no fluxo livre (HIPÓTESE)
+VEL_FATOR_MODO = {"carro": 1.0, "moto": 1.1}      # moto um pouco mais rápida (HIPÓTESE)
 VEL_PEDESTRE = 1.3                                  # m/s
 LIMITE_PROF = {"carro": 0.30, "moto": 0.20, "pedestre": 0.40}   # m de lâmina d'água (HIPÓTESE)
-FATOR_ARRISCAR = 1.5            # passa por trecho "fechado" se prof <= 1,5 x limite (só quem arrisca)
+FATOR_ARRISCAR = 1.5            # quem arrisca passa se prof <= 1,5 x limite
 VEL_ARRISCAR = 0.20             # fração da velocidade ao atravessar trecho perigoso
 BASE_ATIVACAO = {1: 0.25, 2: 0.50, 3: 0.80}         # prob. de ativação por grau (HIPÓTESE)
 SEVERIDADE = {"baixa": 0.4, "media": 0.7, "alta": 1.0}
@@ -66,19 +57,18 @@ RISCO_GRAU = {0: 0.0, 1: 0.33, 2: 0.66, 3: 1.0}
 BETA = {"cauteloso": 2.0, "normal": 1.0, "arrojado": 0.3}        # peso do risco na escolha da rota
 OUSADIA = {"cauteloso": 0.0, "normal": 0.15, "arrojado": 0.70}   # prob. de aceitar atravessar
 ESPERA_MAX_S = {"cauteloso": 3600, "normal": 2400, "arrojado": 1200}
-PERFIL_POR_MODO = {                                              # (caut, normal, arrojado) HIPÓTESE
+PERFIL_POR_MODO = {                                              # (cauteloso, normal, arrojado)
     "carro": (0.30, 0.55, 0.15),
     "moto": (0.15, 0.50, 0.35),
     "pedestre": (0.45, 0.45, 0.10),
 }
 COBERTURA_AVISO = {"local": 0.0, "parcial": 0.5, "amplo": 0.9}
-COMP_VEICULO_M = 8.0            # espaço por veículo REAL na via (capacidade = comprimento / 8)
-# Peso de cada tipo de via para sortear origens (HIPÓTESE: o fluxo se concentra nas vias principais).
-# Calibrar com contagens de tráfego do Demutran/Defesa Civil, se existirem.
+COMP_VEICULO_M = 8.0            # espaço por veículo na via (capacidade = comprimento / 8)
+# peso de cada tipo de via para sortear as origens (HIPÓTESE: mais fluxo nas vias principais)
 PESO_VIA = {"motorway": 10, "trunk": 10, "primary": 8, "secondary": 6, "tertiary": 4,
             "unclassified": 1.5, "residential": 1.5, "living_street": 1.0, "service": 0.5, "track": 0.2}
 PESO_VIA_PADRAO = 1.0
-LENT_MIN = 0.10                 # a lentidão por fila nunca passa de 10x (evita travamento total; HIPÓTESE)
+LENT_MIN = 0.10                 # a fila nunca reduz a velocidade a menos de 10% (HIPÓTESE)
 
 
 @dataclass
@@ -86,13 +76,12 @@ class Params:
     evento: str = "alagamento"      # nenhum | alagamento | deslizamento | erosao | combinado
     severidade: str = "media"       # baixa | media | alta
     info: str = "parcial"           # local | parcial | amplo
-    # Amostra de ~10% da frota de Ibirama (Senatran, dez/2025): 12.733 carros-equivalentes
-    # (automóvel+caminhonete+camioneta+utilitário) e 4.203 motos (motocicleta+motoneta+ciclomotor).
+    # amostra de ~10% da frota de Ibirama (Senatran, dez/2025): 12.733 carros e 4.203 motos
     n_carro: int = 1270
     n_moto: int = 420
-    n_pedestre: int = 250           # HIPÓTESE (não há contagem oficial de pedestres)
-    fracao_amostra: float = 0.10    # cada agente representa 1/fracao veículos reais (ajusta a capacidade das vias)
-    od_ponderada: bool = True       # True: origens sorteadas com peso pelo tipo de via; False: uniforme
+    n_pedestre: int = 250           # HIPÓTESE (sem contagem oficial)
+    fracao_amostra: float = 0.10    # cada agente representa 1/fracao veículos reais
+    od_ponderada: bool = True       # origens sorteadas pelo peso do tipo de via (False = uniforme)
     janela_partida_min: float = 180.0
     inicio_evento_min: float = 45.0
     atraso_aviso_min: float = 10.0
@@ -103,7 +92,7 @@ class Params:
 
 # ------------------------------------------------------------------------------------ MUNDO ---
 class Mundo:
-    """Rede viária + polígonos de risco + pontos críticos (carregados uma vez só)."""
+    """Rede viária, polígonos de risco e pontos críticos."""
 
     def __init__(self, vias_shp, riscos_shp, pontos_csv, buffer_m=40.0, seed_mundo=1):
         vias = gpd.read_file(vias_shp)
@@ -123,7 +112,7 @@ class Mundo:
                 continue
             chave = (min(a, b), max(a, b))
             if chave in escolhido and escolhido[chave][0] <= g.length:
-                continue  # trecho paralelo mais longo: descarta
+                continue  # descarta o trecho paralelo mais longo
             escolhido[chave] = (g.length, h, g, a, b, int(cflag))
         veic = []
         for (lg, h, g, a, b, cflag) in escolhido.values():
@@ -147,7 +136,7 @@ class Mundo:
             self.edge_id[(b, a)] = e
         vel = np.array([VEL_KMH.get(h, VEL_PADRAO_KMH) for h in hw]) / 3.6
         self.vel_via = vel
-        self.tempo = {                                  # tempo de percurso livre de cada trecho (s)
+        self.tempo = {                                  # tempo livre de cada trecho (s)
             "carro": self.comp / vel,
             "moto": self.comp / (vel * VEL_FATOR_MODO["moto"]),
             "pedestre": self.comp / VEL_PEDESTRE,
@@ -160,7 +149,7 @@ class Mundo:
         _, lab = connected_components(gv, directed=False)
         grande = np.argmax(np.bincount(lab[np.unique(np.r_[uu, vv])]))
         self.nos_veic = np.where(lab == grande)[0]
-        # peso de cada nó = maior peso entre as vias de carro que chegam nele (para origens ponderadas)
+        # peso do nó = maior peso das vias de carro que chegam nele
         peso_no = np.zeros(self.n)
         np.maximum.at(peso_no, uu, self.peso_via[self.veic_ok])
         np.maximum.at(peso_no, vv, self.peso_via[self.veic_ok])
@@ -168,7 +157,7 @@ class Mundo:
         w = peso_no[self.nos_veic]
         self.p_origem = w / w.sum()
 
-        # polígono -> trechos a até buffer_m
+        # trechos a até buffer_m de cada polígono
         arvore = STRtree(geoms)
         self.edges_poli, self.risco_edge = [], np.zeros(self.E)
         for _, r in self.riscos.iterrows():
@@ -177,7 +166,7 @@ class Mundo:
             self.risco_edge[idx] = np.maximum(self.risco_edge[idx], RISCO_GRAU[int(r.grau_num)])
         self.grau = self.riscos.grau_num.astype(int).values
 
-        # pontos críticos -> nó mais próximo
+        # nó mais próximo de cada ponto crítico
         self.criticos = {}
         from pyproj import Transformer
         px, py = Transformer.from_crs("EPSG:4326", str(vias.crs), always_xy=True).transform(pts.lon.values, pts.lat.values)
@@ -187,7 +176,7 @@ class Mundo:
             d[~np.isin(np.arange(self.n), self.nos_veic)] = np.inf
             self.criticos.setdefault(r.tipo, []).append(int(np.argmin(d)))
 
-        # destinos: pontos críticos + centralidades (mais próximas do centro dos alagamentos) + aleatórios
+        # destinos: pontos críticos, nós perto do centro dos alagamentos e nós aleatórios
         rng = np.random.default_rng(seed_mundo)
         cx, cy = self.riscos[self.riscos.alaga == 1].geometry.centroid.x.mean(), \
             self.riscos[self.riscos.alaga == 1].geometry.centroid.y.mean()
@@ -208,7 +197,7 @@ class Mundo:
 
 # ---------------------------------------------------------------------------------- EVENTOS ---
 class Eventos:
-    """Sorteia quais polígonos ativam e calcula, a cada 5 min, o estado de cada trecho por modal."""
+    """Sorteia os polígonos ativados e calcula o estado de cada trecho por modal."""
 
     def __init__(self, mundo: Mundo, p: Params, rng):
         self.m, self.p = mundo, p
@@ -248,7 +237,7 @@ class Eventos:
                     else:
                         eros_deg[np.ix_(t_ks >= t0, ed)] = True
         self.H = H
-        # estado por modal: fator de velocidade, bloqueado?, atravessável por quem arrisca?
+        # estado por modal: fator de velocidade, bloqueio e se dá para atravessar
         self.f, self.blk, self.cruza = {}, {}, {}
         for m in MODOS:
             th = LIMITE_PROF[m]
@@ -258,7 +247,7 @@ class Eventos:
             ped = m == "pedestre"
             f = np.where(eros_deg, f * FATOR_EROSAO[m], f)
             blk = blk_flood | desl | eros_col
-            # só enchente rasa (e, a pé, deslizamento/colapso) pode ser atravessada por quem arrisca
+            # só alagamento raso (e, a pé, deslizamento/colapso) pode ser atravessado
             nao_cruza = (blk_flood & ~cruz_flood)
             if not ped:
                 nao_cruza = nao_cruza | desl | eros_col
@@ -268,7 +257,7 @@ class Eventos:
         self._versionar()
 
     def _versionar(self):
-        """Versões do "mapa de bloqueios": só mudam quando o conjunto de trechos fechados muda."""
+        """Numera os mapas de bloqueio: a versão muda quando o conjunto de trechos fechados muda."""
         K = self.K
         self.ver_de_k = np.zeros(K, int)
         self.mask_ver = [{m: (self.blk[m][0].copy(), self.cruza[m][0].copy()) for m in MODOS}]
@@ -279,7 +268,7 @@ class Eventos:
             self.ver_de_k[k] = len(self.mask_ver) - 1
 
     def forcar_bloqueio(self, trechos, t_ini_s, atravessavel=False):
-        """Fecha trechos específicos (ex.: ruas que a Defesa Civil confirma que fecham) a partir de t_ini_s."""
+        """Fecha trechos específicos a partir de t_ini_s (usado nos testes)."""
         k0 = self.k(t_ini_s)
         trechos = np.array(trechos, dtype=int)
         for m in MODOS:
@@ -300,7 +289,7 @@ class Agente:
 
 
 def gerar_populacao(mundo: Mundo, p: Params, seed: int, destinos):
-    """A população depende só da SEMENTE (não do evento) -> permite comparar cenário x linha de base."""
+    """A população depende só da semente, para poder comparar com a linha de base."""
     rng = np.random.default_rng(seed)
     ags = []
     cont = itertools.count()
@@ -313,7 +302,7 @@ def gerar_populacao(mundo: Mundo, p: Params, seed: int, destinos):
             a.perfil = PERFIS[rng.choice(3, p=PERFIL_POR_MODO[modo])]
             a.cruza = bool(rng.random() < OUSADIA[a.perfil])
             a.destino = int(rng.choice(destinos))
-            if modo == "pedestre":   # pedestre faz viagens curtas: origem a até 1,5 km do destino
+            if modo == "pedestre":   # pedestre: origem a até 1,5 km do destino
                 d = np.hypot(centro[:, 0] - centro[a.destino, 0], centro[:, 1] - centro[a.destino, 1])
                 cand = np.where((d < 1500) & (d > 100))[0]
                 a.origem = int(rng.choice(cand)) if len(cand) else int(rng.integers(mundo.n))
@@ -344,7 +333,7 @@ class Simulacao:
         self._csr, self._arv = {}, {}
         self.ocup = np.zeros(mundo.E)
         self.passagens = np.zeros(mundo.E)
-        # capacidade em AGENTES: cada agente representa 1/fracao_amostra veículos reais
+        # capacidade em agentes (cada agente representa 1/fracao_amostra veículos)
         self.capac = np.maximum(1.0, mundo.comp / COMP_VEICULO_M * p.fracao_amostra)
         self.cong_n = 0            # nº de entradas de veículos em trechos
         self.cong_r50 = 0          # ... com ocupação >= 50% da capacidade
@@ -352,7 +341,7 @@ class Simulacao:
         self.r_max = 0.0
         self.log = None            # se for uma lista, registra (t, trecho, agente, atravessou_fechado)
 
-    # --- planejamento de rota: árvore de caminhos mínimos a partir do destino -----------------
+    # --- planejamento de rota (caminhos mínimos a partir do destino) ---
     def _grafo(self, ver, modo, perfil, cruza):
         chave = (ver, modo, perfil, cruza)
         if chave in self._csr:
@@ -373,7 +362,7 @@ class Simulacao:
         return g
 
     def _prox(self, a: Agente):
-        """Próximo nó no caminho do agente segundo o MAPA QUE ELE CONHECE (versão a.kv)."""
+        """Próximo nó da rota, segundo o mapa que o agente conhece (versão a.kv)."""
         chave = (a.kv, a.modo, a.perfil, a.cruza, a.destino)
         if chave not in self._arv:
             g = self._grafo(a.kv, a.modo, a.perfil, a.cruza)
@@ -383,7 +372,7 @@ class Simulacao:
             return None
         return int(pred[a.no])
 
-    # --- laço principal (por eventos) --------------------------------------------------------
+    # --- laço principal ---
     def rodar(self):
         m, p, ev = self.m, self.p, self.ev
         fila, cont = [], itertools.count()
@@ -413,7 +402,7 @@ class Simulacao:
             if prox is not None:
                 e = m.edge_id[(a.no, prox)]
                 if ev.blk[a.modo][k][e] and not (a.cruza and ev.cruza[a.modo][k][e]):
-                    # vê o trecho fechado: aprende, refaz a rota com o mapa atual
+                    # viu o trecho fechado: atualiza o mapa e refaz a rota
                     if a.kv != vig_atual or not a.vigilante:
                         a.kv, a.vigilante = vig_atual, True
                         a.replan += 1
@@ -430,7 +419,7 @@ class Simulacao:
                 if a.t_espera > ESPERA_MAX_S[a.perfil]:
                     if not a.voltando and a.no != a.origem:
                         a.voltando, a.destino, a.t_espera = True, a.origem, 0.0
-                    else:   # nunca saiu de casa -> desistiu (seguro); parou no meio do caminho -> preso
+                    else:   # nunca saiu de casa: desistiu; parou no caminho: preso
                         a.resultado, a.t_fim = ("desistiu" if a.dist == 0 else "preso"), t
                         continue
                 heapq.heappush(fila, (t + 300, next(cont), "decide", a))
@@ -467,7 +456,7 @@ class Simulacao:
                 a.resultado = "em_viagem"
         return self
 
-    # --- acessibilidade a pontos críticos no pico do evento ----------------------------------
+    # --- acessibilidade a pontos críticos no pico do evento ---
     def acessibilidade(self):
         m, ev = self.m, self.ev
         k = ev.k((self.p.inicio_evento_min + 90) * 60)
@@ -485,7 +474,7 @@ class Simulacao:
                 out[f"acc_{tipo}_{modo}_tempo_medio_min"] = round(float(d[fin].mean() / 60), 2) if fin.any() else np.nan
         return out
 
-    # --- métricas ----------------------------------------------------------------------------
+    # --- métricas ---
     def metricas(self, ref=None):
         ags = self.ags
         row = dict(asdict(self.p), seed=self.seed, polig_ativos=len(self.ev.ativos),
@@ -547,7 +536,7 @@ def rodar_um(p: Params, seed: int, rede="teste", ref=None):
 if __name__ == "__main__":
     import argparse
     import time
-    ap = argparse.ArgumentParser(description="Roda UMA simulação e mostra o resumo")
+    ap = argparse.ArgumentParser(description="Roda uma simulação e mostra o resumo")
     ap.add_argument("--evento", default="alagamento")
     ap.add_argument("--severidade", default="media")
     ap.add_argument("--info", default="parcial")
