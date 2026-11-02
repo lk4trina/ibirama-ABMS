@@ -1,6 +1,6 @@
 # Simulação de tráfego em Ibirama sob eventos adversos: guia rápido
 
-Disciplina 5OPMSA (UDESC/CEAVI). Agentes: carros, motos e pedestres. Eventos: alagamento, deslizamento e erosão, a partir das 49 áreas de risco da Defesa Civil. (Guia completo: `README.md`.)
+Disciplina 5OPMSA (UDESC/CEAVI). Agentes: carros, motos e pedestres. Eventos: alagamento, deslizamento e erosão, a partir das 49 áreas de risco da Defesa Civil. 
 
 ## Estado atual
 | Parte | Estado |
@@ -79,6 +79,3 @@ Copie a mensagem **inteira** (e a linha apontada) e mande de volta. Erros comuns
 ## O que falta
 1. Coordenadas reais dos pontos críticos.
 2. Respostas da Defesa Civil para calibrar os parâmetros (hipóteses listadas no `README.md`, seção 6).
-3. Confirmar a execução completa no GAMA (ou usar o Python como plano B).
-4. Avisar o professor da ferramenta (GAMA/Python em vez de NetLogo).
-5. Escrever o artigo (parcial em 29/10, final em 12/11): declarar o uso de IA, com o que a IA fez e o que vocês revisaram, e verificar todas as referências.
