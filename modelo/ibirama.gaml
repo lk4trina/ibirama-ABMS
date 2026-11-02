@@ -1,33 +1,30 @@
 /**
- * COMO O MODELO FUNCIONA
- *  - Agentes "viajante": carro, moto ou pedestre, cada um com perfil de risco (cauteloso/normal/arrojado).
- *  - Agentes "via": trechos de rua. Têm estado (livre, degradado, fechado) separado para cada modal.
- *  - Agentes "zona_risco": os 49 polígonos do mapa oficial. Num cenário, cada polígono do tipo de
- *    evento escolhido é ativado com probabilidade que depende do grau (Médio/Alto/Muito Alto).
- *    As vias a até `buffer_m` metros do polígono são afetadas.
- *  - Eventos: alagamento (lâmina d'água sobe, fica, desce), deslizamento (fecha o trecho),
- *    erosão (degrada ou, com probabilidade, interrompe).
- *  - Informação: o agente só refaz a rota quando (a) VÊ um trecho fechado na rota dentro do raio de
- *    visão ou (b) recebe o aviso da Defesa Civil (fração do nível de informação do cenário).
- *  - Sem rota: espera; esgotada a paciência, volta; quem nunca saiu de casa "desiste"; quem para no
- *    meio do caminho e não consegue voltar fica "preso".
+ * Modelo de tráfego e dispersão em Ibirama sob eventos adversos.
+ *  - viajante: carro, moto ou pedestre, com perfil de risco (cauteloso, normal ou arrojado).
+ *  - via: trecho de rua, com estado (livre, degradado ou fechado) para cada modal.
+ *  - zona_risco: os 49 polígonos do mapa oficial. Cada um é ativado com probabilidade que depende
+ *    do grau e da severidade, e afeta as vias a até buffer_m metros.
+ *  - Eventos: alagamento, deslizamento e erosão.
+ *  - O agente só refaz a rota ao ver um trecho fechado na rota ou ao receber o aviso da Defesa Civil.
+ *  - Sem rota, espera e depois volta. Quem nunca saiu de casa desiste e quem parou no caminho fica preso.
  *
- * Todos os valores marcados HIPÓTESE são pontos de partida, não dados medidos.
+ * Os valores marcados como HIPÓTESE não foram medidos.
  */
 model ibirama
 
 global {
 	// ================================ ARQUIVOS DE ENTRADA ====================================
-	string pasta_dados <- "../includes/dados/";   // no GAMA: copie a pasta dados/ inteira para dentro de includes/ do projeto
-	// REDE DE TESTE (sintética). Troque por "vias.shp" e "pontos_criticos.shp" quando tiver os reais.
+	string pasta_dados <- "../includes/dados/";  
+	
+    // rede de teste (sintética); trocar por vias.shp e pontos_criticos.shp para usar a rede real
 	string arquivo_vias <- "vias_teste_SINTETICO.shp";
 	string arquivo_pontos <- "pontos_criticos_TESTE.shp";
+
 	file shape_vias <- shape_file(pasta_dados + arquivo_vias);
 	file shape_riscos <- shape_file(pasta_dados + "riscos.shp");
 	file shape_pontos <- shape_file(pasta_dados + arquivo_pontos);
 	geometry shape <- envelope(shape_vias);
-	// Camadas de fundo (prédios, rios, água, áreas verdes). Só desenho, não afeta a simulação.
-	// Troque para true DEPOIS de rodar scripts/02b_baixar_camadas_mapa.py e copiar predios/agua/rios/verde para includes/dados/
+	// camadas de fundo (só desenho): ligar depois de rodar scripts/02b e copiar os arquivos para includes/dados/
 	bool usar_camadas_mapa <- false;
 	bool usar_fundo_imagem <- false;
 	float step <- 10.0 #s;
@@ -36,16 +33,16 @@ global {
 	string tipo_evento <- "alagamento";   // nenhum | alagamento | deslizamento | erosao | combinado
 	string severidade <- "media";         // baixa | media | alta
 	string info_nivel <- "parcial";       // local | parcial | amplo
-	// Amostra de ~10% da frota de Ibirama (Senatran, dez/2025): 12.733 carros-equivalentes e 4.203 motos.
+	// amostra de ~10% da frota de Ibirama (Senatran, dez/2025)
 	int n_carro <- 1270;
 	int n_moto <- 420;
-	int n_pedestre <- 250;                // HIPÓTESE (não há contagem oficial de pedestres)
-	float fracao_amostra <- 0.10;         // cada agente representa 1/fracao veículos reais (ajusta a capacidade das vias)
-	bool od_ponderada <- true;            // true: origens sorteadas com peso pelo tipo de via; false: uniforme
+	int n_pedestre <- 250;                // HIPÓTESE 
+	float fracao_amostra <- 0.10;         // cada agente representa 1/fracao veículos reais
+	bool od_ponderada <- true;            // origens sorteadas pelo peso do tipo de via (false = uniforme)
 	float janela_partida_min <- 180.0;    // minutos em que as viagens começam
 	float inicio_evento_min <- 45.0;
 	float atraso_aviso_min <- 10.0;       // demora do aviso oficial após o início do evento
-	float horizonte_min <- 480.0;         // duração da simulação (min). Se mudar, ajuste o `until` do batch
+	float horizonte_min <- 480.0;         // duração (min); se mudar, ajustar o until do batch
 	float buffer_m <- 40.0;               // distância polígono-rua para a rua ser afetada
 	float raio_visao <- 60.0;             // distância (m) em que o agente vê um trecho fechado à frente
 
@@ -69,9 +66,9 @@ global {
 	map<string, float> COBERTURA <- ["local"::0.0, "parcial"::0.5, "amplo"::0.9];
 	map<string, float> VEL_MODO <- ["carro"::1.0, "moto"::1.1, "pedestre"::1.0];
 	map<string, float> VEL_CLASSE_KMH <- ["motorway"::80.0, "trunk"::60.0, "primary"::50.0, "secondary"::50.0, "tertiary"::40.0, "unclassified"::30.0, "residential"::30.0, "living_street"::20.0, "service"::20.0, "track"::20.0];
-	// Peso de cada tipo de via para sortear origens (HIPÓTESE: o fluxo se concentra nas vias principais)
+	// peso de cada tipo de via para sortear origens (HIPÓTESE)
 	map<string, float> PESO_VIA <- ["motorway"::10.0, "trunk"::10.0, "primary"::8.0, "secondary"::6.0, "tertiary"::4.0, "unclassified"::1.5, "residential"::1.5, "living_street"::1.0, "service"::0.5, "track"::0.2];
-	float LENT_MIN <- 0.10;               // a lentidão por fila nunca passa de 10x (HIPÓTESE)
+	float LENT_MIN <- 0.10;               // a fila nunca reduz a velocidade a menos de 10% (HIPÓTESE)
 	float VEL_PED <- 1.3;                 // m/s
 	float COMP_VEICULO <- 8.0;            // m de via por veículo (capacidade)
 
@@ -80,11 +77,11 @@ global {
 	float t_aviso <- 0.0;
 	float cobertura_aviso <- 0.0;
 	map<string, graph> cache_grafos <- [];
-	map<string, graph> grafos_v0 <- [];   // mapa "sem bloqueios" (quem não sabe de nada usa este)
+	map<string, graph> grafos_v0 <- [];   // mapa sem bloqueios (usado por quem ainda não sabe de nada)
 	list<point> nos_todos <- [];
 	list<point> nos_veic <- [];
 	list<point> destinos <- [];
-	map<point, float> peso_no <- [];      // peso de cada nó da rede (maior peso entre as vias de carro que chegam nele)
+	map<point, float> peso_no <- [];      // peso de cada nó (maior peso das vias de carro que chegam nele)
 	list<float> pesos_origem <- [];       // peso dos nós de nos_veic, na mesma ordem
 	bool acesso_medido <- false;
 	bool finalizado <- false;
@@ -139,14 +136,14 @@ global {
 		}
 		nos_todos <- remove_duplicates(via accumulate [first(each.shape.points), last(each.shape.points)]);
 
-		// grafos "sem bloqueios" (estado inicial = tudo aberto), um por modal e perfil
+		// grafos sem bloqueios, um por modal e perfil
 		loop m over: MODOS {
 			loop pf over: PERFIS {
 				grafos_v0[m + "|" + pf] <- construir_grafo(m, pf, false);
 			}
 		}
 
-		// nós de onde um carro consegue chegar ao primeiro ponto crítico (evita origens isoladas)
+		// só usa nós de onde um carro chega ao ponto crítico de referência (evita origens isoladas)
 		point referencia <- (one_of(ponto_critico)).location;
 		point no_ref <- nos_todos closest_to referencia;
 		loop v over: (via where (each.veic = 1)) {
@@ -156,7 +153,7 @@ global {
 			if (!(peso_no contains_key pb) or peso_no[pb] < v.peso) { peso_no[pb] <- v.peso; }
 		}
 		list<point> candidatos <- (min(800, length(nos_todos))) among nos_todos;
-		if (od_ponderada) {   // garante que os nós das vias principais (peso >= 4) estejam entre os candidatos
+		if (od_ponderada) {   // inclui os nós das vias principais (peso >= 4)
 			candidatos <- remove_duplicates(candidatos + (nos_todos where ((peso_no contains_key each) and (peso_no[each] >= 4.0))));
 		}
 		graph g0 <- grafos_v0["carro|normal"];
@@ -177,7 +174,7 @@ global {
 		list<point> destinos_criticos <- ponto_critico collect each.no_rede;
 		destinos <- remove_duplicates(destinos_criticos + destinos_extra);
 
-		// população (criada ANTES de sortear eventos, para ser igual entre cenários com a mesma semente)
+		// população (criada antes dos eventos para ser igual entre cenários com a mesma semente)
 		loop m over: MODOS {
 			int n <- (m = "carro") ? n_carro : ((m = "moto") ? n_moto : n_pedestre);
 			create viajante number: n {
@@ -210,7 +207,7 @@ global {
 	}
 
 	// ================================ CICLO GLOBAL ===========================================
-	// A cada 5 min simulados: atualiza o estado dos trechos a partir dos eventos.
+	// a cada 5 min simulados atualiza o estado dos trechos
 	reflex atualizar_eventos when: (cycle mod 30 = 0) {
 		ask via {
 			prof <- 0.0;
@@ -241,13 +238,13 @@ global {
 		}
 	}
 
-	// Acessibilidade a hospital/bombeiros/abrigo no pico do evento (amostra de nós)
+	// acessibilidade a hospital, bombeiros e abrigo no pico do evento (amostra de nós)
 	reflex medir_acesso when: (!acesso_medido and time >= (inicio_evento_min + 90.0) * 60.0) {
 		acesso_medido <- true;
 		list<point> amostra <- (min(150, length(nos_veic))) among nos_veic;
 		loop tp over: ["hospital", "bombeiros", "abrigo"] {
 			list<ponto_critico> pcs <- ponto_critico where (each.tipo = tp);
-			// sem ponto desse tipo (ex.: abrigo ainda não informado): não mede, e o CSV recebe NaN
+			// sem ponto desse tipo (ex.: abrigo): não mede e o CSV recebe NaN
 			loop m over: ["carro", "pedestre"] {
 				if (empty(pcs)) { continue; }
 				graph g <- grafo_atual(m, "normal", false);
@@ -275,7 +272,7 @@ global {
 		}
 	}
 
-	// Fim da simulação: grava uma linha no CSV de resultados
+	// grava uma linha no CSV de resultados no fim da simulação
 	reflex finalizar when: (!finalizado and time >= horizonte_min * 60.0) {
 		finalizado <- true;
 		string linha <- tipo_evento + "," + severidade + "," + info_nivel + "," + seed + "," + length(zona_risco where each.ativa);
@@ -357,7 +354,7 @@ species via {
 		codigo_ant <- codigo;
 	}
 
-	// Estado da via para cada modal, a partir de lâmina d'água, deslizamento e erosão
+	// estado da via para cada modal (lâmina d'água, deslizamento e erosão)
 	action recalcular {
 		loop m over: MODOS {
 			float lim <- LIMITE_PROF[m];
@@ -388,7 +385,7 @@ species via {
 		if (risco > 0) { cor <- rgb(232, 130, 0); }
 		if (prof > 0) { cor <- #deepskyblue; larg <- larg + 1.0; }
 		if (fechada["carro"] and veic = 1) { cor <- #red; larg <- larg + 1.5; }
-		draw shape color: rgb(255, 255, 255, 190) width: larg + 1.6;   // contorno claro: destaca a rua sobre o mapa de fundo
+		draw shape color: rgb(255, 255, 255, 190) width: larg + 1.6;   // contorno claro
 		draw shape color: cor width: larg;
 	}
 }
@@ -413,7 +410,7 @@ species zona_risco {
 	float t_eros <- 0.0;
 	list<via> trechos <- [];
 
-	// Sorteia se cada família de evento deste polígono ocorre neste cenário
+	// sorteia quais eventos deste polígono ocorrem no cenário
 	action sortear {
 		trechos <- via where (each.zonas contains self);
 		float p <- min(1.0, BASE_ATIV[grau_num] * SEV[severidade]);
@@ -448,7 +445,7 @@ species zona_risco {
 		return 0.0;
 	}
 
-	// Empurra o estado atual deste polígono para as vias dele
+	// passa o estado atual do polígono para as vias dele
 	action aplicar {
 		if (ativa) {
 			float h <- profundidade(time);
@@ -513,7 +510,7 @@ species ponto_critico {
 species viajante skills: [moving] {
 	string modo;
 	string perfil;
-	int variante <- rnd(0, 11);           // só para variar a cor do ícone (carro/moto/pedestre)
+	int variante <- rnd(0, 11);           // só para variar o ícone
 	bool cruza <- false;                  // aceita atravessar trecho perigoso
 	point origem;
 	point origem_fixa;
@@ -555,15 +552,14 @@ species viajante skills: [moving] {
 		}
 	}
 
-	// Pede ao mundo (global) o grafo do mapa de bloqueios atual para este agente.
-	// (funções do global não podem ser chamadas direto de dentro de uma species)
+	// pede ao global o grafo atual (funções do global não podem ser chamadas direto de uma species)
 	action pegar_grafo_atual {
 		ask world {
 			myself.meu_grafo <- grafo_atual(myself.modo, myself.perfil, myself.cruza);
 		}
 	}
 
-	// Aviso oficial (ou conhecimento prévio): passa a usar o mapa de bloqueios atual
+	// com o aviso oficial (ou depois de descobrir um bloqueio), passa a usar o mapa atual
 	action atualizar_conhecimento {
 		bool alerta <- (time >= t_aviso) and (u_aviso < cobertura_aviso);
 		if ((alerta or vigilante) and conhecido != versao) {
@@ -575,7 +571,7 @@ species viajante skills: [moving] {
 		}
 	}
 
-	// Vê trecho fechado na própria rota, dentro do raio de visão: descobre e refaz a rota
+	// se vê um trecho fechado da rota dentro do raio de visão, refaz a rota
 	action perceber {
 		if (!vigilante and !empty(rota)) {
 			list<via> fechadas <- rota where (each.fechada[modo] and !(cruza and each.cruzavel[modo]));
@@ -610,7 +606,7 @@ species viajante skills: [moving] {
 		}
 	}
 
-	// Sem rota possível: espera; depois volta; se nem isso, desiste (nunca saiu) ou fica preso
+	// sem rota: espera, depois volta; se não der, desiste (nunca saiu) ou fica preso
 	action esperar {
 		vigilante <- true;
 		t_espera <- t_espera + step;
@@ -671,8 +667,7 @@ species viajante skills: [moving] {
 	}
 
 	aspect default {
-		// Ícones exagerados (o mapa tem ~6 km de largura), girados conforme a direção do movimento.
-		// Halo vermelho = parado, esperando uma rota livre.
+		// ícones ampliados (o mapa tem ~6 km de largura); halo vermelho = esperando rota
 		if (estado in ["viajando", "espera"]) {
 			if (estado = "espera") {
 				draw circle(26) color: rgb(255, 0, 0, 70) border: #red;
@@ -689,7 +684,7 @@ species viajante skills: [moving] {
 }
 
 // ================================================================================ EXPERIMENTOS ====
-// 1) Interativo: abre o mapa, permite mudar os parâmetros e ver os gráficos.
+// 1) interativo: mapa, parâmetros e gráficos
 experiment Interativo type: gui {
 	parameter "Tipo de evento" var: tipo_evento <- "alagamento" among: ["nenhum", "alagamento", "deslizamento", "erosao", "combinado"] category: "Cenário";
 	parameter "Severidade" var: severidade <- "media" among: ["baixa", "media", "alta"] category: "Cenário";
@@ -754,8 +749,8 @@ experiment Interativo type: gui {
 	}
 }
 
-// 2) Em lote: todos os cenários x repetições; grava em includes/resultados_gama.csv (uma linha por execução).
-//    Se mudar `horizonte_min`, mude também o número abaixo (480 min = 28800 s).
+// 2) em lote: todos os cenários x repetições, grava em includes/resultados_gama.csv
+//    (se mudar horizonte_min, mudar também o 28800 abaixo: 480 min = 28800 s)
 experiment Lote type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) {
 	parameter "Tipo de evento" var: tipo_evento among: ["nenhum", "alagamento", "deslizamento", "erosao", "combinado"];
 	parameter "Severidade" var: severidade among: ["baixa", "media", "alta"];
