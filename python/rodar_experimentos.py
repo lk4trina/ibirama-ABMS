@@ -1,12 +1,12 @@
 """
-Executa a bateria de experimentos (todos os cenários x N repetições) e grava um CSV.
+Roda todos os cenários (4 eventos x 3 severidades x 3 níveis de informação, mais a linha de base)
+com N repetições e grava um CSV.
 
-    python python/rodar_experimentos.py                      # 10 repetições, rede de TESTE
+    python python/rodar_experimentos.py
     python python/rodar_experimentos.py --reps 30 --rede real
 
-Cenários: 4 tipos de evento x 3 severidades x 3 níveis de informação = 36, mais a linha de base
-("nenhum"). Cada repetição usa uma semente diferente; a mesma semente gera a MESMA população de
-agentes em todos os cenários, o que permite calcular o atraso de cada agente em relação à linha de base.
+A mesma semente gera a mesma população em todos os cenários, então dá para comparar cada agente
+com a linha de base.
 """
 import argparse
 import itertools
@@ -35,7 +35,7 @@ total = a.reps * (1 + len(EVENTOS) * len(SEVER) * len(INFO))
 feito = 0
 for seed in range(1, a.reps + 1):
     base_t = {}
-    # linha de base: 1 por (seed, info) -- o aviso não muda nada sem evento, mas mantemos o mesmo formato
+    # linha de base (sem evento), uma por nível de informação
     for info in INFO:
         row, tempos = rodar_um(Params(evento="nenhum", info=info), seed, a.rede)
         base_t[info] = tempos
