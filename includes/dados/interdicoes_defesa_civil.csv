@@ -1,0 +1,9 @@
+id,via,bairros,tipo_evento,duracao_min,geometria,status,fonte
+1,Rua Blumenau,Centro e Anchieta,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+2,Rua Guarani,Progresso e Rafael,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+3,Rua Santa Cruz,Progresso e Sellin,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+4,Rua Duque de Caxias,Taquaras,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+5,Rua Marquês do Herval,Bela Vista,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+6,Rua João Aurich,Ponto Chic e Nova Stettin,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+7,Rua Machado de Assis,Bela Vista,nao_informado,nao_informada,nao_disponivel,pendente_associacao_trecho,Defesa Civil de Ibirama
+8,Ponte Ibirama-Apiúna,"BR-470 km 111",nao_informado,nao_informada,nao_disponivel,pendente_geometria,Defesa Civil de Ibirama

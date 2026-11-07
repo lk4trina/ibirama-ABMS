@@ -1,0 +1,29 @@
+tipo,grupo,nome,endereco,lat,lon,precisao,fonte_cadastro,fonte_coordenada
+hospital,hospital,Hospital Dr. Waldomiro Colautti,,-27.062188628256386,-49.515842199795856,informada_equipe,equipe_projeto,equipe_projeto
+bombeiros,bombeiros,Corpo de Bombeiros de Ibirama,,-27.05913484756936,-49.50591786803701,informada_equipe,equipe_projeto,equipe_projeto
+defesa_civil,defesa_civil,Defesa Civil de Ibirama,,-27.063025924633997,-49.5224648985052,informada_equipe,equipe_projeto,equipe_projeto
+escola,educacao,Colégio Hamônia,"Rua Dr. Getúlio Vargas, 454 - Centro",-27.055022999204,-49.519633021913,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,EEB Walmor Ribeiro,"Avenida Missler, 989 - Dalbérgia",-27.035000015532,-49.591201985996,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,EEB Gertrud Aichinger,"Rua Imbúia, 150 - Centro",-27.063415002573,-49.522969019377,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,EEB Eliseu Guilherme,"Rua Dr. Getúlio Vargas, 1545 - Bela Vista",-27.058062989757,-49.528216006946,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,CAESP Mãos de Amor - APAE,"Rua 25 de Julho, 1182 - Centro",-27.059887981536,-49.506936031164,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,CEJA de Ibirama,"Rua 3 de Maio, 365 - Centro",-27.057208644141,-49.516671433428,endereco_interpolado,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Caminho da Estação,"Rua 25 de Julho, 2697 - Centro",-27.071759973164,-49.501816641237,endereco_interpolado,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Christa Sedlacek,"Rua Elisabeth Welschenfelder, 111 - Ponto Chic",-27.058784001069,-49.539096974553,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Paulo André Miguel,"Estrada Leopoldo Schifter, 655 - Nova Stettin",-27.0607,-49.5715,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Bairro Operário,"Rua Rudolfo Koepsel, 246 - Bairro Operário",-27.04650111873,-49.511247097335,endereco_interpolado,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Verônica Keil,Ibirama,-27.0801,-49.5306,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+escola,educacao,Escola Municipal Tancredo Neves,Ibirama,-27.1170821,-49.5268651,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+cei,educacao,Centro de Educação Infantil Lidi Brodwolf,"Rua Adolfo Zaiser, 189 - Bela Vista",-27.044634516269,-49.541110378121,endereco_interpolado,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+cei,educacao,CEI Ruth Schlei,Ponto Chic,-27.0616055,-49.5374897,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+cei,educacao,Centro de Educação Infantil Abelhinha Feliz,"Rua Bahia, 300 - Areado",-27.083046,-49.526013,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+cei,educacao,Centro de Educação Infantil Nova Stettin,"Rua João Aurich, 4188 - Nova Stettin",-27.0575114,-49.5654515,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+cei,educacao,Centro de Educação Infantil Siegolf Radloff,Rua Hermann Aichinger - Centro,-27.0447128,-49.5424593,poi,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+ensino_superior,educacao,Instituto Federal Catarinense - Campus Ibirama,"Rua Santa Cruz, 123 - Bela Vista",-27.049191446269,-49.538274569071,endereco_interpolado,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+ensino_superior,educacao,UDESC - Alto Vale - CEAVI,"Rua Dr. Getúlio Vargas, 2822 - Bela Vista",-27.050157011044,-49.537751008541,ponto_endereco,Prospectei_QEdu_resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,UBS Prefeito Dieter Staudinger - ESF Centro/Padre Anchieta,"Rua Alwin Duwe, 78 - Centro",-27.062377993512,-49.522257982531,ponto_endereco,resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,ESF Ponto Chic,"Rua 1 de Maio, 163 - Ponto Chic",-27.058603016646,-49.538482308755,centro_da_via,resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,ESF Areado - UBS Ribeirão Areado,"Rua Bahia, 50 - Areado",-27.0765851,-49.5261096,centro_do_bairro,resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,ESF Dalbérgia - PSF Dalbérgia,"Avenida Missler, 1879 - Dalbérgia",-27.042811991201,-49.588844994823,ponto_endereco,resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,PSF Serra São Miguel,Rua Santa Catarina - Serra São Miguel,-27.1104,-49.5251,centro_do_bairro,resposta_usuario,ArcGIS_World_Geocoding
+ubs,ubs,PSF Progresso,Endereço não confirmado,-27.0448981,-49.5420113,poi_baixa_confianca,resposta_usuario,ArcGIS_World_Geocoding

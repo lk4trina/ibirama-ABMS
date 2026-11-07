@@ -521,7 +521,7 @@ _MUNDO_CACHE = {}
 def carregar_mundo(rede="teste", buffer_m=40.0):
     if rede in _MUNDO_CACHE:
         return _MUNDO_CACHE[rede]
-    d = RAIZ / "dados"
+    d = RAIZ / "includes" / "dados"
     vias = d / ("vias_teste_SINTETICO.shp" if rede == "teste" else "vias.shp")
     pts = d / ("pontos_criticos_TESTE.csv" if rede == "teste" else "pontos_criticos.csv")
     _MUNDO_CACHE[rede] = Mundo(vias, d / "riscos.shp", pts, buffer_m)

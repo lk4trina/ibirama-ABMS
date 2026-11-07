@@ -8,7 +8,7 @@ Instalação (uma vez):   pip install folium      (já está no requirements.txt
 
 Uso (na pasta raiz do projeto):
     python scripts/06_mapa_interativo.py
-    python scripts/06_mapa_interativo.py --vias dados/vias_teste_SINTETICO.shp --pontos dados/pontos_criticos_TESTE.shp
+    python scripts/06_mapa_interativo.py --vias includes/dados/vias_teste_SINTETICO.shp --pontos includes/dados/pontos_criticos_TESTE.shp
 
 Gera  resultados/mapa_interativo.html  (dê duplo clique). No canto superior direito há o seletor de camadas:
 fundo de ruas, satélite ou relevo, e liga/desliga de cada camada.
@@ -36,7 +36,7 @@ ap.add_argument("--pontos", default=None)
 ap.add_argument("--saida", default=None)
 a = ap.parse_args()
 
-dados = RAIZ / "dados"
+dados = RAIZ / "includes" / "dados"
 riscos_shp = dados / "riscos.shp"
 vias_shp = Path(a.vias) if a.vias else dados / "vias.shp"
 if a.pontos:
