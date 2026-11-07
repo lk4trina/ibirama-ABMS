@@ -18,7 +18,7 @@ model ibirama
 
 global {
 	// ================================ ARQUIVOS DE ENTRADA ====================================
-	string pasta_dados <- "../includes/dados/";   // no GAMA: copie a pasta dados/ inteira para dentro de includes/ do projeto
+	string pasta_dados <- "../includes/dados/";   // dados do projeto (já ficam em includes/dados/; caminho relativo a models/)
 	// Rede viária real e pontos críticos ampliados após consulta à Defesa Civil.
 	string arquivo_vias <- "vias.shp";
 	string arquivo_pontos <- "pontos_criticos.geojson";
@@ -135,10 +135,12 @@ global {
 		create zona_risco from: shape_riscos with: [zid::int(read("id")), grau_num::int(read("grau_num")), alaga::int(read("alaga")), eros::int(read("eros")), desl::int(read("desl")), tipo_txt::string(read("tipo_txt"))];
 		create ponto_critico from: shape_pontos with: [tipo::string(read("tipo")), grupo::string(read("grupo")), nome::string(read("nome")), precisao::string(read("precisao"))];
 		if (usar_camadas_mapa) {
-			create verde from: shape_file(pasta_dados + "verde.shp");
-			create agua from: shape_file(pasta_dados + "agua.shp");
-			create rio from: shape_file(pasta_dados + "rios.shp");
-			create predio from: shape_file(pasta_dados + "predios.shp");
+			// Cada camada só é criada se o shapefile existir, para não quebrar num clone sem esses arquivos
+			// (ex.: predios.* está no .gitignore). Rode scripts/02b_baixar_camadas_mapa.py para gerá-los.
+			if (file_exists(pasta_dados + "verde.shp")) { create verde from: shape_file(pasta_dados + "verde.shp"); }
+			if (file_exists(pasta_dados + "agua.shp")) { create agua from: shape_file(pasta_dados + "agua.shp"); }
+			if (file_exists(pasta_dados + "rios.shp")) { create rio from: shape_file(pasta_dados + "rios.shp"); }
+			if (file_exists(pasta_dados + "predios.shp")) { create predio from: shape_file(pasta_dados + "predios.shp"); }
 		}
 
 		ask zona_risco {
