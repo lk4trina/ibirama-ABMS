@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 # imagens e dados pesados gerados pelos scripts (podem ser regerados)
 includes/dados/fundo_mapa.png
+# a versao LEVE do fundo (poucos MB) e versionada de proposito:
+!includes/dados/fundo_mapa_leve.jpg
 includes/dados/predios.*
 resultados/mapa_interativo.html
 resultados/*.csv
