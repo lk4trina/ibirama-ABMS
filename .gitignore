@@ -1,4 +1,3 @@
-@'
 __pycache__/
 *.pyc
 .venv/
@@ -13,4 +12,3 @@ resultados/analise/
 *.log
 .workspace/
 cache/
-'@ | Set-Content .gitignore -Encoding UTF8
