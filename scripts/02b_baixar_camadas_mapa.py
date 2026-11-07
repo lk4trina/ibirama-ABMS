@@ -6,7 +6,7 @@ do OpenStreetMap e grava shapefiles que o GAMA desenha no fundo da simulação.
 Uso (na pasta raiz do projeto, depois de instalar com  pip install -r requirements.txt):
     python scripts/02b_baixar_camadas_mapa.py
 
-Gera em dados/:  predios.shp  agua.shp  rios.shp  verde.shp   (em metros, UTM 22S)
+Gera em includes/dados/:  predios.shp  agua.shp  rios.shp  verde.shp   (em metros, UTM 22S)
 Depois, no topo do ibirama.gaml, troque
     bool usar_camadas_mapa <- false;
 por
@@ -25,7 +25,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 CRS_METROS = "EPSG:31982"
 MARGEM_M = 700
 
-riscos = gpd.read_file(RAIZ / "dados" / "riscos.shp")
+riscos = gpd.read_file(RAIZ / "includes" / "dados" / "riscos.shp")
 x0, y0, x1, y1 = riscos.total_bounds
 x0, y0, x1, y1 = x0 - MARGEM_M, y0 - MARGEM_M, x1 + MARGEM_M, y1 + MARGEM_M
 caixa_m = box(x0, y0, x1, y1)
@@ -66,7 +66,7 @@ def gravar(g, nome):
         print(f"  {nome}: vazio (gravado um quadrado de 1 m para o GAMA não reclamar)")
     else:
         print(f"  {nome}: {len(g)} objetos")
-    g.to_file(RAIZ / "dados" / nome)
+    g.to_file(RAIZ / "includes" / "dados" / nome)
 
 
 predios = preparar(baixar({"building": True}, "prédios"), "predio", area_min=25.0)
@@ -75,7 +75,7 @@ rios = preparar(baixar({"waterway": ["river", "stream", "canal"]}, "rios e córr
 verde = preparar(baixar({"landuse": ["forest", "grass", "meadow", "village_green"], "natural": ["wood", "scrub", "grassland"],
                          "leisure": ["park", "garden"]}, "áreas verdes"), "verde", area_min=500.0, simplificar=3.0)
 
-print("Gravando shapefiles em dados/ ...")
+print("Gravando shapefiles em includes/dados/ ...")
 gravar(predios, "predios.shp")
 gravar(agua, "agua.shp")
 gravar(rios, "rios.shp")

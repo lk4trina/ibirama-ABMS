@@ -10,7 +10,7 @@ O que faz:
        desl  = deslizamento / queda de blocos / fluxo de detritos / rastejo
      (um polígono pode ter mais de uma família)
   4. Reprojeta para metros (SIRGAS 2000 / UTM 22S, EPSG:31982), porque o GAMA trabalha em metros.
-  5. Grava dados/riscos.shp (para o GAMA) e dados/riscos_wgs84.geojson (para o QGIS / mapas).
+  5. Grava includes/dados/riscos.shp (para o GAMA) e includes/dados/riscos_wgs84.geojson (para o QGIS / mapas).
 
 Como rodar (na pasta raiz do projeto):
     python scripts/01_kmz_para_shapefile.py
@@ -25,9 +25,9 @@ import geopandas as gpd
 from shapely.geometry import Polygon
 
 RAIZ = Path(__file__).resolve().parent.parent
-KMZ = RAIZ / "dados" / "AREAS_DE_RISCO_IBIRAMA.kmz"
-SAIDA_SHP = RAIZ / "dados" / "riscos.shp"
-SAIDA_GEOJSON = RAIZ / "dados" / "riscos_wgs84.geojson"
+KMZ = RAIZ / "includes" / "dados" / "AREAS_DE_RISCO_IBIRAMA.kmz"
+SAIDA_SHP = RAIZ / "includes" / "dados" / "riscos.shp"
+SAIDA_GEOJSON = RAIZ / "includes" / "dados" / "riscos_wgs84.geojson"
 CRS_METROS = "EPSG:31982"  # SIRGAS 2000 / UTM zona 22S (Ibirama fica nesta zona)
 
 K = "{http://www.opengis.net/kml/2.2}"

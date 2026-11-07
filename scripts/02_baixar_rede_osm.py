@@ -1,5 +1,5 @@
 """
-PASSO 2 - Baixa as ruas REAIS de Ibirama (OpenStreetMap) e grava dados/vias.shp.
+PASSO 2 - Baixa as ruas REAIS de Ibirama (OpenStreetMap) e grava includes/dados/vias.shp.
 *** Precisa de internet. Rode no SEU computador. ***
 
 Instalação (uma vez):
@@ -31,7 +31,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 CRS_METROS = "EPSG:31982"
 MARGEM_M = 700
 
-riscos = gpd.read_file(RAIZ / "dados" / "riscos.shp")  # já em metros
+riscos = gpd.read_file(RAIZ / "includes" / "dados" / "riscos.shp")  # já em metros
 x0, y0, x1, y1 = riscos.total_bounds
 caixa = gpd.GeoSeries.from_xy([x0 - MARGEM_M, x1 + MARGEM_M], [y0 - MARGEM_M, y1 + MARGEM_M], crs=CRS_METROS).to_crs(4326)
 oeste, sul = caixa.x.min(), caixa.y.min()
@@ -59,6 +59,6 @@ arestas["pedest"] = (~arestas.highway.isin(NAO_PEDESTRE)).astype(int)
 arestas = arestas.to_crs(CRS_METROS)
 arestas["comp"] = arestas.geometry.length.round(1)
 vias = arestas[["highway", "carro", "pedest", "comp", "geometry"]]
-vias.to_file(RAIZ / "dados" / "vias.shp")
-print(f"{len(vias)} trechos gravados em dados/vias.shp")
+vias.to_file(RAIZ / "includes" / "dados" / "vias.shp")
+print(f"{len(vias)} trechos gravados em includes/dados/vias.shp")
 print(vias.highway.value_counts().head(10).to_string())

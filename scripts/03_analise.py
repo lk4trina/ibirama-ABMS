@@ -28,7 +28,7 @@ from scipy import stats
 arq = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "resultados" / "resultados_python_real.csv"
 saida = arq.parent / "analise"
 saida.mkdir(exist_ok=True)
-# Colunas do CSV do GAMA (a ordem é a mesma gravada por modelo/ibirama.gaml, que não grava cabeçalho)
+# Colunas do CSV do GAMA (a ordem é a mesma gravada por models/ibirama.gaml, que não grava cabeçalho)
 COLUNAS_GAMA = ["evento", "severidade", "info", "seed", "polig_ativos"]
 for _m in ("carro", "moto", "pedestre"):
     COLUNAS_GAMA += [f"{_m}_{c}" for c in ("n", "concluiu_pct", "voltou_pct", "desistiu_pct", "preso_pct", "emviagem_pct",

@@ -1,0 +1,7 @@
+id,nome,tipo,observacao,status,fonte
+1,Rua Blumenau,via_principal,,pendente_associacao_rede,Defesa Civil de Ibirama
+2,Rua XV de Novembro,via_principal,,pendente_associacao_rede,Defesa Civil de Ibirama
+3,SC-340,via_principal,,pendente_associacao_rede,Defesa Civil de Ibirama
+4,Rua Marquês do Herval,via_principal,,pendente_associacao_rede,Defesa Civil de Ibirama
+5,Rua Dr. Getúlio Vargas,via_principal,,pendente_associacao_rede,Defesa Civil de Ibirama
+6,Ponte Ibirama-Apiúna,ponte,"BR-470 km 111; alternativa distante pela Serra da Guaricana, via Ascurra e Sellin",pendente_geometria,Defesa Civil de Ibirama

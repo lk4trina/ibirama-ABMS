@@ -11,7 +11,7 @@ Uso (na pasta raiz do projeto):
     python scripts/05_gerar_fundo_mapa.py --fonte satelite   # imagem de satélite
     python scripts/05_gerar_fundo_mapa.py --zoom 16 --largura 4000   # mais detalhe (mais lento)
 
-Gera  dados/fundo_mapa.png  cobrindo EXATAMENTE a extensão da rede (dados/vias.shp).
+Gera  includes/dados/fundo_mapa.png  cobrindo EXATAMENTE a extensão da rede (includes/dados/vias.shp).
 Depois: copie o arquivo para Ibirama/includes/dados/ e, no topo do ibirama.gaml, troque
     bool usar_fundo_imagem <- false;     por     bool usar_fundo_imagem <- true;
 (e deixe  usar_camadas_mapa  em false, para os desenhos vetoriais não cobrirem a imagem).
@@ -37,18 +37,18 @@ import matplotlib.pyplot as plt  # noqa: E402
 RAIZ = Path(__file__).resolve().parent.parent
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--vias", default=None, help="shapefile das ruas (padrão: dados/vias.shp)")
+ap.add_argument("--vias", default=None, help="shapefile das ruas (padrão: includes/dados/vias.shp)")
 ap.add_argument("--fonte", default="ruas", choices=["ruas", "claro", "relevo", "satelite"])
 ap.add_argument("--zoom", type=int, default=15)
 ap.add_argument("--largura", type=int, default=3000, help="largura da imagem em pixels")
 ap.add_argument("--saida", default=None)
 a = ap.parse_args()
 
-vias_shp = Path(a.vias) if a.vias else RAIZ / "dados" / "vias.shp"
+vias_shp = Path(a.vias) if a.vias else RAIZ / "includes" / "dados" / "vias.shp"
 if not vias_shp.exists():
     sys.exit(f"Não encontrei {vias_shp}. Rode antes o scripts/02_baixar_rede_osm.py "
-             f"(ou use --vias dados/vias_teste_SINTETICO.shp para testar).")
-saida = Path(a.saida) if a.saida else RAIZ / "dados" / "fundo_mapa.png"
+             f"(ou use --vias includes/dados/vias_teste_SINTETICO.shp para testar).")
+saida = Path(a.saida) if a.saida else RAIZ / "includes" / "dados" / "fundo_mapa.png"
 
 import contextily as ctx  # noqa: E402
 

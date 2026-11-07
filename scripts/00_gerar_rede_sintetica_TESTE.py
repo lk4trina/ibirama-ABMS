@@ -7,8 +7,8 @@ passando por cada polígono de risco) na mesma região do mapa de risco real, co
 de arquivo da rede real. Assim dá para testar o modelo antes de ter as ruas de verdade.
 
 Gera:
-    dados/vias_teste_SINTETICO.shp          (ruas, UTM 22S)
-    dados/pontos_criticos_TESTE.csv/.shp    (hospital/bombeiros/abrigos de MENTIRA)
+    includes/dados/vias_teste_SINTETICO.shp          (ruas, UTM 22S)
+    includes/dados/pontos_criticos_TESTE.csv/.shp    (hospital/bombeiros/abrigos de MENTIRA)
 Uso:
     python scripts/00_gerar_rede_sintetica_TESTE.py
 """
@@ -26,7 +26,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 random.seed(7)
 np.random.seed(7)
 
-riscos = gpd.read_file(RAIZ / "dados" / "riscos.shp")
+riscos = gpd.read_file(RAIZ / "includes" / "dados" / "riscos.shp")
 x0, y0, x1, y1 = riscos.total_bounds
 x0, y0, x1, y1 = x0 - 300, y0 - 300, x1 + 300, y1 + 300
 PASSO = 220.0
@@ -97,7 +97,7 @@ G = G.subgraph(maior).copy()
 
 linhas = [dict(highway=d["hw"], carro=1, pedest=1, comp=round(d["geom"].length, 1), geometry=d["geom"]) for _, _, d in G.edges(data=True)]
 vias = gpd.GeoDataFrame(linhas, crs="EPSG:31982")
-vias.to_file(RAIZ / "dados" / "vias_teste_SINTETICO.shp")
+vias.to_file(RAIZ / "includes" / "dados" / "vias_teste_SINTETICO.shp")
 
 # --- pontos críticos de MENTIRA (substituir pelos reais quando a Defesa Civil responder) ----
 nos_l = np.array(list(G.nodes))
@@ -121,9 +121,9 @@ from pyproj import Transformer
 df_pts = pd.DataFrame(pts, columns=["tipo", "nome", "x", "y"])
 lon, lat = Transformer.from_crs("EPSG:31982", "EPSG:4326", always_xy=True).transform(df_pts.x.values, df_pts.y.values)
 df_pts["lat"], df_pts["lon"] = lat.round(6), lon.round(6)
-df_pts[["tipo", "nome", "lat", "lon"]].to_csv(RAIZ / "dados" / "pontos_criticos_TESTE.csv", index=False)
+df_pts[["tipo", "nome", "lat", "lon"]].to_csv(RAIZ / "includes" / "dados" / "pontos_criticos_TESTE.csv", index=False)
 gpd.GeoDataFrame(df_pts[["tipo", "nome"]], geometry=gpd.points_from_xy(df_pts.x, df_pts.y), crs="EPSG:31982").to_file(
-    RAIZ / "dados" / "pontos_criticos_TESTE.shp")
+    RAIZ / "includes" / "dados" / "pontos_criticos_TESTE.shp")
 
 print(f"Rede sintética: {G.number_of_nodes()} nós, {G.number_of_edges()} trechos "
       f"({extras} ruas extras para cobrir polígonos de risco)")
