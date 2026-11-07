@@ -29,8 +29,13 @@ global {
 	// Camadas de fundo (prédios, rios, água, áreas verdes). Só desenho, não afeta a simulação.
 	// Troque para true DEPOIS de rodar scripts/02b_baixar_camadas_mapa.py e copiar predios/agua/rios/verde para includes/dados/
 	bool usar_camadas_mapa <- false;
-	bool usar_fundo_imagem <- file_exists(pasta_dados + "fundo_mapa.png");
+	// Fundo em imagem: prefere a versão leve (fundo_mapa_leve.jpg, versionada) se existir; senão o PNG
+	// grande (fundo_mapa.png, fora do Git); se nenhuma existir, cai no fundo vetorial. Nunca é true fixo.
+	string arquivo_fundo <- file_exists(pasta_dados + "fundo_mapa_leve.jpg") ? "fundo_mapa_leve.jpg"
+		: (file_exists(pasta_dados + "fundo_mapa.png") ? "fundo_mapa.png" : "");
+	bool usar_fundo_imagem <- arquivo_fundo != "";
 	float step <- 10.0 #s;
+	bool pausar_no_fim <- false;   // só visual: o experimento Interativo liga isto para pausar aos horizonte_min
 
 	// ================================ PARÂMETROS DO CENÁRIO ==================================
 	string tipo_evento <- "alagamento";   // nenhum | alagamento | deslizamento | erosao | combinado
@@ -331,6 +336,7 @@ global {
 		}
 		save (linha + "\n") to: "../includes/resultados_gama_dc.csv" format: "text" rewrite: false;
 		write "Simulação concluída. Linha gravada em includes/resultados_gama_dc.csv";
+		if (pausar_no_fim) { do pause; }   // só no Interativo (no Lote, pausar_no_fim fica false)
 	}
 }
 
@@ -537,10 +543,12 @@ species ponto_critico {
 	string precisao;
 	point no_rede;
 	aspect default {
+		// Cores distintas por grupo (educação e UBS diferentes de abrigo); ver legenda no mapa.
 		rgb cor_ponto <- (grupo = "hospital") ? #red
 			: ((grupo = "bombeiros") ? #orangered
 			: ((grupo = "defesa_civil") ? #purple
-			: ((grupo = "ubs") ? #magenta : #green)));
+			: ((grupo = "ubs") ? #magenta
+			: ((grupo = "educacao") ? rgb(0, 110, 220) : #green))));   // educação=azul, abrigo/outros=verde
 		draw triangle(120) color: cor_ponto border: #black;
 	}
 }
@@ -742,12 +750,13 @@ experiment Interativo type: gui {
 	parameter "Há rede energizada" var: rede_energizada <- false category: "Evento";
 	parameter "Duração da erosão (min, hipótese)" var: duracao_erosao_min <- 480.0 min: 5.0 max: 480.0 category: "Evento";
 	parameter "Raio de visão (m)" var: raio_visao <- 60.0 min: 10.0 max: 300.0 category: "Agentes";
+	parameter "Pausar no fim (480 min)" var: pausar_no_fim <- true category: "Agentes";
 
 	output {
-		display "Mapa" background: rgb(232, 240, 222) {
+		display "Mapa" type: 3d axes: false background: rgb(232, 240, 222) {
 			graphics "fundo" refresh: false {
 				if (usar_fundo_imagem) {
-					draw image_file(pasta_dados + "fundo_mapa.png") at: world.location size: {world.shape.width, world.shape.height};
+					draw image_file(pasta_dados + arquivo_fundo) at: world.location size: {world.shape.width, world.shape.height};
 				}
 			}
 			species verde refresh: false;
@@ -758,7 +767,7 @@ experiment Interativo type: gui {
 			species zona_risco;
 			species ponto_critico;
 			species viajante;
-			overlay position: {5, 5} size: {250 #px, 215 #px} background: #black transparency: 0.35 border: #black rounded: true {
+			overlay position: {5, 5} size: {250 #px, 350 #px} background: #black transparency: 0.35 border: #black rounded: true {
 				int h <- int(time / 3600);
 				int mi <- (int(time) mod 3600) div 60;
 				draw "Tempo simulado: " + h + " h " + mi + " min" at: {10 #px, 20 #px} color: #white font: font("SansSerif", 12, #bold);
@@ -776,17 +785,49 @@ experiment Interativo type: gui {
 				draw "Rua alagada" at: {44 #px, 160 #px} color: #white font: font("SansSerif", 11, #plain);
 				draw line([{14 #px, 174 #px}, {34 #px, 174 #px}]) color: #red width: 3;
 				draw "Rua fechada (carro)" at: {44 #px, 178 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw "Halo vermelho = parado esperando rota" at: {10 #px, 200 #px} color: #lightgray font: font("SansSerif", 10, #plain);
+				draw "Halo vermelho = parado esperando rota" at: {10 #px, 198 #px} color: #lightgray font: font("SansSerif", 10, #plain);
+				// Legenda dos pontos críticos (mesmas cores do triângulo no mapa)
+				draw "Pontos críticos:" at: {10 #px, 222 #px} color: #white font: font("SansSerif", 11, #bold);
+				draw triangle(13 #px) at: {24 #px, 238 #px} color: #red border: #black;
+				draw "Hospital" at: {44 #px, 242 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 256 #px} color: #orangered border: #black;
+				draw "Bombeiros" at: {44 #px, 260 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 274 #px} color: #purple border: #black;
+				draw "Defesa Civil" at: {44 #px, 278 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 292 #px} color: rgb(0, 110, 220) border: #black;
+				draw "Educação (escolas, CEIs, universidade)" at: {44 #px, 296 #px} color: #white font: font("SansSerif", 10, #plain);
+				draw triangle(13 #px) at: {24 #px, 310 #px} color: #magenta border: #black;
+				draw "UBS" at: {44 #px, 314 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 328 #px} color: #green border: #black;
+				draw "Abrigo" at: {44 #px, 332 #px} color: #white font: font("SansSerif", 11, #plain);
 			}
 		}
-		display "Desfechos" refresh: every(10 #cycles) {
-			chart "Situação dos agentes" type: series {
-				data "Em viagem" value: viajante count (each.estado = "viajando") color: #blue;
-				data "Esperando rota" value: viajante count (each.estado = "espera") color: #black;
-				data "Concluíram" value: viajante count (each.estado = "concluiu") color: #green;
-				data "Voltaram" value: viajante count (each.estado = "voltou") color: #orange;
-				data "Desistiram" value: viajante count (each.estado = "desistiu") color: #gray;
-				data "Presos" value: viajante count (each.estado = "preso") color: #red;
+		// Atualiza a cada 60 ciclos (= 10 min simulados) para não travar nem criar escala gigante ao acelerar.
+		display "Desfechos" type: 2d background: #white refresh: every(60 #cycles) {
+			// Em cima: os três estados principais, em % do total de agentes, escala fixa 0–100.
+			chart "Situação dos agentes (%)" type: series
+				size: {1.0, 0.55} position: {0.0, 0.0}
+				x_serie: (time / 60.0) x_range: 480 x_tick_unit: 60
+				x_label: "tempo simulado (min) · evento começa aos " + int(inicio_evento_min) + " min"
+				y_range: {0, 100} y_label: "% dos agentes"
+				series_label_position: legend
+				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
+			{
+				data "Em viagem" value: 100.0 * (viajante count (each.estado = "viajando")) / max(1, length(viajante)) color: rgb(0, 114, 178) marker: false thickness: 2;
+				data "Esperando rota" value: 100.0 * (viajante count (each.estado = "espera")) / max(1, length(viajante)) color: rgb(213, 94, 0) marker: false thickness: 2;
+				data "Concluíram" value: 100.0 * (viajante count (each.estado = "concluiu")) / max(1, length(viajante)) color: rgb(0, 158, 115) marker: false thickness: 2;
+			}
+			// Embaixo: desfechos menos frequentes, com escala própria (automática), para não ficarem colados no zero.
+			chart "Voltaram / desistiram / presos (%)" type: series
+				size: {1.0, 0.45} position: {0.0, 0.55}
+				x_serie: (time / 60.0) x_range: 480 x_tick_unit: 60
+				x_label: "tempo simulado (min)" y_label: "% dos agentes"
+				series_label_position: legend
+				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
+			{
+				data "Voltaram" value: 100.0 * (viajante count (each.estado = "voltou")) / max(1, length(viajante)) color: rgb(230, 159, 0) marker: false thickness: 2;
+				data "Desistiram" value: 100.0 * (viajante count (each.estado = "desistiu")) / max(1, length(viajante)) color: rgb(86, 180, 233) marker: false thickness: 2;
+				data "Presos" value: 100.0 * (viajante count (each.estado = "preso")) / max(1, length(viajante)) color: rgb(204, 121, 167) marker: false thickness: 2;
 			}
 		}
 		monitor "Trechos fechados (carro)" value: via count (each.fechada["carro"] and each.veic = 1);
