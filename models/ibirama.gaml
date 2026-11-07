@@ -411,7 +411,7 @@ species via {
 		if (risco > 0) { cor <- rgb(232, 130, 0); }
 		if (prof > 0) { cor <- #deepskyblue; larg <- larg + 1.0; }
 		if (fechada["carro"] and veic = 1) { cor <- #red; larg <- larg + 1.5; }
-		draw shape color: rgb(255, 255, 255, 190) width: larg + 1.6;   // contorno claro: destaca a rua sobre o mapa de fundo
+		draw shape color: rgb(255, 255, 255, 190) width: larg + 1.6;
 		draw shape color: cor width: larg;
 	}
 }
@@ -807,29 +807,31 @@ experiment Interativo type: gui {
 		// Atualiza a cada 60 ciclos (= 10 min simulados) para não travar nem criar escala gigante ao acelerar.
 		display "Desfechos" type: 2d background: #white refresh: every(60 #cycles) {
 			// Em cima: os três estados principais, em % do total de agentes, escala fixa 0–100.
-			chart "Situação dos agentes (%)" type: series
+			// type: xy com value: [x, y] = [minutos, %] -> eixo X em minutos de verdade (0 a 480),
+			// crescendo da esquerda para a direita. (x_serie com escalar nao funciona de forma confiavel.)
+			chart "Situação dos agentes (%)" type: xy
 				size: {1.0, 0.55} position: {0.0, 0.0}
-				x_serie: (time / 60.0) x_range: 480 x_tick_unit: 60
+				x_range: {0, 480} x_tick_unit: 60
 				x_label: "tempo simulado (min) · evento começa aos " + int(inicio_evento_min) + " min"
 				y_range: {0, 100} y_label: "% dos agentes"
 				series_label_position: legend
 				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
 			{
-				data "Em viagem" value: 100.0 * (viajante count (each.estado = "viajando")) / max(1, length(viajante)) color: rgb(0, 114, 178) marker: false thickness: 2;
-				data "Esperando rota" value: 100.0 * (viajante count (each.estado = "espera")) / max(1, length(viajante)) color: rgb(213, 94, 0) marker: false thickness: 2;
-				data "Concluíram" value: 100.0 * (viajante count (each.estado = "concluiu")) / max(1, length(viajante)) color: rgb(0, 158, 115) marker: false thickness: 2;
+				data "Em viagem" value: [time / 60.0, 100.0 * (viajante count (each.estado = "viajando")) / max(1, length(viajante))] color: rgb(0, 114, 178) marker: false thickness: 2;
+				data "Esperando rota" value: [time / 60.0, 100.0 * (viajante count (each.estado = "espera")) / max(1, length(viajante))] color: rgb(213, 94, 0) marker: false thickness: 2;
+				data "Concluíram" value: [time / 60.0, 100.0 * (viajante count (each.estado = "concluiu")) / max(1, length(viajante))] color: rgb(0, 158, 115) marker: false thickness: 2;
 			}
 			// Embaixo: desfechos menos frequentes, com escala própria (automática), para não ficarem colados no zero.
-			chart "Voltaram / desistiram / presos (%)" type: series
+			chart "Voltaram / desistiram / presos (%)" type: xy
 				size: {1.0, 0.45} position: {0.0, 0.55}
-				x_serie: (time / 60.0) x_range: 480 x_tick_unit: 60
+				x_range: {0, 480} x_tick_unit: 60
 				x_label: "tempo simulado (min)" y_label: "% dos agentes"
 				series_label_position: legend
 				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
 			{
-				data "Voltaram" value: 100.0 * (viajante count (each.estado = "voltou")) / max(1, length(viajante)) color: rgb(230, 159, 0) marker: false thickness: 2;
-				data "Desistiram" value: 100.0 * (viajante count (each.estado = "desistiu")) / max(1, length(viajante)) color: rgb(86, 180, 233) marker: false thickness: 2;
-				data "Presos" value: 100.0 * (viajante count (each.estado = "preso")) / max(1, length(viajante)) color: rgb(204, 121, 167) marker: false thickness: 2;
+				data "Voltaram" value: [time / 60.0, 100.0 * (viajante count (each.estado = "voltou")) / max(1, length(viajante))] color: rgb(230, 159, 0) marker: false thickness: 2;
+				data "Desistiram" value: [time / 60.0, 100.0 * (viajante count (each.estado = "desistiu")) / max(1, length(viajante))] color: rgb(86, 180, 233) marker: false thickness: 2;
+				data "Presos" value: [time / 60.0, 100.0 * (viajante count (each.estado = "preso")) / max(1, length(viajante))] color: rgb(204, 121, 167) marker: false thickness: 2;
 			}
 		}
 		monitor "Trechos fechados (carro)" value: via count (each.fechada["carro"] and each.veic = 1);
