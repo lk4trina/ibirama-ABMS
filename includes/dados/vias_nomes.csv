@@ -1,0 +1,1183 @@
+id_trecho,name,ref,highway,comp
+0,Rodovia Ingo Hering,BR-470,trunk,179.7
+1,,,service,43.8
+2,Rodovia Ingo Hering,BR-470,trunk,396.4
+3,,,service,255.2
+4,Rodovia Ingo Hering,BR-470,trunk,37.7
+5,Rodovia Ingo Hering,BR-470,trunk,33.7
+6,,,residential,102.7
+7,,,service,29.9
+8,Rua Santa Catarina,,residential,7.6
+9,Rodovia Ingo Hering,BR-470,trunk,92.0
+10,Rodovia Ingo Hering,BR-470,trunk,321.2
+11,Rodovia Ingo Hering,BR-470,trunk,32.6
+12,Rodovia Ingo Hering,BR-470,trunk,167.6
+13,,,service,178.8
+14,,,service,242.6
+15,Rodovia Ingo Hering,BR-470,trunk,238.6
+16,Rodovia Ingo Hering,BR-470,trunk,324.0
+17,Rodovia Ingo Hering,BR-470,trunk,223.0
+18,Rua Avelino Fossa,,unclassified,6.5
+19,Rua 25 de Julho,SC-340,secondary,294.9
+20,Rua 25 de Julho,SC-340,secondary,118.2
+21,Rua 25 de Julho,SC-340,secondary,21.8
+22,Rua 25 de Julho,SC-340,secondary,231.5
+23,,,service,90.9
+24,Rodovia Ingo Hering,BR-470,trunk,201.4
+25,Rodovia Ingo Hering,BR-470,trunk,220.8
+26,Rodovia Ingo Hering,BR-470,trunk,1679.4
+27,,,residential,312.6
+28,Rodovia Ingo Hering,BR-470,trunk,152.3
+29,Rua Belém,,residential,24.7
+30,Rodovia Ingo Hering,BR-470,trunk,29.8
+31,Rodovia Ingo Hering,BR-470,trunk,37.0
+32,,,service,23.3
+33,,,tertiary,29.6
+34,Rodovia Ingo Hering,BR-470,trunk,223.4
+35,Rua 25 de Julho,SC-340,secondary,54.2
+36,Rua 25 de Julho,SC-340,secondary,252.1
+37,,,service,166.2
+38,Rua 25 de Julho,SC-340,secondary,18.1
+39,Rua 25 de Julho,SC-340,secondary,100.4
+40,,,trunk_link,400.3
+41,Rua 25 de Julho,SC-340,secondary,87.1
+42,Rua 25 de Julho,SC-340,secondary_link,5.8
+43,,,trunk_link,61.0
+44,Rodovia Ingo Hering,BR-470,trunk,142.8
+45,Rodovia Ingo Hering,BR-470,trunk,77.6
+46,,,trunk_link,201.6
+47,Estrada da Palestina,,unclassified,23.8
+48,Rodovia Ingo Hering,BR-470,trunk,128.6
+49,,,service,53.9
+50,,,trunk_link,31.1
+51,Rodovia Ingo Hering,BR-470,trunk,159.4
+52,Rodovia Ingo Hering,BR-470,trunk,68.7
+53,,,service,43.5
+54,Rua 25 de Julho,SC-340,secondary,10.4
+55,Rua 25 de Julho,SC-340,secondary,40.1
+56,,,service,17.2
+57,Rua 25 de Julho,SC-340,secondary,393.9
+58,Rua 25 de Julho,SC-340,secondary,44.1
+59,,,track,2044.2
+60,,,unclassified,1460.7
+61,Ponte de Hansa; Rua Avelino Fossa,,unclassified,224.0
+62,,,unclassified,221.5
+63,,,service,302.5
+64,Rua 25 de Julho,SC-340,secondary,271.6
+65,Rodovia Ingo Hering,BR-470,trunk,120.0
+66,Rodovia Ingo Hering,BR-470,trunk,47.9
+67,Rodovia Ingo Hering,BR-470,trunk,363.4
+68,,,trunk_link,148.2
+69,Rodovia Ingo Hering,BR-470,trunk,136.3
+70,Rodovia Ingo Hering,BR-470,trunk,569.0
+71,,,service,328.5
+72,,,residential,439.4
+73,Rua Vitor Meireles,,residential,20.6
+74,Rua Alfredo Henschel,,residential,91.1
+75,Rua Vitor Meireles; Rua Gaspar,,residential,115.6
+76,Rua Vitor Meireles,,residential,67.2
+77,Rua Brusque,,residential,79.9
+78,Rua Vitor Meireles,,residential,88.4
+79,Rua Joinville,,residential,50.1
+80,Rua Joinville,,residential,250.6
+81,Rua Joinville,,residential,70.6
+82,Rua Danilo Marchetti,,residential,64.2
+83,Rua Joinville,,residential,289.0
+84,Rua Joinville,,tertiary,47.9
+85,Rua Willi Luderwaldt,,residential,202.8
+86,Rua Willi Luderwaldt,,tertiary,32.4
+87,Rua Doutor Getúlio Vargas,,tertiary,34.3
+88,Rua Doutor Getúlio Vargas,,tertiary,129.8
+89,Rua Duque de Caxias,,tertiary,88.4
+90,Rua Duque de Caxias,,tertiary,153.7
+91,,,service,35.5
+92,Rua Doutor Getúlio Vargas,,tertiary,97.7
+93,Rua 11 de Março,,tertiary,34.6
+94,Rua Duque de Caxias,,tertiary,35.2
+95,Rua Nereu Ramos,,tertiary,45.2
+96,Rua Doutor Getúlio Vargas,,tertiary,32.4
+97,,,footway,46.6
+98,Rua Heinrich Berg,,residential,70.4
+99,Rua Doutor Getúlio Vargas,,tertiary,114.1
+100,Rua Doutor Getúlio Vargas,,tertiary,108.0
+101,Rua Doutor Getúlio Vargas,,tertiary,66.4
+102,Rua Doutor Getúlio Vargas,,tertiary,69.5
+103,,,residential,78.3
+104,Rua Doutor Getúlio Vargas,,tertiary,58.5
+105,Rua Dom Bosco,,residential,130.5
+106,Rua Doutor Getúlio Vargas,,tertiary,129.9
+107,Rua Guarani,,tertiary,595.8
+108,Rua Guarani,,tertiary,51.0
+109,Rua Santa Cruz,,tertiary_link,20.3
+110,Rua Nereu Ramos,,residential,69.2
+111,Rua Nereu Ramos,,residential,241.3
+112,Rua Willi Luderwaldt,,tertiary,33.0
+113,,,tertiary,4.8
+114,,,tertiary,16.1
+115,,,tertiary,13.1
+116,Rua Doutor Getúlio Vargas,,tertiary,41.9
+117,Rua Doutor Getúlio Vargas,,tertiary,101.2
+118,Ponte Prefeito Osvaldo Tadeu Beltramini; Rua Marcílio João da Silveira,,tertiary,279.8
+119,Rua Padre Franz Eigmann,,residential,143.6
+120,Rua Presidente Getúlio,,residential,82.8
+121,Rua Heinrich Berg,,residential,48.2
+122,Rua Marquês do Herval,SC-340,secondary,109.0
+123,Rua Marquês do Herval,SC-340,secondary,18.2
+124,Rua José Wagner,,residential,139.3
+125,Rua Marquês do Herval,SC-340,secondary,27.0
+126,,,service,13.8
+127,Rua Marquês do Herval,SC-340,secondary,63.1
+128,Rua Professora Nair Ribeiro,,residential,444.5
+129,Rua Marquês do Herval,SC-340,secondary,504.8
+130,Rua Marquês do Herval,SC-340,secondary,57.2
+131,Rua Aníbal Tambani,,residential,156.7
+132,Rua Marquês do Herval,SC-340,secondary,69.1
+133,,SC-340,secondary,18.1
+134,,,secondary_link,45.5
+135,Rua Tiradentes,SC-340,secondary,23.3
+136,Rua 25 de Julho,SC-340,secondary,345.8
+137,Rua 25 de Julho,SC-340,secondary,90.6
+138,,,footway,144.5
+139,Rua 3 de Maio,,secondary,40.9
+140,Rua XV de Novembro,,tertiary,27.6
+141,,SC-340,secondary,23.4
+142,Rua XV de Novembro,,tertiary,56.4
+143,Rua XV de Novembro,,tertiary,65.7
+144,Rua Vereador Alberto Laun,,residential,112.8
+145,Rua XV de Novembro,,tertiary,75.6
+146,Rua Ituporanga,,residential,142.6
+147,Rua XV de Novembro,,tertiary,36.6
+148,Rua XV de Novembro,,tertiary,497.1
+149,Rua Alfredo Kunrow,,residential,172.1
+150,Rua Rudolf Maas,,residential,101.3
+151,Rua XV de Novembro,,tertiary,42.6
+152,Rua XV de Novembro,,tertiary,46.3
+153,Rua XV de Novembro,,tertiary,31.8
+154,,,residential,146.6
+155,Rua XV de Novembro,,tertiary,585.3
+156,Rua XV de Novembro,,tertiary,152.0
+157,,,service,195.3
+158,Rua das Flores,,tertiary,1280.0
+159,,,unclassified,1089.1
+160,Avenida Castelo Branco,,tertiary,391.3
+161,Rua das Flores,,tertiary,151.8
+162,,,service,323.9
+163,Rua das Flores,,tertiary,1162.5
+164,Rua Carlos Machota,,unclassified,1240.2
+165,Estrada Ribeirão das Pedras,,unclassified,1144.1
+166,Rua das Flores,,tertiary,115.4
+167,,,service,1027.6
+168,Rua das Flores,,tertiary,755.3
+169,Rua das Flores,,tertiary,674.1
+170,,,service,1062.5
+171,Rua das Flores,,tertiary,109.1
+172,,,service,744.0
+173,Rua das Flores,,tertiary,84.4
+174,,,service,18.8
+175,Rua das Flores,,tertiary,39.8
+176,Rua das Flores,,tertiary,172.1
+177,,,service,64.3
+178,Rua das Flores,,tertiary,10.4
+179,Rodovia Ingo Hering,BR-470,trunk,40.5
+180,Rodovia Ingo Hering,BR-470,trunk,50.2
+181,Rua Carlos Machota,,unclassified,536.4
+182,,,service,586.9
+183,Rodovia Ingo Hering,BR-470,trunk,383.6
+184,Rodovia Ingo Hering,BR-470,trunk,656.5
+185,,,service,508.9
+186,Estrada Ribeirão das Pedras,,unclassified,427.4
+187,,,unclassified,1519.1
+188,,,unclassified,1611.8
+189,Estrada Ribeirão das Pedras,,unclassified,122.0
+190,,,unclassified,1021.5
+191,,,track,1110.4
+192,,,unclassified,451.9
+193,,,footway,6.6
+194,Rua Otto Jost,,tertiary,26.1
+195,Rua Otto Jost,,tertiary,13.2
+196,Rua Marquês do Herval,SC-340,secondary,54.7
+197,Rua Marquês do Herval,SC-340,secondary,44.0
+198,Rua Marquês do Herval,SC-340,secondary,16.2
+199,Rua Castro Alves,,tertiary,108.5
+200,Rua Otto Jost; Rua Castro Alves,,tertiary,224.2
+201,Rua José Bonifácio,,residential,671.0
+202,Rua Doutor Getúlio Vargas,,tertiary,198.3
+203,Rua Doutor Getúlio Vargas,,tertiary,120.5
+204,Rua Doutor Getúlio Vargas,,tertiary,108.9
+205,Rua 7 de Setembro; Rua General Osório,,residential,406.2
+206,Rua Doutor Getúlio Vargas,,tertiary,82.6
+207,Rua Werner Weber,,residential,171.8
+208,Rua Santa Cruz,,tertiary,16.8
+209,Rua Santa Cruz,,tertiary_link,19.0
+210,Rua Santa Cruz,,tertiary,78.2
+211,,,footway,15.1
+212,Rua Doutor Getúlio Vargas,,tertiary,74.3
+213,Rua Marquês do Herval,SC-340,secondary,95.6
+214,Avenida Missler,,secondary,25.9
+215,Rua Mirador,SC-340,secondary,355.7
+216,Rua Osvaldo Link,,residential,82.8
+217,Rua Marechal Deodoro,,residential,199.6
+218,Rua Doutor Getúlio Vargas,,tertiary,16.4
+219,Rua Doutor Getúlio Vargas,,tertiary,65.7
+220,Rua Doutor Getúlio Vargas,,tertiary,26.6
+221,Rua Doutor Getúlio Vargas,,tertiary,24.9
+222,Rua Rozene Rossini,,service,265.3
+223,Rua Curt José Rosenfelder,,residential,164.7
+224,Rua Doutor Getúlio Vargas,,tertiary,177.9
+225,Rua Machado de Assis,,residential,1215.6
+226,Rua Doutor Getúlio Vargas,,tertiary,64.4
+227,Rua Doutor Getúlio Vargas,,tertiary,82.7
+228,Rua Arthur Krambeck,,residential,175.1
+229,Rua Doutor Getúlio Vargas,,tertiary,81.5
+230,Rua Doutor Getúlio Vargas,,tertiary,489.4
+231,,,service,6.1
+232,,,service,132.6
+233,,,steps,84.9
+234,Rua Marquês do Herval,SC-340,secondary,152.8
+235,Rua Marquês do Herval,SC-340,secondary,504.1
+236,,,service,73.5
+237,Rua Marquês do Herval,SC-340,secondary,84.2
+238,,,service,111.4
+239,Rua Rudolfo Fey,,residential,49.7
+240,Rua Mirador,SC-340,secondary,149.2
+241,Rua Orival Tomaz Pereira,,residential,169.6
+242,Rua Mirador,SC-340,secondary,177.9
+243,Rua Princesa Isabel,,tertiary,11.9
+244,Rua Doutor Getúlio Vargas,,tertiary,222.7
+245,,,service,17.1
+246,Rua XV de Novembro,,tertiary,25.7
+247,Rua XV de Novembro,,tertiary,28.9
+248,Rua Marquês do Herval,SC-340,secondary,34.0
+249,,,secondary_link,17.3
+250,Rua Walter Ideker,,residential,274.4
+251,Rua Doutor Getúlio Vargas,,tertiary,55.0
+252,Rua Tiradentes,SC-340,secondary,18.8
+253,Rua Tiradentes,SC-340,secondary,155.0
+254,,,tertiary,66.1
+255,,,unclassified,28.5
+256,,,service,207.0
+257,,,unclassified,1898.8
+258,,,unclassified,350.9
+259,,,residential,249.0
+260,Estrada Geral Atafona,LOT 010,tertiary,91.3
+261,Estrada Geral Atafona,LOT 010,tertiary,325.9
+262,,,track,2409.3
+263,Estrada Geral Atafona,LOT 010,tertiary,10.3
+264,,,service,259.7
+265,,,secondary,86.3
+266,,,footway,88.2
+267,Avenida Missler,,secondary,134.4
+268,Trilha Ferrovia das Bromélias,EF-488,path,71.6
+269,Trilha Ferrovia das Bromélias,EF-488,path,1949.0
+270,,,path,243.1
+271,Trilha Ferrovia das Bromélias,EF-488,path,211.0
+272,Trilha Planalto,,path,1799.3
+273,Trilha Ferrovia das Bromélias,EF-488,path,163.5
+274,Trilha Ferrovia das Bromélias,EF-488,path,2699.8
+275,,,path,438.2
+276,,,secondary,8.5
+277,,,secondary,21.7
+278,Rua Tiradentes,,tertiary,40.6
+279,,,secondary_link,39.3
+280,,,secondary,19.4
+281,Rua Tiradentes,SC-340,secondary,61.2
+282,Rua 3 de Maio,,residential,19.3
+283,,,service,176.3
+284,Rua 3 de Maio,,residential,92.6
+285,,,secondary,3.7
+286,Rua 25 de Julho,SC-340,secondary,65.0
+287,,,secondary,21.7
+288,Rua 25 de Julho,SC-340,secondary,783.5
+289,Rua 25 de Julho,SC-340,secondary,66.1
+290,,SC-340,secondary,24.4
+291,Rua Marquês do Herval,SC-340,secondary,30.1
+292,,,secondary,13.0
+293,Rua Tiradentes,SC-340,secondary,42.7
+294,Rua XV de Novembro,,tertiary,25.7
+295,Rua XV de Novembro,,tertiary,383.4
+296,Rua XV de Novembro,,tertiary,24.9
+297,Avenida Castelo Branco,,tertiary,38.9
+298,Avenida Castelo Branco,,tertiary,21.1
+299,Avenida Castelo Branco,,tertiary,21.3
+300,Rua Tiradentes,,tertiary,31.8
+301,Avenida Castelo Branco,,tertiary,236.1
+302,Rodovia Ingo Hering,BR-470,trunk,137.5
+303,Rua XV de Novembro,,tertiary,38.3
+304,Rua XV de Novembro,,tertiary,160.6
+305,Rua Agronômica,,residential,309.0
+306,,,tertiary,10.7
+307,,,tertiary,15.4
+308,Rua México,,residential,55.6
+309,Rua Tiradentes,,tertiary,45.7
+310,Rua Leopoldo Mönich,,residential,110.4
+311,Rua Iba Goitacazes dos Reis,,residential,41.3
+312,Rua Tiradentes,SC-340,secondary,37.0
+313,Rua Marquês do Herval,SC-340,secondary,50.8
+314,Rua Vereador Alberto Laun,,residential,56.9
+315,Rua Dom Pio de Freitas Reis,,residential,213.1
+316,Rua Dom Pio de Freitas Reis; Rua Martin Schmoll,,residential,255.1
+317,Rua XV de Novembro,,tertiary,163.5
+318,Rua XV de Novembro,,tertiary,120.8
+319,Rua Franz Roedel,,residential,126.0
+320,Rua Martin Schmoll,,residential,108.6
+321,Rodovia Ingo Hering,BR-470,trunk,121.1
+322,Rodovia Ingo Hering,BR-470,trunk,93.6
+323,Rua Anita Garibaldi,,residential,167.3
+324,Rua Anita Garibaldi,,secondary,71.4
+325,Rua 3 de Maio,,residential,142.2
+326,Rua 3 de Maio,,secondary,83.3
+327,Rua Itajaí,,residential,680.0
+328,Rua 3 de Maio,,residential,122.9
+329,Rua 3 de Maio,,residential,297.0
+330,Rua Iba Goitacazes dos Reis,,residential,69.6
+331,Rua 3 de Maio,,secondary,150.2
+332,Rua Tiradentes,SC-340,secondary,120.3
+333,Rua Tiradentes,,secondary,25.7
+334,Avenida Castelo Branco,,tertiary,15.7
+335,,,residential,208.1
+336,Avenida Castelo Branco,,tertiary,533.8
+337,Avenida Castelo Branco,,tertiary,32.3
+338,Avenida Castelo Branco,,tertiary,26.2
+339,Rua Cidadãos Livres,,residential,21.1
+340,Rua Roberto Gubler,,residential,197.0
+341,,,residential,82.4
+342,Rua do Loyd,,tertiary,57.2
+343,Rua do Loyd,,tertiary,407.4
+344,,,service,213.4
+345,Rua Roberto Gubler,,residential,119.4
+346,Avenida Missler,,secondary,251.1
+347,Avenida Missler,,secondary,116.5
+348,Rua Alvina Grahl,,residential,100.4
+349,Rua Scharlach,,residential,149.4
+350,Rua Scharlach,,residential,113.0
+351,Avenida Missler,,secondary,18.1
+352,Avenida Missler,,secondary,157.3
+353,Rua Siegfried Reiner,,unclassified,193.5
+354,Rua Siegfried Reiner,,unclassified,1103.7
+355,Rua Conselheiro Stolz,,footway,184.0
+356,Rua Vidal Ramos Júnior,,tertiary,181.9
+357,Rua Conselheiro Stolz,,residential,112.6
+358,Rua do Loyd,,tertiary,95.9
+359,Rua Conselheiro Stolz,,residential,164.7
+360,Rua João Galdino da Silva,,residential,151.4
+361,Rua Conselheiro Stolz,,residential,181.0
+362,Rua Pedro Ringenberg,,service,286.0
+363,Rua Guarani,,tertiary,695.8
+364,Rua Otto Lindner,,residential,90.3
+365,Avenida Missler,,secondary,189.9
+366,Rua Francisca Martendal,,residential,100.0
+367,Avenida Missler,,secondary,256.2
+368,Rua Emílio Krause,,residential,174.9
+369,Avenida Missler,,secondary,41.2
+370,,,service,36.9
+371,Rua Siegfried Reiner,,unclassified,263.4
+372,Rua Alberto Fredel,,residential,93.5
+373,Avenida Missler,,secondary,145.4
+374,Rua Arthur Hasse,,residential,106.9
+375,Avenida Missler,,secondary,116.7
+376,,,residential,78.3
+377,Rua Emílio Krause,,residential,112.3
+378,Rua Guarani,,tertiary,299.3
+379,,,service,100.9
+380,Rua Siegfried Reiner,,unclassified,86.5
+381,Rua Siegfried Reiner,,unclassified,48.7
+382,,,service,144.8
+383,Rua Siegfried Reiner,,unclassified,132.8
+384,Rua Sambaqui,,residential,73.1
+385,Rua Marquês do Herval,SC-340,secondary,16.1
+386,Rua Marquês do Herval,SC-340,secondary,99.6
+387,,,service,81.6
+388,Rua Nereu Ramos,,residential,350.7
+389,Rua Nereu Ramos,,residential,25.5
+390,Rua Nereu Ramos,,residential,40.1
+391,,,residential,118.3
+392,,,residential,8.7
+393,Rua Presidente Juscelino,,residential,229.8
+394,Rua Presidente Juscelino,,residential,170.4
+395,Rua Lindolfo Koepsel,,residential,136.8
+396,Rua Lindolfo Koepsel,,residential,82.0
+397,Rua Presidente Juscelino,,residential,51.7
+398,Rua Atalanta,,residential,146.4
+399,Rua Agrolândia,,residential,96.4
+400,Rua Presidente Juscelino,,residential,27.1
+401,Rua Alberto Lessa,,residential,279.6
+402,Rua Marquês do Herval,SC-340,secondary,81.8
+403,Rua Franz Roedel,,residential,83.6
+404,Rua Hermann Aichinger,,residential,249.7
+405,Rua Marquês do Herval,SC-340,secondary,268.0
+406,Rua Professora Gertrud Aichinger; Rua Franz Roedel,,residential,125.7
+407,Rua Regente Feijó,,residential,179.0
+408,Rua Anita Garibaldi,,residential,152.9
+409,Rua Anita Garibaldi,,residential,97.1
+410,Rua Eduardo de Lima e Silva,,residential,180.5
+411,Rua Leopoldo Spliter,,residential,22.8
+412,Rua Marquês do Herval,SC-340,secondary,104.9
+413,Rua Marquês do Herval,SC-340,secondary,40.8
+414,Rua Leopoldo Spliter,,residential,199.7
+415,Rua João Weidman,,residential,136.9
+416,Rua João Weidman,,residential,301.3
+417,Rua Alwin Duwe,,residential,48.0
+418,Rua Professora Gertrud Aichinger,,residential,80.5
+419,Rua Alwin Duwe,,residential,75.9
+420,Rua Imbuia,,residential,97.2
+421,Rua Imbuia,,residential,130.2
+422,Rua Professora Nair Ribeiro,,residential,27.4
+423,Rua Professora Nair Ribeiro,,residential,159.3
+424,,,residential,81.7
+425,Rua Professora Nair Ribeiro,,residential,144.8
+426,Rua Adolfo Reinecke,,residential,319.0
+427,Rua Adolfo Reinecke,,residential,114.7
+428,Rua Adolfo Reinecke,,residential,69.0
+429,Rua Adolfo Schurt,,service,195.3
+430,Rua João Duwe,,residential,308.0
+431,Rua Marquês do Herval,SC-340,secondary,78.1
+432,Rua Marquês do Herval,SC-340,secondary,47.3
+433,Rua Padre Anchieta,,residential,163.2
+434,Rua Marquês do Herval,SC-340,secondary,170.2
+435,Rua 1º de Maio,,service,70.0
+436,Rua 1º de Maio,,residential,37.8
+437,Rua 1º de Maio,,residential,107.6
+438,Rua Alfredo Schifter,,residential,134.8
+439,Rua 1º de Maio,,residential,168.7
+440,Rua Marquês do Herval,SC-340,secondary,37.8
+441,Rua Marquês do Herval,SC-340,secondary,24.7
+442,Rua Itália,,residential,306.2
+443,Rua 1º de Maio,,residential,72.5
+444,,,service,21.6
+445,Rua Primeiro de Maio,,service,160.7
+446,Rua Almirante Tamandaré,,residential,105.4
+447,Rua Almirante Tamandaré,,residential,53.5
+448,,,residential,8.2
+449,Rua Almirante Tamandaré,,residential,391.7
+450,Rua 1º de Maio,,residential,49.2
+451,Rua Elisabeth Weschenfelder,,residential,93.2
+452,Rua 1º de Maio,,residential,74.8
+453,Rua Hermann Schlup,,residential,72.5
+454,Rua Hermann Schlup,,residential,45.7
+455,Rua Presidente Costa e Silva,,residential,163.0
+456,Rua Hermann Schlup,,residential,209.3
+457,Rua João Aurcih,,residential,305.7
+458,Rua João Aurcih,,residential,199.1
+459,Rua Presidente Costa e Silva,,residential,200.2
+460,Rua Hermann Schlup,,residential,29.3
+461,Rua Hermann Schlup,,residential,22.0
+462,Rua Carl Laemmle,,residential,117.7
+463,Rua Frederico Paupitz,,residential,241.1
+464,,,residential,38.9
+465,Rua Marquês do Herval,SC-340,secondary,58.0
+466,Rua Marquês do Herval,SC-340,secondary,1361.1
+467,Rua João Aurcih,,residential,44.3
+468,Rua Marquês do Herval,SC-340,secondary,214.4
+469,Rua Witmarsun,,service,64.9
+470,Rua João Aurcih,,residential,84.8
+471,Rua João Aurcih,,residential,37.4
+472,Rua Rio do Oeste,,service,50.7
+473,Rua João Aurcih,,residential,109.0
+474,Rua Pouso Redondo,,service,102.3
+475,Rua Marquês do Herval,SC-340,secondary,13.4
+476,,,secondary_link,21.2
+477,Rua Tancredo Neves,,service,89.5
+478,Rua Marechal Rondon,,unclassified,1268.2
+479,Rua Marechal Rondon,,unclassified,70.9
+480,Rua Marechal Rondon,,unclassified,817.2
+481,Rua Adolfo Eskelsen,,service,97.4
+482,Rua Santa Cruz,,tertiary,45.4
+483,Rua Santa Cruz,,tertiary,46.0
+484,Rua Emílio Odebrecht,,residential,113.0
+485,Rua Emílio Odebrecht,,residential,62.7
+486,,,residential,47.4
+487,Rua Santa Cruz,,tertiary,54.6
+488,Rua Santa Cruz,,tertiary,448.4
+489,Rua Bertholdo Larsen,,residential,161.5
+490,Rua Adolfo Zaiser,,residential,121.6
+491,Rua Santa Cruz,,tertiary,53.5
+492,Rua Rodolfo Koffke,,residential,48.8
+493,Rua Santa Cruz,,tertiary,103.0
+494,Rua Rodolfo Koffke,,residential,218.2
+495,Rua Adolfo Zaiser,,residential,130.4
+496,Rua Herbert Radloff,,residential,51.0
+497,Rua Herbert Radloff,,residential,50.5
+498,Rua Erich Krause,,residential,22.9
+499,Rua Erich Krause,,residential,144.5
+500,Rua Adolfo Koffke,,residential,109.0
+501,Rua Hermann Koehler,,residential,62.2
+502,Rua Hermann Koehler,,residential,55.7
+503,Rua Adolfo Koffke,,residential,128.7
+504,Rua Hermann Koehler,,residential,50.8
+505,Rua Adolfo Zaiser,,residential,249.4
+506,Rua Guarani,,tertiary,181.9
+507,Rua Guarani,,tertiary,289.5
+508,Rua Helmuth Hohl,,residential,54.5
+509,Rua Adolfo Zaiser,,residential,52.8
+510,Rua Helmuth Hohl,,residential,51.1
+511,Rua Walter Grahl,,service,151.3
+512,Rua Adolfo Zaiser,,residential,91.0
+513,Rua Ernesto Braatz,,residential,105.0
+514,Rua Princesa Isabel,,tertiary,802.3
+515,Rua Princesa Isabel,,tertiary,32.3
+516,Rua Princesa Isabel,,tertiary,15.0
+517,Rua Princesa Isabel,,tertiary,726.5
+518,,,residential,92.2
+519,Rua Dom Bosco,,residential,73.7
+520,Rua 25 de Julho,SC-340,secondary,52.7
+521,Rua Itajaí,,residential,92.6
+522,Rua Itajaí,,residential,69.3
+523,Rua Garuva,,residential,121.7
+524,Rua José Boiteux,,residential,174.6
+525,Rua Blumenau,,tertiary,71.8
+526,Rua Blumenau,,tertiary,9.4
+527,Rua Rio do Sul,,residential,111.4
+528,Rua Rio do Sul,,residential,64.2
+529,Rua Blumenau,,tertiary,88.4
+530,Rua Dom Pedro II,,residential,114.6
+531,Rua Dom Pedro II,,residential,25.9
+532,Rua Dom Pedro II,,residential,82.7
+533,,,residential,68.6
+534,Rua Lontras,,residential,82.4
+535,Rua Duque de Caxias,,tertiary,47.8
+536,Rua Marcos Gramkow,,residential,218.9
+537,Rua Duque de Caxias,,tertiary,145.8
+538,Rua Arthur Schiffter,,residential,132.7
+539,Rua Duque de Caxias,,tertiary,206.8
+540,Rua Duque de Caxias,,tertiary,495.7
+541,Rua Rodolfo Koepsel,,residential,58.3
+542,Rua Conrak Koepsel,,unclassified,1119.7
+543,Rua Martin Luther,,service,183.1
+544,Rua Duque de Caxias,,tertiary,201.0
+545,Rua Trentini,,service,98.0
+546,Rua Martin Luther,,service,30.3
+547,Rua Rodolfo Koffke,,residential,94.6
+548,Rua Herbert Radloff,,residential,53.4
+549,Rua Almirante Tamandaré,,residential,444.6
+550,Rua São Sebastião,,residential,293.1
+551,,,residential,56.9
+552,Rua Santa Catarina,,residential,9.2
+553,Rua Joaquim Gramkow,,residential,34.0
+554,Rua Santa Catarina,,residential,96.7
+555,Rua Santa Catarina,,residential,110.2
+556,,,service,404.5
+557,Rua Santa Catarina,,residential,112.4
+558,Rua 19 de Dezembro,,residential,624.6
+559,Rua Santa Catarina,,residential,142.5
+560,,,service,698.1
+561,Rua Francisco Chiarelli,,residential,53.5
+562,Rua Francisco Chiarelli,,residential,112.2
+563,Rua Bahia,,residential,71.5
+564,Rua Bahia,,residential,258.6
+565,Rua Mato Grosso,,residential,258.6
+566,Avenida Castelo Branco,,tertiary,222.4
+567,Rua Francisco Chiarelli,,residential,65.9
+568,Rua XV de Novembro,,tertiary,37.2
+569,Rua XV de Novembro,,tertiary,44.0
+570,Rua Dorival Fritz,,residential,319.0
+571,,,residential,55.1
+572,Rua Índio Xokleng,,residential,116.5
+573,Rua Índio Xokleng,,residential,187.0
+574,Rua XV de Novembro,,tertiary,55.9
+575,Rua Adolfo Fiedler,,residential,166.5
+576,Rua Adolfo Fiedler,,residential,376.1
+577,Rua XV de Novembro,,tertiary,33.5
+578,,,residential,613.5
+579,,,residential,67.8
+580,Rua Rudolfo Fey,,service,179.2
+581,Rua Rudolfo Fey,,residential,14.9
+582,Rua Oswaldo Rey,,residential,66.5
+583,Rua Mirador,SC-340,secondary,89.3
+584,Rua Mirador,SC-340,secondary,20.7
+585,Rua Alfredo Hellmann,,residential,312.0
+586,Rua Alfredo Hellmann,,residential,23.3
+587,Rua Alfredo Hellmann,,residential,233.3
+588,Rua Alvina Pereira,,residential,130.5
+589,Rua Alfredo Hellmann,,residential,112.0
+590,Rua Ary Odorizzi,,residential,127.0
+591,,,service,130.3
+592,Rua Alvina Pereira,,residential,73.6
+593,Rua Orival Tomaz Pereira,,residential,255.1
+594,Rua Raimundo Hedler,,residential,35.6
+595,,,residential,77.3
+596,Rua Alvina Pereira,,residential,64.3
+597,Rua Raimundo Hedler,,residential,64.7
+598,Rua Agnes Fey,,residential,94.8
+599,Rua Raimundo Hedler,,residential,68.3
+600,Rua Raimundo Hedler,,residential,65.2
+601,Rua Cristiano Stüpp,,residential,149.6
+602,Rua Elsbeth Hedler,,residential,184.2
+603,Rua Orival Tomaz Pereira,,residential,52.0
+604,Rua Ary Odorizzi,,residential,50.9
+605,Rua Magdalena Schlüter,,residential,69.4
+606,Rua Orival Tomaz Pereira,,residential,59.2
+607,Rua Orival Tomaz Pereira,,residential,59.8
+608,Rua Bertha Breischatt,,residential,77.8
+609,Rua Raimundo Hedler,,residential,64.2
+610,Rua Rodolfo Hedler,,service,146.3
+611,Rua Berta Hedler,,residential,125.1
+612,Rua Kilian Hedler,,residential,128.5
+613,Rua Raimundo Hedler,,residential,59.6
+614,Rua Princesa Isabel,,tertiary,1639.2
+615,Rua Friedrich Schlegel,,unclassified,801.1
+616,,,tertiary,59.6
+617,Rua Santa Cruz,,tertiary,772.2
+618,Rua Princesa Isabel,,tertiary,107.7
+619,,,service,244.0
+620,Rua Marquês do Herval,SC-340,secondary,49.1
+621,Rua Marquês do Herval,SC-340,secondary,1111.3
+622,Rua Rodeio,,residential,200.7
+623,,,footway,223.4
+624,Rua Ascurra,,residential,404.3
+625,,,unclassified,1553.2
+626,Rua Pomerode,,residential,101.9
+627,Rua Timbó,,residential,64.2
+628,Rua Timbó,,residential,33.8
+629,Rua Indaial,,residential,51.9
+630,Rua Indaial,,residential,180.6
+631,Rua Ascurra,,residential,394.8
+632,Rua Indaial,,residential,106.4
+633,Rua Indaial,,residential,89.7
+634,Rua São João Batista,,residential,186.4
+635,Rua Reinhold Müller,,residential,139.2
+636,Rua Reinhold Müller,,residential,208.0
+637,,,residential,70.7
+638,,,residential,46.3
+639,Rua Reinhold Müller,,residential,187.4
+640,Rua Marquês do Herval,SC-340,secondary,21.4
+641,Rua Marquês do Herval,SC-340,secondary,321.5
+642,Rua Marquês do Herval,SC-340,secondary,234.2
+643,Rua Marquês do Herval,SC-340,secondary,20.3
+644,Rua Marquês do Herval,SC-340,secondary,214.5
+645,Rua Marquês do Herval,SC-340,secondary,381.0
+646,,,unclassified,1357.4
+647,,,service,42.1
+648,,,unclassified,1683.4
+649,,,unclassified,26.1
+650,Rua João Aurcih,,unclassified,276.7
+651,,,residential,67.8
+652,,,unclassified,377.0
+653,,,unclassified,919.9
+654,,,service,448.7
+655,,,service,462.5
+656,Rua Nereu Ramos,,unclassified,818.3
+657,Rua Nereu Ramos,,unclassified,1300.5
+658,Rua Ricardo Muller,,service,109.4
+659,Rua Nereu Ramos,,residential,130.5
+660,Rua Marcos Gramkow,,service,231.5
+661,,,residential,78.5
+662,Rua Laurentino,,residential,43.6
+663,Rua Laurentino,,residential,74.6
+664,Rua Blumenau,,tertiary,28.6
+665,Rua Otto João Lyra,,residential,64.9
+666,Rua Tiradentes,,tertiary,191.5
+667,Rua Barão do Rio Branco,,service,71.9
+668,Rua Blumenau,,tertiary,237.5
+669,,,service,18.1
+670,Rua 25 de Julho,SC-340,secondary,147.4
+671,Rua Blumenau,,tertiary,325.3
+672,Rua Blumenau,,tertiary,347.5
+673,,,residential,33.9
+674,Rua 25 de Julho,SC-340,secondary,40.8
+675,,,service,41.7
+676,,,service,44.4
+677,Rua 25 de Julho,SC-340,secondary,257.3
+678,,,service,65.5
+679,Rua Aníbal Tambani,,residential,53.2
+680,Rua Mariana Marx,,residential,150.9
+681,,,service,142.3
+682,Rua Leuclides da Silva,,residential,181.1
+683,Rua 25 de Julho,SC-340,secondary,60.2
+684,Rua dos Imigrantes,,residential,143.4
+685,Rua Francisco Chiarelli,,residential,67.9
+686,,,service,65.0
+687,Rua Francisco Chiarelli,,residential,71.7
+688,Rua Blumenau,,tertiary,1628.2
+689,Rua Blumenau,,tertiary,98.5
+690,,,service,112.8
+691,Rua Guarani,,tertiary,76.4
+692,Rua Marechal Rondon,,unclassified,210.0
+693,Rua Harmonia,,footway,277.6
+694,Rua Fritz Franke,,service,121.0
+695,Rua Carlos Reistembach,,service,45.0
+696,Rua Fritz Franke,,service,21.7
+697,Rua Marquês do Herval,SC-340,secondary,61.3
+698,Rua Marquês do Herval,SC-340,secondary,6.9
+699,Rua Marquês do Herval,SC-340,secondary,20.8
+700,Rua Otto Jost,,tertiary,12.6
+701,Rua Otto Jost,,tertiary,15.2
+702,,,secondary_link,19.2
+703,Rua Marquês do Herval,SC-340,secondary,33.1
+704,,,service,133.4
+705,,,service,48.4
+706,,,service,11.0
+707,,,service,83.3
+708,Rua Heinz Otto Dieling,,residential,513.0
+709,Rua Guilherme Quesinski,,residential,141.5
+710,Rua Blumenau,,tertiary,718.7
+711,Rua João Aurcih,,residential,114.5
+712,Rua Almirante Tamandaré,,residential,59.8
+713,,,residential,58.0
+714,Rua Almirante Tamandaré,,residential,50.6
+715,,,service,58.4
+716,,,residential,66.1
+717,,,service,52.0
+718,Rua Henrique Black,,service,188.7
+719,Rua Marquês do Herval,SC-340,secondary,32.5
+720,Rua Marquês do Herval,SC-340,secondary,105.6
+721,,,service,115.8
+722,,,service,7.1
+723,Rua Alfredo Braatz,,service,97.1
+724,Rua Salete,,service,202.6
+725,,,service,84.2
+726,Rua Salete,,service,63.4
+727,Rua Mirador,,residential,524.3
+728,Rua Mirador,,residential,795.9
+729,,,service,211.8
+730,,,service,444.4
+731,Rua 8 de Novembro,,residential,98.8
+732,Rua 25 de Julho,SC-340,secondary,343.8
+733,Rua José João Rossini,,residential,126.9
+734,Rua Walter Frech,,service,170.0
+735,Rua Georg Basedow,,residential,153.5
+736,,,service,59.6
+737,Rua Adolfo Zaiser,,residential,133.3
+738,,,service,92.8
+739,,,service,63.1
+740,Rua Aurora,,residential,83.0
+741,Rua Guarani,,tertiary,62.1
+742,Rua Aurora,,residential,27.3
+743,,,residential,50.7
+744,,,service,67.4
+745,,,service,74.2
+746,Rua Princesa Isabel,,tertiary,280.3
+747,,,service,137.3
+748,,,service,45.3
+749,,,service,27.1
+750,Rua Ernesto Braatz,,residential,594.5
+751,Rua Ernesto Braatz,,residential,36.0
+752,Rua Ernesto Braatz,,residential,201.4
+753,,,service,119.1
+754,Rua Peter Schelle,,residential,648.2
+755,Rua Franz Link,,unclassified,1575.5
+756,,,tertiary,459.6
+757,,,tertiary,1042.8
+758,,,unclassified,23.2
+759,,,tertiary,24.7
+760,Rua Duque de Caxias,,tertiary,697.7
+761,,,unclassified,31.5
+762,,,unclassified,979.4
+763,Rua Ilhabela,,residential,405.1
+764,Rua Duque de Caxias,,tertiary,323.6
+765,,,unclassified,401.8
+766,Rua Luiz Indaiatuba,,residential,80.0
+767,Rua Anita Cardoso Leal,,residential,228.2
+768,Rua Frederico Schmidt,,residential,107.7
+769,Rua Duque de Caxias,,tertiary,218.1
+770,Rua Duque de Caxias,,tertiary,435.6
+771,,,residential,88.2
+772,Rua Julio Lunelli,,residential,49.4
+773,,,residential,242.1
+774,Rua Luiz Indaiatuba,,residential,106.0
+775,,,residential,97.7
+776,,,residential,313.8
+777,,,residential,89.4
+778,Rua Sidhio Taschner,,residential,215.7
+779,Rua Julio Lunelli,,residential,156.2
+780,Rua Iguape,,residential,366.0
+781,,,residential,102.9
+782,Rua Lindolfo Koepsel; Rua Rodolfo Koepsel,,residential,651.1
+783,,,residential,149.8
+784,,,residential,62.3
+785,Rua Sidhio Taschner,,residential,911.1
+786,,,residential,28.9
+787,Rua Hermann Koepsel,,service,207.7
+788,Estrada da Palestina,,unclassified,1612.6
+789,Estrada da Palestina,,unclassified,768.8
+790,,,service,1434.9
+791,,,service,98.1
+792,,,service,72.6
+793,,,service,10.9
+794,,,service,48.8
+795,,,service,25.8
+796,,,service,50.7
+797,,,service,98.8
+798,Rua 25 de Julho,SC-340,secondary,10.1
+799,Rua 25 de Julho,SC-340,secondary,58.0
+800,,,service,116.2
+801,,,residential,135.9
+802,,,residential,73.6
+803,,,residential,161.5
+804,,,residential,65.9
+805,,,path,1035.5
+806,Trilha Ferrovia das Bromélias,EF-488,path,452.9
+807,,,track,462.5
+808,Trilha Ferrovia das Bromélias,EF-488,path,1159.4
+809,Trilha Ferrovia das Bromélias; Ponte 16,EF-488,path,698.4
+810,,,track,279.9
+811,,,track,878.5
+812,,,service,1564.3
+813,,,service,300.1
+814,,,unclassified,2278.7
+815,,,service,673.7
+816,,LOT-403,service,893.7
+817,Estrada Geral Atafona,LOT 010,tertiary,907.7
+818,,LOT-406,unclassified,933.7
+819,,LOT-406,unclassified,144.9
+820,,,track,394.4
+821,,LOT-405,unclassified,472.1
+822,,LOT-405,unclassified,1731.4
+823,,,service,421.5
+824,,LOT-405,unclassified,1367.2
+825,,,service,561.6
+826,,,path,79.1
+827,,,path,1665.8
+828,,,residential,5.2
+829,Trilha Ferrovia das Bromélias,EF-488,path,1186.7
+830,Trilha Ferrovia das Bromélias,EF-488,path,140.3
+831,,,residential,177.1
+832,,,residential,127.4
+833,,,track,76.2
+834,,,track,301.7
+835,,,unclassified,2015.9
+836,,,unclassified,24.7
+837,,,unclassified,919.6
+838,,,service,701.6
+839,,,unclassified,395.6
+840,,,service,300.0
+841,,,service,354.4
+842,,,path,460.0
+843,,,path,894.8
+844,,,steps,22.0
+845,Rua Conselheiro Stolz,,residential,32.6
+846,,,residential,36.3
+847,Rua Vidal Ramos Júnior,,tertiary,115.1
+848,Rua Pedro C. Gonçalves,,residential,99.8
+849,Trilha Ferrovia das Bromélias,EF-488,path,277.0
+850,,,residential,212.2
+851,Rua Marquês do Herval,SC-340,secondary,322.3
+852,,,service,76.0
+853,,,unclassified,216.7
+854,,,tertiary,414.3
+855,,,service,351.4
+856,,,service,44.3
+857,Rua Julio Schneider,,unclassified,15.0
+858,Rodovia Ingo Hering,BR-470,trunk,67.4
+859,Rodovia Ingo Hering,BR-470,trunk,970.1
+860,Rua Julio Schneider,,unclassified,75.1
+861,Rua Vila Nova,,residential,250.4
+862,Rua Julio Schneider,,unclassified,99.8
+863,Rua Pedro Peron,,residential,166.0
+864,Rua Julio Schneider,,unclassified,192.8
+865,Rua Julio Schneider,,unclassified,189.7
+866,,,service,125.7
+867,Rua Julio Schneider,,unclassified,58.8
+868,Rua Albertina Gramkow,,residential,316.4
+869,Rua Pedro Silva,,residential,109.6
+870,Rua Julio Schneider,,unclassified,121.0
+871,Rua Grabowski,,unclassified,736.0
+872,Rua Julio Schneider,,unclassified,342.9
+873,Rua Julio Schneider,,unclassified,59.6
+874,,,service,88.8
+875,,,path,1993.7
+876,Rua Osmar Grabowski,,unclassified,95.2
+877,Rua Oscar Mett,,residential,960.0
+878,Rua Antônia Tambani,,residential,90.0
+879,Rua Ascurra,,residential,65.4
+880,Rua Leonardo Dopke,,residential,83.4
+881,Rua Christian Striebel,,residential,13.9
+882,Rua Marquês do Herval,SC-340,secondary,151.6
+883,Rua Christian Striebel,,residential,442.4
+884,Rua Amanda Grosch,,residential,287.7
+885,Rua Videira,,residential,47.9
+886,,,residential,49.3
+887,,,residential,229.0
+888,,,service,546.5
+889,,,track,573.5
+890,,,residential,62.3
+891,Rua José Pinto,,residential,18.0
+892,Rua José Pinto,,residential,55.4
+893,Rua José Pinto,,residential,299.0
+894,Rua José Pinto,,residential,24.2
+895,,,residential,20.2
+896,,,residential,18.9
+897,Rodovia Ingo Hering,BR-470,trunk,52.0
+898,Rodovia Ingo Hering,BR-470,trunk,68.3
+899,Rua Alfredo Schifter,,residential,90.8
+900,Rua Alfredo Schifter,,residential,102.7
+901,,,service,40.0
+902,Rua Mirador,,residential,128.0
+903,,,service,37.4
+904,Rua Anita Garibaldi,,secondary,73.2
+905,,,service,58.3
+906,,,service,41.5
+907,,,service,70.0
+908,,,service,42.6
+909,,,service,19.4
+910,Rodovia Ingo Hering,BR-470,trunk,168.8
+911,Rodovia Ingo Hering,BR-470,trunk,149.1
+912,Rua Julio Schneider,,residential,7.3
+913,Rua Julio Schneider,,unclassified,26.9
+914,Rua Pedro Antônio,,residential,220.4
+915,Rua José Manoel de Andrade,,residential,189.3
+916,Rua Julio Schneider,,unclassified,104.0
+917,Rua Valdomiro Vieira,,residential,97.8
+918,,,residential,100.0
+919,,,residential,24.5
+920,,,residential,147.4
+921,Rua Grabowski,,unclassified,24.4
+922,Rua Osmar Grabowski,,unclassified,96.9
+923,,,residential,82.2
+924,,,residential,63.5
+925,,,residential,154.9
+926,,,residential,60.5
+927,,,residential,25.4
+928,,,residential,40.3
+929,,,residential,74.3
+930,Rua Aníbal Tambani,,residential,75.1
+931,,,residential,75.6
+932,,,service,28.6
+933,,,service,95.1
+934,,,residential,141.4
+935,,,residential,108.6
+936,,,residential,104.2
+937,Rua Heinrich Berg,,residential,417.9
+938,,,service,499.0
+939,,,service,82.4
+940,,,residential,164.4
+941,,,residential,219.3
+942,Rua Marquês do Herval,SC-340,secondary,25.1
+943,,,track,844.9
+944,,,service,2263.5
+945,,,residential,412.7
+946,,,residential,80.2
+947,,,residential,196.3
+948,Rua Princesa Isabel,,tertiary,27.4
+949,,,residential,129.9
+950,,,residential,100.6
+951,,,residential,78.5
+952,Rua Alfredo Hellmann,,residential,141.0
+953,,,residential,216.0
+954,,,residential,77.0
+955,,,residential,363.3
+956,Rua Mirador,SC-340,secondary,337.9
+957,,,service,6.0
+958,Rua Mirador,SC-340,secondary,132.0
+959,,,service,293.4
+960,,,service,173.1
+961,,,service,621.5
+962,Rua Mirador,SC-340,secondary,134.0
+963,,,service,452.5
+964,Rua Raimundo Hedler,,residential,27.9
+965,Rua Raimundo Hedler,,residential,70.1
+966,Rua Maria Conceição R. Albuquerque,,residential,111.6
+967,Rua Adolf Bähr,,residential,124.0
+968,Rua Orival Tomaz Pereira,,residential,57.6
+969,Rua Marquês do Herval,SC-340,secondary,402.8
+970,Rua das Palmeiras,,residential,332.3
+971,Rua Marquês do Herval,SC-340,secondary,33.1
+972,Rua 17 de Março,,residential,120.6
+973,,,service,93.4
+974,Rua 17 de Março,,residential,236.7
+975,Rua Erwin Braatz,,residential,299.2
+976,,,residential,109.7
+977,,,service,133.7
+978,,,residential,87.7
+979,Rua Rio de Janeiro,,residential,144.3
+980,Rua Salvador,,residential,206.3
+981,Rua Salvador,,residential,261.2
+982,Rua Salvador,,residential,271.8
+983,,,service,38.7
+984,Rua Tocantins,,residential,302.4
+985,Rua Tocantins,,residential,59.5
+986,Rua Paraná,,residential,162.4
+987,,,track,325.5
+988,Rua Tocantins,,residential,137.0
+989,Rua Francisco Chiarelli,,residential,66.7
+990,,,residential,142.4
+991,,,residential,46.7
+992,,,service,162.5
+993,,,service,556.0
+994,Rua Osmar Grabowski,,unclassified,333.1
+995,Rua Erwin Kopsch,,service,164.0
+996,,,service,289.1
+997,,,service,79.3
+998,,,service,130.3
+999,,,service,78.8
+1000,,,service,2667.3
+1001,Rua Belém,,residential,189.2
+1002,,,service,25.6
+1003,,,service,503.8
+1004,,,service,43.6
+1005,,,service,64.1
+1006,,,service,59.1
+1007,,,service,14.2
+1008,Rua Joaquim Gramkow,,residential,9.4
+1009,Rodovia Ingo Hering,BR-470,trunk,65.1
+1010,Rua Joaquim Gramkow,,residential,132.6
+1011,Travessa André Lino,,service,97.7
+1012,Rua 25 de Julho,SC-340,secondary,128.6
+1013,,,service,361.6
+1014,Rodovia Ingo Hering,BR-470,trunk,220.9
+1015,,,unclassified,67.3
+1016,,,unclassified,622.8
+1017,,,path,1053.1
+1018,,,path,227.0
+1019,,,track,670.8
+1020,Estrada da Palestina,,unclassified,2431.5
+1021,,,track,831.7
+1022,,,track,321.7
+1023,,,service,116.8
+1024,,,service,37.7
+1025,Rua 11 de Março,,tertiary,130.2
+1026,,,tertiary,18.0
+1027,Rua Blumenau,,tertiary,51.7
+1028,,,tertiary,13.0
+1029,,,tertiary,1.7
+1030,,,tertiary,8.9
+1031,,,tertiary,14.3
+1032,,,tertiary,9.4
+1033,,,service,112.2
+1034,,,service,61.9
+1035,,,service,90.6
+1036,,,service,45.9
+1037,,,track,280.1
+1038,,,track,695.4
+1039,,,track,123.2
+1040,,,track,246.0
+1041,,,service,87.4
+1042,,,service,97.6
+1043,,,service,62.7
+1044,,,service,92.1
+1045,Travessa André Lino,,service,7.8
+1046,,,service,50.6
+1047,,,service,15.7
+1048,,,service,110.9
+1049,,,service,50.7
+1050,Rodovia Ingo Hering,BR-470,trunk,27.2
+1051,Rodovia Ingo Hering,BR-470,trunk,30.0
+1052,,,service,27.2
+1053,,,service,33.1
+1054,,,service,37.7
+1055,,,service,33.3
+1056,Rodovia Ingo Hering,BR-470,trunk,37.0
+1057,,,service,28.0
+1058,,,service,44.4
+1059,,,residential,18.5
+1060,,,residential,29.7
+1061,Rua Itaiópolis,,residential,109.7
+1062,Rua José Cristiano,,residential,77.6
+1063,Rua Paulo Müller,,residential,19.6
+1064,Rua Paulo Müller,,residential,257.8
+1065,,,footway,23.7
+1066,,,service,44.6
+1067,,,trunk_link,28.0
+1068,,,steps,36.5
+1069,Avenida Missler,,secondary,160.4
+1070,Rua Rudolfo Fey,,residential,17.4
+1071,,,service,39.8
+1072,,,service,35.9
+1073,Rua Johann Schlüter,,residential,79.8
+1074,,,residential,65.4
+1075,,,residential,99.0
+1076,,,residential,73.3
+1077,,,residential,98.3
+1078,,,residential,43.4
+1079,,,residential,27.2
+1080,,,residential,161.9
+1081,,,residential,91.7
+1082,,,residential,52.2
+1083,,,residential,194.7
+1084,,,residential,63.8
+1085,,,residential,67.5
+1086,,,residential,194.8
+1087,,,residential,194.7
+1088,,,residential,23.7
+1089,,,service,81.2
+1090,,,residential,235.5
+1091,,,residential,114.3
+1092,,,residential,57.0
+1093,,,residential,44.0
+1094,,,residential,46.5
+1095,,,service,274.4
+1096,Rua Helmuth Botzan,,service,337.5
+1097,,,service,338.0
+1098,Rua Osmar Grabowski,,unclassified,137.1
+1099,,,service,346.1
+1100,,,service,635.5
+1101,,,service,76.8
+1102,,,service,154.5
+1103,,,service,126.0
+1104,,,service,101.4
+1105,Rodovia Ingo Hering,BR-470,trunk,267.0
+1106,,,service,103.9
+1107,,,service,233.8
+1108,,,track,454.9
+1109,,,service,1132.5
+1110,,,service,870.1
+1111,,,path,236.9
+1112,,,service,37.9
+1113,,,service,39.0
+1114,Rua Florianópolis,,service,147.8
+1115,Rodovia Ingo Hering,BR-470,trunk,99.3
+1116,,,service,157.5
+1117,,,service,18.2
+1118,,,service,107.5
+1119,,,service,69.0
+1120,Rua José Pinto,,residential,26.1
+1121,,,service,112.1
+1122,Rodovia Ingo Hering,BR-470,trunk,41.3
+1123,,,service,41.1
+1124,,,service,177.0
+1125,,,service,51.0
+1126,,,service,67.3
+1127,Rodovia Ingo Hering,BR-470,trunk,32.3
+1128,,,service,24.4
+1129,,,service,16.0
+1130,,,service,38.7
+1131,,,service,25.1
+1132,,,residential,43.2
+1133,,,residential,150.7
+1134,,,service,62.6
+1135,,,service,62.4
+1136,,,service,62.6
+1137,,,service,20.2
+1138,,,service,45.5
+1139,,,residential,127.9
+1140,,,residential,24.5
+1141,,,residential,59.1
+1142,,,residential,48.3
+1143,,,residential,9.8
+1144,,,service,81.1
+1145,,,service,72.7
+1146,,,service,90.2
+1147,,,residential,36.9
+1148,,,residential,41.1
+1149,Rua Conselheiro Stolz,,residential,21.6
+1150,,,service,18.1
+1151,,,service,14.6
+1152,,,service,55.5
+1153,Rua Doutor Getúlio Vargas,,tertiary,33.7
+1154,,,service,48.8
+1155,,,service,66.2
+1156,,,service,12.8
+1157,,,service,47.5
+1158,,,service,71.7
+1159,,,service,12.0
+1160,,,service,84.6
+1161,,,service,74.3
+1162,,,residential,104.7
+1163,,,residential,127.2
+1164,,,residential,181.2
+1165,,,residential,183.8
+1166,,,residential,54.9
+1167,,,residential,56.0
+1168,,,residential,11.7
+1169,,,service,288.9
+1170,,,service,70.6
+1171,,,service,74.0
+1172,,,service,44.8
+1173,,,service,9.4
+1174,,,service,28.7
+1175,,,service,12.3
+1176,,,service,127.2
+1177,,,service,83.3
+1178,,,service,78.1
+1179,,,service,30.3
+1180,Rua 3 de Maio,,service,56.5
+1181,,,service,72.7
