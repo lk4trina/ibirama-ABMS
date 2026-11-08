@@ -26,9 +26,21 @@ Consulte [`docs/dados_defesa_civil.md`](docs/dados_defesa_civil.md) para ver as 
 
 ## Scripts e simulador em Python
 
-A pasta `python/` traz um protótipo do modelo em Python (`simulador.py`), além de testes e utilitários.
+A pasta `python/` traz uma versão do modelo em Python (`simulador.py`), além de testes e utilitários.
 
-> **Atenção:** o código em `python/` está **dessincronizado** do modelo GAMA. As durações novas (alagamento/deslizamento de ~30 min), os grupos de acesso ampliados, o parâmetro `rede_energizada`, os pontos críticos ampliados e o esquema de 53 colunas do CSV **ainda não** acompanham a versão GAML atual. O simulador em Python serve apenas para prototipagem e testes rápidos e **não gera resultados válidos para o artigo**. Os resultados do trabalho vêm do modelo GAMA (`models/ibirama.gaml`).
+O simulador em Python **reproduz as regras** do modelo GAMA (`models/ibirama.gaml`): perfil e duração do
+alagamento (subida 1/3, platô 1/6, recessão), deslizamento com reabertura e `rede_energizada` (60–90 min),
+erosão com colapso e reabertura, ativação por grau×severidade, pontos críticos do `pontos_criticos.geojson`
+agrupados por grupo, os 6 grupos de acesso (com NaN no abrigo), a medição de acesso em `início + 25 min` e
+o CSV com as **mesmas 53 colunas** do GAMA (um teste automático confere o cabeçalho).
+
+> **Atenção:** o Python é **mesoscópico** (o agente atravessa cada trecho de uma vez) e o GAMA move o
+> agente **passo a passo**, com geração de números aleatórios diferente. Então os números **não são
+> idênticos**. Uma verificação cruzada (ver [`docs/python_vs_gaml.md`](docs/python_vs_gaml.md)) mostrou
+> **boa equivalência nos desfechos** (% que conclui/volta/desiste/fica preso, Gini) e **diferenças maiores
+> na acessibilidade** (sobretudo a pé e no cenário combinado, por ser um indicador topológico). Por isso,
+> **os resultados do artigo vêm do GAMA**; o Python serve como **verificação cruzada** e para rodar muitas
+> repetições rápido. Rode `python python/testes_logica.py` e, para os cenários, `python python/rodar_experimentos.py --rede real` (grava em `resultados/`, nunca em `includes/resultados_gama_dc.csv`).
 
 ## Arquivos de teste (fictícios)
 
