@@ -106,8 +106,34 @@ print("      (obs.: na rede REAL o grupo sem pontos e 'abrigo' -> NaN)")
 
 # T10 - cabecalho: as 53 colunas do Python sao iguais, na mesma ordem, as do CSV do GAMA
 gama_header = (RAIZ / "includes" / "resultados_gama_dc.csv").read_text(encoding="utf8").splitlines()[0].split(",")
-checa("T10 cabecalho de 53 colunas igual ao includes/resultados_gama_dc.csv",
+checa("T10 cabecalho de 54 colunas igual ao includes/resultados_gama_dc.csv",
       CABECALHO == gama_header, f"py={len(CABECALHO)} gama={len(gama_header)}")
+
+# T11 - compatibilidade: com duracao_chuva_min = 0 o perfil do alagamento e EXATAMENTE o de antes (10/5/15)
+dur = 30 * 60.0
+rampa = dur / 3.0
+tks = np.arange(0, 6000, 300.0)
+t0, pico = 1000.0, 0.8
+antigo = np.interp(tks, [t0, t0 + rampa, t0 + rampa + dur / 6.0, t0 + dur], [0, pico, pico, 0], left=0, right=0)
+plato0 = dur / 6.0
+rec0 = dur - rampa - plato0
+novo0 = np.interp(tks, [t0, t0 + rampa, t0 + rampa + plato0, t0 + rampa + plato0 + rec0], [0, pico, pico, 0], left=0, right=0)
+checa("T11 chuva=0 reproduz o perfil de 30 min (10/5/15)", np.allclose(antigo, novo0))
+
+# T12 - chuva longa faz a inundacao DURAR MAIS e reabrir so depois (mesma semente = mesmos poligonos)
+ev0 = Eventos(mundo, Params(tipo_evento="alagamento", severidade="alta", duracao_chuva_min=0.0), np.random.default_rng(9))
+ev120 = Eventos(mundo, Params(tipo_evento="alagamento", severidade="alta", duracao_chuva_min=120.0), np.random.default_rng(9))
+passos0 = int((ev0.H > 0).any(axis=1).sum())
+passos120 = int((ev120.H > 0).any(axis=1).sum())
+checa("T12 chuva longa prolonga a inundacao", passos120 > passos0 and passos0 > 0, f"sem chuva={passos0}, chuva120={passos120} passos de 5 min")
+cnt = ev120.blk["carro"].sum(axis=1)
+checa("T12 reabertura: inunda durante e ZERA depois (chuva 120 min)", cnt.max() > 0 and cnt[ev120.k(300 * 60)] == 0,
+      f"max={int(cnt.max())}, em_300min={int(cnt[ev120.k(300*60)])}")
+
+# T13 - compatibilidade no resultado: chuva=0 da o MESMO que o padrao (mesma semente)
+m_pad = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta"), 7).rodar().metricas()[0]
+m_ch0 = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta", duracao_chuva_min=0.0), 7).rodar().metricas()[0]
+checa("T13 duracao_chuva_min=0 reproduz a versao anterior (mesma semente)", m_pad == m_ch0)
 
 print("\nTODOS OS TESTES PASSARAM" if ok else "\nHA TESTES FALHANDO")
 sys.exit(0 if ok else 1)
