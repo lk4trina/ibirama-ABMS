@@ -15,14 +15,21 @@ como **hipótese** na lista.
 
 ## Como abrir
 Duplo clique no `resultados/mapa_rotas.html`. **O roteamento funciona offline** (grafo embutido em JSON,
-Dijkstra em JavaScript no navegador). Só o **fundo** (satélite Esri / OSM) depende de internet; o Leaflet
-vem por CDN com **versão fixa** (1.9.4). Se abrir sem internet, o mapa-base fica cinza mas as rotas e os
-fechamentos continuam sendo calculados e desenhados.
+Dijkstra em JavaScript no navegador). Só o **fundo** depende de internet; o Leaflet vem por CDN com
+**versão fixa** (1.9.4). O mapa abre **enquadrado em Ibirama** (`fitBounds` nos limites da rede, com
+`minZoom` e `maxBounds` em torno da área de estudo) — não abre em zoom mundial. Se um tile falhar, aparece
+um **aviso discreto** e a **rede e as rotas continuam visíveis e calculáveis**.
+
+Fundo padrão: **satélite Esri (World Imagery)**. Alternativas de **ruas que funcionam abrindo por
+`file://`**: **Esri World Street Map** e **CARTO Voyager**. O **OpenStreetMap não é usado**: a política de
+tiles do OSM devolve **403 (Access blocked)** quando o HTML é aberto por duplo clique (`file://`).
 
 ## O que dá para fazer
 - **Origem e destino:** clicando no mapa (associa ao **nó da rede mais próximo** e mostra a distância de
   associação) ou **digitando** — autocompletar com nomes de rua (`vias_nomes.csv`, 242 ruas) e os
   **29 pontos críticos** (`pontos_criticos.geojson`, inclui o abrigo *Ginásio João Moretti*).
+  Cliques a mais de **500 m** de qualquer rua são **rejeitados** ("Clique mais perto de uma rua") e não
+  definem origem/destino.
 - **Modal:** carro, moto e a pé — mesmas velocidades do GAML (`VEL_CLASSE_KMH`; moto 1,1×; a pé 1,3 m/s).
 - **Rota normal** (cinza tracejado) e **rota com desvio** (verde) quando um fechamento está no caminho;
   mostra distância, tempo em fluxo livre e o **acréscimo**. Se não houver alternativa, diz
@@ -32,7 +39,8 @@ fechamentos continuam sendo calculados e desenhados.
   **clicar num trecho** no mapa (camada *rede clicável*) para fechar/abrir à mão. Trechos fechados em
   **vermelho**, com a geometria real da rua (sem retas atravessando o mapa).
 - **Atalhos:** "ir ao abrigo mais próximo" e "ir ao hospital" a partir da origem, com e sem os fechamentos.
-- **Camadas:** satélite (Esri, Maxar, Earthstar Geographics), OSM, áreas de risco, pontos críticos.
+- **Camadas:** satélite (Esri, Maxar, Earthstar Geographics), ruas (Esri; CARTO Voyager), áreas de risco,
+  pontos críticos.
 
 ## Igual ao modelo (fonte da verdade)
 Rede, nós (extremos arredondados a 0,1 m), pesos e velocidades são os mesmos de `08_desvios.py` /
@@ -46,9 +54,12 @@ moto `comp/(vel·1,1)`, a pé `comp/1,3`. Distância = soma dos comprimentos rea
   `scipy.dijkstra` (algoritmo do script 08) a 0 s **quando os 12 pares de trechos paralelos são tratados
   por mínimo** — como um Dijkstra correto faz (o `csr_matrix` do scipy *soma* arestas paralelas, o que
   infla o custo; o roteador JS usa o menor, que é o certo).
-- **Playwright headless** (`scripts/playwright_rotas.py`): abre o HTML, **sem erros no console**; busca e
-  clique funcionam; a rota é desenhada; e no caso conhecido da **ponte Ibirama-Apiúna fechada** (nó 128 →
-  nó 3) exibe "SEM ROTA ALTERNATIVA" **sem** desenhar o desvio.
+- **Playwright headless** (`scripts/playwright_rotas.py`): abre o HTML, **sem erros no console**; confere
+  que os **tiles carregam sem status 403** e **sem requisição ao OSM**, e que o mapa abre **enquadrado em
+  Ibirama** (zoom ≥ 12, centro na área de estudo); busca e clique funcionam; **clique a >500 m é
+  rejeitado**; os atalhos **"ir ao abrigo"** e **"ir ao hospital"** definem o destino e traçam a rota; e no
+  caso conhecido da **ponte Ibirama-Apiúna fechada** (nó 128 → nó 3) exibe "SEM ROTA ALTERNATIVA" **sem**
+  desenhar o desvio. Capturas (satélite e ruas) salvas fora do repo.
 
 ## Limitações (ser honesto)
 - **OSM sem sentido único e sem semáforo:** a rede é não-direcionada; rotas podem usar um sentido que na
