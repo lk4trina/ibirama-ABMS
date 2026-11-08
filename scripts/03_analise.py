@@ -42,7 +42,10 @@ else:  # CSV do GAMA sem cabecalho: usa as 53 colunas na ordem conhecida
 # fatores (mesmos nomes do GAML)
 if "cenario" not in df:
     df["cenario"] = (df["tipo_evento"] + "|" + df["severidade"].astype(str) + "|" + df["info_nivel"]
-                     + "|" + df.get("rede_energizada", "normal").astype(str))
+                     + "|" + df.get("rede_energizada", "normal").astype(str)
+                     + "|chuva" + df.get("duracao_chuva_min", 0).astype(str))
+# fatores de cenario presentes (inclui a duracao da chuva quando o CSV varia esse campo)
+FATORES = [c for c in ("tipo_evento", "severidade", "info_nivel", "duracao_chuva_min") if c in df.columns]
 # atraso pareado = tempo medio do cenario - tempo medio da linha de base (tipo_evento = nenhum), mesma semente
 base = df[df.tipo_evento == "nenhum"]
 for m in MODOS:
@@ -83,8 +86,8 @@ def a12(x, y):
 
 linhas = []
 for met in METRICAS:
-    d = com_evento[["tipo_evento", "severidade", "info_nivel", met]].dropna()
-    for fator in ("tipo_evento", "severidade", "info_nivel"):
+    d = com_evento[FATORES + [met]].dropna()
+    for fator in FATORES:
         grupos = [g[met].values for _, g in d.groupby(fator) if len(g) > 1]
         if len(grupos) > 1 and np.ptp(np.concatenate(grupos)) > 0:
             h, pv = stats.kruskal(*grupos)
