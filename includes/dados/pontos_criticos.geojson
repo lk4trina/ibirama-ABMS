@@ -30,6 +30,7 @@
     {"type":"Feature","properties":{"tipo":"ubs","grupo":"ubs","nome":"ESF Areado - UBS Ribeirão Areado","precisao":"centro_do_bairro"},"geometry":{"type":"Point","coordinates":[-49.5261096,-27.0765851]}},
     {"type":"Feature","properties":{"tipo":"ubs","grupo":"ubs","nome":"ESF Dalbérgia - PSF Dalbérgia","precisao":"ponto_endereco"},"geometry":{"type":"Point","coordinates":[-49.588844994823,-27.042811991201]}},
     {"type":"Feature","properties":{"tipo":"ubs","grupo":"ubs","nome":"PSF Serra São Miguel","precisao":"centro_do_bairro"},"geometry":{"type":"Point","coordinates":[-49.5251,-27.1104]}},
-    {"type":"Feature","properties":{"tipo":"ubs","grupo":"ubs","nome":"PSF Progresso","precisao":"poi_baixa_confianca"},"geometry":{"type":"Point","coordinates":[-49.5420113,-27.0448981]}}
+    {"type":"Feature","properties":{"tipo":"ubs","grupo":"ubs","nome":"PSF Progresso","precisao":"poi_baixa_confianca"},"geometry":{"type":"Point","coordinates":[-49.5420113,-27.0448981]}},
+    {"type":"Feature","properties":{"tipo":"abrigo","grupo":"abrigo","nome":"Ginásio de Esportes João Moretti","precisao":"informada_equipe"},"geometry":{"type":"Point","coordinates":[-49.50697786194434,-27.05976218782422]}}
   ]
 }
