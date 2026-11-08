@@ -44,7 +44,8 @@ O arquivo operacional `includes/dados/pontos_criticos.geojson` reúne:
 - escolas estaduais, municipais e particulares informadas;
 - CEIs;
 - IFC e UDESC/CEAVI;
-- UBSs e ESFs informadas.
+- UBSs e ESFs informadas;
+- abrigo municipal (Ginásio de Esportes João Moretti, Centro).
 
 O cadastro rastreável, com endereço, coordenadas, precisão, fonte do cadastro e fonte da coordenada, está em `includes/dados/pontos_criticos_cadastro.csv`.
 
@@ -58,7 +59,9 @@ As precisões significam:
 - `centro_do_bairro`: localização provisória, inadequada para conclusões em escala de quadra;
 - `poi_baixa_confianca`: resultado possível que precisa de confirmação local.
 
-Antes dos resultados finais, a Defesa Civil ou a equipe deve validar especialmente ESF Areado, PSF Serra São Miguel e PSF Progresso. Não foi informado abrigo oficial; o indicador de abrigo continua como `NaN`.
+Antes dos resultados finais, a Defesa Civil ou a equipe deve validar especialmente ESF Areado, PSF Serra São Miguel e PSF Progresso.
+
+**Abrigo municipal (cadastrado em nov/2025):** o **Ginásio de Esportes João Moretti** (Centro de Ibirama) foi cadastrado como abrigo em caso de enchentes e temporais, com coordenada `informada_equipe` (precisão alta; fica a ~8 m de um nó da rede e dentro da área das vias). Fonte: **equipe do projeto — a confirmar com a Defesa Civil**. Com isso, o indicador de acesso ao abrigo **deixa de ser `NaN`** (antes não havia endereço oficial). O modelo **GAMA lê o `includes/dados/pontos_criticos.geojson`**, então passa a medir o acesso ao abrigo. O **simulador em Python**: na versão alinhada (branch `python-sync`, que também lê o geojson agrupado por grupo) ele **também passa a medir o abrigo**; na versão antiga (que lia o CSV de 3 pontos `pontos_criticos.csv`) o abrigo seguiria `NaN`. Ver `docs/python_vs_gaml.md`.
 
 ## Alterações no modelo
 

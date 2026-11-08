@@ -27,3 +27,4 @@ ubs,ubs,ESF Areado - UBS Ribeirão Areado,"Rua Bahia, 50 - Areado",-27.0765851,-
 ubs,ubs,ESF Dalbérgia - PSF Dalbérgia,"Avenida Missler, 1879 - Dalbérgia",-27.042811991201,-49.588844994823,ponto_endereco,resposta_usuario,ArcGIS_World_Geocoding
 ubs,ubs,PSF Serra São Miguel,Rua Santa Catarina - Serra São Miguel,-27.1104,-49.5251,centro_do_bairro,resposta_usuario,ArcGIS_World_Geocoding
 ubs,ubs,PSF Progresso,Endereço não confirmado,-27.0448981,-49.5420113,poi_baixa_confianca,resposta_usuario,ArcGIS_World_Geocoding
+abrigo,abrigo,Ginásio de Esportes João Moretti,,-27.05976218782422,-49.50697786194434,informada_equipe,equipe_projeto (a confirmar com a Defesa Civil),equipe_projeto (a confirmar com a Defesa Civil)
