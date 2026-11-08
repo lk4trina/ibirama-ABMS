@@ -40,7 +40,3 @@ Os arquivos com `_TESTE` ou `_SINTETICO` no nome (por exemplo `vias_teste_SINTET
 - População e domicílios: **IBGE — Censo Demográfico 2022**.
 - Áreas de risco, pontos críticos, interdições e tempos de interdição: **Defesa Civil de Ibirama** (reunião do projeto); detalhes e demais fontes em [`docs/dados_defesa_civil.md`](docs/dados_defesa_civil.md).
 - Rede viária: **OpenStreetMap**.
-
-## Uso de inteligência artificial
-
-Este projeto utilizou o assistente de IA **Claude (da Anthropic)** como apoio na estruturação do repositório, nos scripts em Python, no simulador em Python, no modelo GAMA e na documentação. Todo o conteúdo gerado por IA foi **revisado pela equipe**, que é responsável pelo resultado final.
