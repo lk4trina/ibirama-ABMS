@@ -60,6 +60,12 @@ global {
 	float duracao_desl_energ_min <- 60.0;
 	float duracao_desl_energ_max <- 90.0;
 	float duracao_erosao_min <- 480.0;     // HIPÓTESE: ainda não informada pela Defesa Civil
+	// HIPÓTESE (não informada pela Defesa Civil): quanto a CHUVA dura. 0 = comportamento atual (perfil de 30 min).
+	// > 0: a água sobe em 10 min, fica no pico enquanto chove e desce em duracao_alagamento_min após a chuva.
+	float duracao_chuva_min <- 0.0;
+	// Momento da medição de acessibilidade, em min após inicio_evento_min. 25 = comportamento atual.
+	// Com chuva longa, medir mais tarde (no platô) é mais representativo (não mudo o padrão).
+	float medicao_acesso_min <- 25.0;
 
 	// ================================ HIPÓTESES (calibrar) ===================================
 	list<string> MODOS <- ["carro", "moto", "pedestre"];
@@ -262,7 +268,7 @@ global {
 	// Acessibilidade 25 min após o início-base do evento (amostra de nós).
 	// Como cada zona pode começar até 20 min depois, este indicador representa uma janela do evento,
 	// não um pico simultâneo. Educação reúne escolas, CEIs, IFC e UDESC; UBS reúne UBSs/ESFs.
-	reflex medir_acesso when: (!acesso_medido and time >= (inicio_evento_min + 25.0) * 60.0) {
+	reflex medir_acesso when: (!acesso_medido and time >= (inicio_evento_min + medicao_acesso_min) * 60.0) {
 		acesso_medido <- true;
 		list<point> amostra <- (min(150, length(nos_veic))) among nos_veic;
 		loop tp over: GRUPOS_ACESSO {
@@ -300,6 +306,7 @@ global {
 		finalizado <- true;
 		string linha <- tipo_evento + "," + severidade + "," + info_nivel + "," + string(rede_energizada)
 			+ "," + duracao_alagamento_min + "," + duracao_deslizamento_min + "," + duracao_erosao_min
+			+ "," + duracao_chuva_min
 			+ "," + seed + "," + length(zona_risco where each.ativa);
 		loop m over: MODOS {
 			list<viajante> s <- viajante where (each.modo = m);
@@ -456,7 +463,9 @@ species zona_risco {
 		}
 		if (quer_desl and flip(p)) {
 			a_desl <- true;
-			t_desl <- t0 + rnd(1200.0);
+			// com chuva longa, o deslizamento pode começar a qualquer momento dela (não só nos 1os 20 min);
+			// com chuva = 0, cai no rnd(1200) de antes (mesma chamada -> mesmo resultado com a mesma semente).
+			t_desl <- t0 + ((duracao_chuva_min > 0.0) ? rnd(duracao_chuva_min * 60.0) : rnd(1200.0));
 			// A Defesa Civil informou 30 min sem rede energizada e 60-90 min com rede.
 			dur_desl_s <- rede_energizada
 				? (duracao_desl_energ_min + rnd(duracao_desl_energ_max - duracao_desl_energ_min)) * 60.0
@@ -474,13 +483,22 @@ species zona_risco {
 	float profundidade (float t) {
 		if (!a_alaga or t < t_alaga) { return 0.0; }
 		float dur <- duracao_alagamento_min * 60.0;
-		float rampa <- dur * FRAC_RAMPA;
-		float plato <- dur * FRAC_PLATO;
-		float recesso <- dur - rampa - plato;
+		float rampa <- dur * FRAC_RAMPA;                 // subida (= 10 min quando dur = 30)
+		float plato <- 0.0;
+		float recesso <- 0.0;
+		if (duracao_chuva_min > 0.0) {
+			// chuva longa: sobe em 'rampa', fica no pico ENQUANTO chove, e desce em duracao_alagamento_min
+			plato <- max(0.0, duracao_chuva_min * 60.0 - rampa);
+			recesso <- dur;
+		} else {
+			// comportamento atual (perfil de 30 min): 10 sobe / 5 pico / 15 desce
+			plato <- dur * FRAC_PLATO;
+			recesso <- dur - rampa - plato;
+		}
 		float dt <- t - t_alaga;
 		if (dt < rampa) { return pico * dt / rampa; }
 		if (dt < rampa + plato) { return pico; }
-		if (dt < dur) { return pico * (1.0 - (dt - rampa - plato) / recesso); }
+		if (dt < rampa + plato + recesso) { return pico * (1.0 - (dt - rampa - plato) / recesso); }
 		return 0.0;
 	}
 
@@ -751,6 +769,8 @@ experiment Interativo type: gui {
 	parameter "Duração do deslizamento (min)" var: duracao_deslizamento_min <- 30.0 min: 5.0 max: 240.0 category: "Evento";
 	parameter "Há rede energizada" var: rede_energizada <- false category: "Evento";
 	parameter "Duração da erosão (min, hipótese)" var: duracao_erosao_min <- 480.0 min: 5.0 max: 480.0 category: "Evento";
+	parameter "Duração da chuva (min, HIPÓTESE; 0 = perfil de 30 min)" var: duracao_chuva_min <- 0.0 min: 0.0 max: 480.0 category: "Evento";
+	parameter "Medição do acesso (min após início)" var: medicao_acesso_min <- 25.0 min: 0.0 max: 480.0 category: "Evento";
 	parameter "Raio de visão (m)" var: raio_visao <- 60.0 min: 10.0 max: 300.0 category: "Agentes";
 	parameter "Pausar no fim (480 min)" var: pausar_no_fim <- true category: "Agentes";
 
@@ -769,7 +789,7 @@ experiment Interativo type: gui {
 			species zona_risco;
 			species ponto_critico;
 			species viajante;
-			overlay position: {5, 5} size: {250 #px, 350 #px} background: #black transparency: 0.35 border: #black rounded: true {
+			overlay position: {5, 5} size: {260 #px, 368 #px} background: #black transparency: 0.35 border: #black rounded: true {
 				int h <- int(time / 3600);
 				int mi <- (int(time) mod 3600) div 60;
 				draw "Tempo simulado: " + h + " h " + mi + " min" at: {10 #px, 20 #px} color: #white font: font("SansSerif", 12, #bold);
@@ -802,6 +822,9 @@ experiment Interativo type: gui {
 				draw "UBS" at: {44 #px, 314 #px} color: #white font: font("SansSerif", 11, #plain);
 				draw triangle(13 #px) at: {24 #px, 328 #px} color: #green border: #black;
 				draw "Abrigo" at: {44 #px, 332 #px} color: #white font: font("SansSerif", 11, #plain);
+				// Só aparece quando a chuva (hipótese) está ligada
+				draw (duracao_chuva_min > 0.0 ? ("Chuva até o min " + int(inicio_evento_min + duracao_chuva_min)) : "")
+					at: {10 #px, 352 #px} color: #deepskyblue font: font("SansSerif", 11, #bold);
 			}
 		}
 		// Atualiza a cada 60 ciclos (= 10 min simulados) para não travar nem criar escala gigante ao acelerar.
@@ -836,6 +859,7 @@ experiment Interativo type: gui {
 		}
 		monitor "Trechos fechados (carro)" value: via count (each.fechada["carro"] and each.veic = 1);
 		monitor "Eventos em curso" value: zona_risco count each.em_curso;
+		monitor "Chuva até o minuto (0 = perfil de 30 min)" value: duracao_chuva_min > 0.0 ? int(inicio_evento_min + duracao_chuva_min) : 0;
 	}
 }
 
@@ -846,4 +870,14 @@ experiment Lote type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) 
 	parameter "Severidade" var: severidade among: ["baixa", "media", "alta"];
 	parameter "Nível de informação" var: info_nivel among: ["local", "parcial", "amplo"];
 	parameter "Rede energizada" var: rede_energizada among: [false, true];
+}
+
+// 3) Sensibilidade da DURAÇÃO DA CHUVA (HIPÓTESE, não informada pela Defesa Civil). Separado do Lote
+//    principal para não multiplicar execuções inúteis. Varia só a chuva e o tipo de evento.
+experiment LoteChuva type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) {
+	parameter "Tipo de evento" var: tipo_evento among: ["combinado", "alagamento"];
+	parameter "Duração da chuva (min, HIPÓTESE)" var: duracao_chuva_min among: [60.0, 120.0, 240.0];
+	parameter "Severidade" var: severidade <- "alta";
+	parameter "Nível de informação" var: info_nivel <- "parcial";
+	parameter "Rede energizada" var: rede_energizada <- false;
 }
