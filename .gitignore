@@ -8,6 +8,9 @@ includes/dados/fundo_mapa.png
 includes/dados/predios.*
 resultados/mapa_interativo.html
 resultados/*.csv
+# apoio regeravel do mapa de rotas (o mapa_rotas.html ja e autocontido)
+resultados/mapa_rotas_dados.json
+resultados/mapa_rotas_router.js
 resultados/analise/
 # arquivos do GAMA
 .metadata/
