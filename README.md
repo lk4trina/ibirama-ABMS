@@ -42,6 +42,14 @@ o CSV com as **mesmas 53 colunas** do GAMA (um teste automático confere o cabe�
 > **os resultados do artigo vêm do GAMA**; o Python serve como **verificação cruzada** e para rodar muitas
 > repetições rápido. Rode `python python/testes_logica.py` e, para os cenários, `python python/rodar_experimentos.py --rede real` (grava em `resultados/`, nunca em `includes/resultados_gama_dc.csv`).
 
+## Desvios (rotas alternativas)
+
+A pedido da Defesa Civil (ideia parecida com o **Alerta Blu** de Blumenau), `scripts/08_desvios.py`
+pré-calcula **rotas alternativas** para trechos fechados e gera `includes/dados/desvios_sugeridos.csv`,
+`resultados/mapa_desvios.html` (mapa), `resultados/desvios_exemplos.geojson` e `resultados/fig_desvios.png`.
+**Não é alerta em tempo real** — são desvios para planejamento, sobre a rede do OSM, sem sentido único e
+sem semáforo. Detalhes e limitações em [`docs/desvios.md`](docs/desvios.md).
+
 ## Arquivos de teste (fictícios)
 
 Os arquivos com `_TESTE` ou `_SINTETICO` no nome (por exemplo `vias_teste_SINTETICO.shp`, `pontos_criticos_TESTE.csv`) são **dados fictícios**, usados só para experimentar os scripts e o modelo sem a rede real. **Não produzem resultado válido** e não devem ser usados nas análises.
