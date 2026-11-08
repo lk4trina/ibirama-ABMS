@@ -87,7 +87,7 @@ LENT_MIN = 0.10                # GAML 89
 # Cabecalho de saida: MESMAS 53 colunas, na mesma ordem, que includes/resultados_gama_dc.csv (GAML 301-338)
 CABECALHO = ["tipo_evento", "severidade", "info_nivel", "rede_energizada",
              "duracao_alagamento_min", "duracao_deslizamento_min", "duracao_erosao_min",
-             "seed", "n_poligonos_com_evento"]
+             "duracao_chuva_min", "seed", "n_poligonos_com_evento"]
 for _m in MODOS:
     CABECALHO += [f"n_{_m}", f"pct_concluiu_{_m}", f"pct_voltou_{_m}", f"pct_desistiu_{_m}", f"pct_preso_{_m}",
                   f"pct_em_andamento_{_m}", f"tempo_medio_{_m}_min", f"distancia_media_{_m}_m",
@@ -95,7 +95,7 @@ for _m in MODOS:
 CABECALHO += ["gini_fluxo", "pct_fluxo_top10_vias"]
 for _g in GRUPOS_ACESSO:
     CABECALHO += [f"sem_acesso_{_g}_carro_pct", f"sem_acesso_{_g}_pedestre_pct"]
-assert len(CABECALHO) == 53, len(CABECALHO)
+assert len(CABECALHO) == 54, len(CABECALHO)
 
 
 @dataclass
@@ -121,6 +121,8 @@ class Params:
     duracao_desl_energ_min: float = 60.0    # GAML 60
     duracao_desl_energ_max: float = 90.0    # GAML 61
     duracao_erosao_min: float = 480.0       # GAML 62 (HIPOTESE)
+    duracao_chuva_min: float = 0.0          # GAML 63 (HIPOTESE; 0 = perfil de 30 min, comportamento atual)
+    medicao_acesso_min: float = 25.0        # GAML 66 (momento da medicao de acesso; 25 = comportamento atual)
     # --- especifico do Python (nao existe no GAML) ---
     n_destinos: int = 30                # quantos destinos sortear (o GAML usa pontos criticos + 20 extra)
 
@@ -268,10 +270,9 @@ class Eventos:
                "erosao": ["eros"], "combinado": ["alaga", "desl", "eros"]}[p.tipo_evento]
         mult = SEVERIDADE[p.severidade]
         t_ks = np.arange(K) * GRID
-        # perfil temporal do alagamento dentro de duracao_alagamento_min (GAML 474-484)
+        # perfil temporal do alagamento (GAML profundidade, 474-491); rampa = subida (= 10 min quando dur=30)
         dur_al = p.duracao_alagamento_min * 60.0
         rampa = dur_al * FRAC_RAMPA
-        plato = dur_al * FRAC_PLATO
         for i, r in mundo.riscos.iterrows():
             ed = mundo.edges_poli[i]
             if len(ed) == 0:
@@ -281,13 +282,24 @@ class Eventos:
                     continue
                 if rng.random() >= min(1.0, BASE_ATIVACAO[int(r.grau_num)] * mult):
                     continue
-                t0 = p.inicio_evento_min * 60 + rng.uniform(0, 1200)   # GAML: t0 + rnd(1200)
+                # deslizamento com chuva longa comeca em qualquer momento dela; alaga/eros (e tudo com chuva=0)
+                # nos 1os 20 min -> com chuva=0 a chamada de rnd e identica a de antes (mesmo resultado).
+                if f == "desl" and p.duracao_chuva_min > 0.0:
+                    t0 = p.inicio_evento_min * 60 + rng.uniform(0, p.duracao_chuva_min * 60.0)
+                else:
+                    t0 = p.inicio_evento_min * 60 + rng.uniform(0, 1200)
                 self.ativos.append((i, f, t0))
                 if f == "alaga":
                     lo, hi = PROF_PICO[int(r.grau_num)]
                     pico = rng.uniform(lo, hi)
-                    d = np.interp(t_ks, [t0, t0 + rampa, t0 + rampa + plato, t0 + dur_al],
-                                  [0, pico, pico, 0], left=0, right=0)   # 0 apos dur_al -> reabre
+                    if p.duracao_chuva_min > 0.0:   # chuva longa: pico enquanto chove, desce em duracao_alagamento_min
+                        plato = max(0.0, p.duracao_chuva_min * 60.0 - rampa)
+                        recesso = dur_al
+                    else:                           # perfil atual de 30 min (10 sobe / 5 pico / 15 desce)
+                        plato = dur_al * FRAC_PLATO
+                        recesso = dur_al - rampa - plato
+                    knots = [t0, t0 + rampa, t0 + rampa + plato, t0 + rampa + plato + recesso]
+                    d = np.interp(t_ks, knots, [0, pico, pico, 0], left=0, right=0)   # 0 apos o fim -> reabre
                     H[:, ed] = np.maximum(H[:, ed], d[:, None].astype(np.float32))
                 elif f == "desl":
                     # 30 min, ou 60-90 min (uniforme) se rede_energizada (GAML 461-463); depois reabre
@@ -524,7 +536,7 @@ class Simulacao:
     # --- acessibilidade: inicio_evento_min + 25 min, amostra 150 nos, carro+pedestre (GAML medir_acesso, 265-293) ---
     def acessibilidade(self):
         m, ev, p = self.m, self.ev, self.p
-        t_meas = (p.inicio_evento_min + 25.0) * 60.0
+        t_meas = (p.inicio_evento_min + p.medicao_acesso_min) * 60.0
         k = ev.k(t_meas)
         rng = np.random.default_rng(self.seed + 20_000)
         if len(m.nos_veic) <= 150:
@@ -559,7 +571,7 @@ class Simulacao:
             "rede_energizada": "true" if p.rede_energizada else "false",   # GAML grava string(rede_energizada)
             "duracao_alagamento_min": p.duracao_alagamento_min,
             "duracao_deslizamento_min": p.duracao_deslizamento_min,
-            "duracao_erosao_min": p.duracao_erosao_min,
+            "duracao_erosao_min": p.duracao_erosao_min, "duracao_chuva_min": p.duracao_chuva_min,
             "seed": self.seed, "n_poligonos_com_evento": n_poli,
         }
         tempos = {}
