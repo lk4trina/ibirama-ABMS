@@ -1,0 +1,157 @@
+cenario,tipo,modal,n_trechos_fechados,metros_fechados,n_pares_afetados,pct_sem_alternativa,acrescimo_dist_mediana_m,acrescimo_dist_p90_m,acrescimo_tempo_mediana_min,acrescimo_tempo_p90_min,top3_ruas_desvio,observacao
+interdicao: Rua Blumenau (rua inteira),interdicao_inteira,carro,11,3605.6,145,60.0,99.7,180.7,0.23,0.33,Rodovia Ingo Hering; Rua 25 de Julho; Rua Tiradentes,associado
+interdicao: Rua Blumenau (rua inteira),interdicao_inteira,pedestre,11,3605.6,192,75.5,37.0,37.0,0.47,0.47,Rua Tiradentes; Rua 25 de Julho; Rua Doutor Getúlio Vargas,associado
+interdicao: Rua Blumenau (so <=40m do risco),interdicao_buffer,carro,5,3118.2,29,0.0,180.7,180.7,0.33,0.33,Rodovia Ingo Hering; Rua 25 de Julho; Rua Tiradentes,intersecao com buffer 40 m
+interdicao: Rua Blumenau (so <=40m do risco),interdicao_buffer,pedestre,5,3118.2,104,55.8,37.0,339.2,0.47,4.35,Rua Tiradentes; Rua 25 de Julho; Rua Blumenau,intersecao com buffer 40 m
+interdicao: Rua Guarani (rua inteira),interdicao_inteira,carro,8,2251.8,276,72.5,50.5,170.2,0.1,0.64,Rua Santa Cruz; Rua Adolfo Zaiser; Rua Princesa Isabel,associado
+interdicao: Rua Guarani (rua inteira),interdicao_inteira,pedestre,8,2251.8,423,41.1,340.4,1942.4,9.57,30.11,Rua Doutor Getúlio Vargas; Rua Castro Alves; Rua Otto Jost; Rua Castro Alves,associado
+interdicao: Rua Guarani (so <=40m do risco),interdicao_buffer,carro,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+interdicao: Rua Guarani (so <=40m do risco),interdicao_buffer,pedestre,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+interdicao: Rua Santa Cruz (rua inteira),interdicao_inteira,carro,11,1657.4,848,33.5,882.8,1143.6,1.46,1.98,Rua Guarani; Rua Adolfo Zaiser; Rua Doutor Getúlio Vargas,associado
+interdicao: Rua Santa Cruz (rua inteira),interdicao_inteira,pedestre,11,1657.4,685,37.7,882.8,1327.6,11.32,16.78,Rua Guarani; Rua Adolfo Zaiser; Rua Harmonia,associado
+interdicao: Rua Santa Cruz (so <=40m do risco),interdicao_buffer,carro,1,772.2,45,0.0,559.2,2011.3,1.02,3.83,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,intersecao com buffer 40 m
+interdicao: Rua Santa Cruz (so <=40m do risco),interdicao_buffer,pedestre,1,772.2,72,0.0,427.7,1757.7,9.19,27.6,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,intersecao com buffer 40 m
+interdicao: Rua Duque de Caxias (rua inteira),interdicao_inteira,carro,12,3049.4,538,21.6,974.1,7067.7,2.23,12.77,Rua Nereu Ramos; Rua Doutor Getúlio Vargas; Rua Franz Link,associado
+interdicao: Rua Duque de Caxias (rua inteira),interdicao_inteira,pedestre,12,3049.4,398,29.1,1942.7,8203.2,19.76,105.17,Rua Nereu Ramos; Rua Franz Link; Rua Doutor Getúlio Vargas,associado
+interdicao: Rua Duque de Caxias (so <=40m do risco),interdicao_buffer,carro,8,1385.7,537,10.8,1169.5,3338.1,2.96,6.97,Rua Nereu Ramos; Rua Doutor Getúlio Vargas; Rua Franz Link,intersecao com buffer 40 m
+interdicao: Rua Duque de Caxias (so <=40m do risco),interdicao_buffer,pedestre,8,1385.7,395,14.7,1782.5,3361.8,21.3,41.62,Rua Nereu Ramos; Rua Doutor Getúlio Vargas; Rua Rodolfo Koepsel,intersecao com buffer 40 m
+interdicao: Rua Marquês do Herval (rua inteira),interdicao_inteira,carro,51,8079.5,2926,83.7,148.4,1354.0,0.44,6.11,Rua Franz Roedel; Rua XV de Novembro; Rua Tiradentes,associado
+interdicao: Rua Marquês do Herval (rua inteira),interdicao_inteira,pedestre,51,8079.5,2627,86.1,171.5,1484.7,2.2,19.17,Rua XV de Novembro; Rua Franz Roedel; Rua Doutor Getúlio Vargas,associado
+interdicao: Rua Marquês do Herval (so <=40m do risco),interdicao_buffer,carro,8,2126.4,1650,57.6,1261.8,1609.7,5.33,5.75,Rua João Aurcih; Rua Indaial; Rua Ascurra,intersecao com buffer 40 m
+interdicao: Rua Marquês do Herval (so <=40m do risco),interdicao_buffer,pedestre,8,2126.4,1238,0.0,2675.1,4809.8,30.09,61.49,Rua Indaial; Rua Ascurra; Rua Marechal Rondon,intersecao com buffer 40 m
+interdicao: Rua João Aurich (rua inteira),interdicao_inteira,carro,8,1171.5,63,0.0,142.6,6691.4,0.34,10.41,Rua Marquês do Herval; Rua Almirante Tamandaré; Rua Otto Jost,associado
+interdicao: Rua João Aurich (rua inteira),interdicao_inteira,pedestre,8,1171.5,302,0.0,500.4,678.6,6.42,8.7,Rua Marquês do Herval; Rua Otto Jost; Rua Otto Jost; Rua Castro Alves,associado
+interdicao: Rua João Aurich (so <=40m do risco),interdicao_buffer,carro,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+interdicao: Rua João Aurich (so <=40m do risco),interdicao_buffer,pedestre,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+interdicao: Rua Machado de Assis (rua inteira),interdicao_inteira,carro,1,1215.6,0,NaN,NaN,NaN,NaN,NaN,,associado
+interdicao: Rua Machado de Assis (rua inteira),interdicao_inteira,pedestre,1,1215.6,0,NaN,NaN,NaN,NaN,NaN,,associado
+interdicao: Rua Machado de Assis (so <=40m do risco),interdicao_buffer,carro,1,1215.6,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m
+interdicao: Rua Machado de Assis (so <=40m do risco),interdicao_buffer,pedestre,1,1215.6,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m
+interdicao: Ponte Ibirama-Apiúna (rua inteira),interdicao_inteira,carro,50,10183.1,1496,52.3,460.5,2652.6,5.77,7.16,Avenida Castelo Branco; Rua XV de Novembro; Rua das Flores,parcial
+interdicao: Ponte Ibirama-Apiúna (rua inteira),interdicao_inteira,pedestre,50,10183.1,0,NaN,NaN,NaN,NaN,NaN,,parcial; nenhum trecho usavel por este modal
+interdicao: Ponte Ibirama-Apiúna (so <=40m do risco),interdicao_buffer,carro,21,2354.6,1258,34.6,2096.4,3171.5,4.28,5.88,Avenida Castelo Branco; Rua das Flores; Rua Carlos Machota,intersecao com buffer 40 m
+interdicao: Ponte Ibirama-Apiúna (so <=40m do risco),interdicao_buffer,pedestre,21,2354.6,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+via principal: Rua Blumenau (via inteira),via_principal_inteira,carro,11,3605.6,145,60.0,99.7,180.7,0.23,0.33,Rodovia Ingo Hering; Rua 25 de Julho; Rua Tiradentes,associado
+via principal: Rua Blumenau (via inteira),via_principal_inteira,pedestre,11,3605.6,192,75.5,37.0,37.0,0.47,0.47,Rua Tiradentes; Rua 25 de Julho; Rua Doutor Getúlio Vargas,associado
+via principal: Rua Blumenau (so <=40m do risco),via_principal_buffer,carro,5,3118.2,29,0.0,180.7,180.7,0.33,0.33,Rodovia Ingo Hering; Rua 25 de Julho; Rua Tiradentes,intersecao com buffer 40 m
+via principal: Rua Blumenau (so <=40m do risco),via_principal_buffer,pedestre,5,3118.2,104,55.8,37.0,339.2,0.47,4.35,Rua Tiradentes; Rua 25 de Julho; Rua Blumenau,intersecao com buffer 40 m
+via principal: Rua XV de Novembro (via inteira),via_principal_inteira,carro,24,2759.4,1701,24.9,3443.9,4519.0,2.67,4.28,Rua 25 de Julho; Rodovia Ingo Hering; Rua Tiradentes,associado
+via principal: Rua XV de Novembro (via inteira),via_principal_inteira,pedestre,24,2759.4,1558,92.5,809.2,3929.9,32.18,52.67,Rua 25 de Julho; Rua Tiradentes; Rua Marquês do Herval,associado
+via principal: Rua XV de Novembro (so <=40m do risco),via_principal_buffer,carro,2,553.0,1540,0.0,3589.4,5643.6,3.16,6.35,Rua 25 de Julho; Rodovia Ingo Hering; Rua Tiradentes,intersecao com buffer 40 m
+via principal: Rua XV de Novembro (so <=40m do risco),via_principal_buffer,pedestre,2,553.0,1439,93.5,3596.9,4136.3,43.36,52.67,Rua 25 de Julho; Rua Tiradentes; Rua Marquês do Herval,intersecao com buffer 40 m
+via principal: SC-340 (via inteira),via_principal_inteira,carro,98,14394.5,4751,68.2,243.1,1083.6,0.73,2.55,Rua Iba Goitacazes dos Reis; Rua Leopoldo Mönich; Rua 3 de Maio,associado
+via principal: SC-340 (via inteira),via_principal_inteira,pedestre,98,14394.5,4118,73.3,258.7,935.0,3.86,15.82,Rua 3 de Maio; Rua Iba Goitacazes dos Reis; Rua Leopoldo Mönich,associado
+via principal: SC-340 (so <=40m do risco),via_principal_buffer,carro,16,3492.5,3184,31.2,93.0,1269.6,0.29,5.57,Rua Marquês do Herval; Rua 3 de Maio; Rua Anita Garibaldi,intersecao com buffer 40 m
+via principal: SC-340 (so <=40m do risco),via_principal_buffer,pedestre,16,3492.5,2415,15.6,377.0,3106.2,4.23,45.03,Rua 3 de Maio; Rua Marquês do Herval; Rua Indaial,intersecao com buffer 40 m
+via principal: Rua Marquês do Herval (via inteira),via_principal_inteira,carro,51,8079.5,2926,83.7,148.4,1354.0,0.44,6.11,Rua Franz Roedel; Rua XV de Novembro; Rua Tiradentes,associado
+via principal: Rua Marquês do Herval (via inteira),via_principal_inteira,pedestre,51,8079.5,2627,86.1,171.5,1484.7,2.2,19.17,Rua XV de Novembro; Rua Franz Roedel; Rua Doutor Getúlio Vargas,associado
+via principal: Rua Marquês do Herval (so <=40m do risco),via_principal_buffer,carro,8,2126.4,1650,57.6,1261.8,1609.7,5.33,5.75,Rua João Aurcih; Rua Indaial; Rua Ascurra,intersecao com buffer 40 m
+via principal: Rua Marquês do Herval (so <=40m do risco),via_principal_buffer,pedestre,8,2126.4,1238,0.0,2675.1,4809.8,30.09,61.49,Rua Indaial; Rua Ascurra; Rua Marechal Rondon,intersecao com buffer 40 m
+via principal: Rua Dr. Getúlio Vargas (via inteira),via_principal_inteira,carro,29,2909.2,2073,25.8,3960.4,8709.0,7.11,13.18,Rua Lindolfo Koepsel; Rua Rodolfo Koepsel; Rua Rodolfo Koepsel; Rua Duque de Caxias,associado
+via principal: Rua Dr. Getúlio Vargas (via inteira),via_principal_inteira,pedestre,29,2909.2,2054,23.5,1638.3,3357.8,14.86,39.99,Rua Marquês do Herval; Rua Tiradentes; Rua Guarani,associado
+via principal: Rua Dr. Getúlio Vargas (so <=40m do risco),via_principal_buffer,carro,9,1105.1,1447,2.0,821.5,2464.5,0.54,3.45,Rua Marquês do Herval; Rua Otto Jost; Rua Castro Alves; Rua Otto Jost,intersecao com buffer 40 m
+via principal: Rua Dr. Getúlio Vargas (so <=40m do risco),via_principal_buffer,pedestre,9,1105.1,1719,1.7,655.6,2459.1,8.08,30.13,Rua Marquês do Herval; Rua Tiradentes; Rua Otto Jost; Rua Castro Alves,intersecao com buffer 40 m
+via principal: Ponte Ibirama-Apiúna (via inteira),via_principal_inteira,carro,50,10183.1,1496,52.3,460.5,2652.6,5.77,7.16,Avenida Castelo Branco; Rua XV de Novembro; Rua das Flores,parcial
+via principal: Ponte Ibirama-Apiúna (via inteira),via_principal_inteira,pedestre,50,10183.1,0,NaN,NaN,NaN,NaN,NaN,,parcial; nenhum trecho usavel por este modal
+via principal: Ponte Ibirama-Apiúna (so <=40m do risco),via_principal_buffer,carro,21,2354.6,1258,34.6,2096.4,3171.5,4.28,5.88,Avenida Castelo Branco; Rua das Flores; Rua Carlos Machota,intersecao com buffer 40 m
+via principal: Ponte Ibirama-Apiúna (so <=40m do risco),via_principal_buffer,pedestre,21,2354.6,0,NaN,NaN,NaN,NaN,NaN,,intersecao com buffer 40 m; nenhum trecho usavel por este modal
+poligono 0 (grau MuitoAlto),poligono,carro,9,1231.2,970,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 0 (grau MuitoAlto),poligono,pedestre,9,1231.2,891,32.5,1826.4,2945.4,22.28,36.63,Rua Conselheiro Stolz; Rua Siegfried Reiner; Avenida Missler,grau_num=3
+poligono 1 (grau Alto),poligono,carro,1,394.8,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 1 (grau Alto),poligono,pedestre,1,394.8,244,0.0,1523.4,1942.4,24.74,30.11,Rua Marquês do Herval; Rua Doutor Getúlio Vargas; Rua Castro Alves,grau_num=2
+poligono 2 (grau Alto),poligono,carro,6,2036.4,1634,75.2,-678.6,1279.9,1.61,5.33,Rua João Aurcih; Rua Almirante Tamandaré; Rua Marquês do Herval,grau_num=2
+poligono 2 (grau Alto),poligono,pedestre,6,2036.4,1277,92.2,1279.9,2008.6,16.51,30.92,Rua Marquês do Herval; Rua Marechal Rondon; Rua Indaial,grau_num=2
+poligono 3 (grau MuitoAlto),poligono,carro,3,1846.4,1552,0.0,1269.6,1270.6,5.57,5.57,Rua Indaial; Rua Ascurra; Rua Marechal Rondon,grau_num=3
+poligono 3 (grau MuitoAlto),poligono,pedestre,3,1846.4,966,0.0,1269.6,1371.2,16.28,17.58,Rua Indaial; Rua Ascurra; Rua Marechal Rondon,grau_num=3
+poligono 4 (grau Alto),poligono,carro,1,513.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 4 (grau Alto),poligono,pedestre,1,513.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 5 (grau Alto),poligono,carro,2,346.9,29,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 5 (grau Alto),poligono,pedestre,2,346.9,29,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 6 (grau MuitoAlto),poligono,carro,2,925.7,45,0.0,559.2,2011.3,1.02,3.83,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,grau_num=3
+poligono 6 (grau MuitoAlto),poligono,pedestre,2,925.7,72,0.0,427.7,1757.7,9.19,27.6,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,grau_num=3
+poligono 7 (grau Alto),poligono,carro,1,772.2,45,0.0,559.2,2011.3,1.02,3.83,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,grau_num=2
+poligono 7 (grau Alto),poligono,pedestre,1,772.2,72,0.0,427.7,1757.7,9.19,27.6,Rua Doutor Getúlio Vargas; Rua Santa Cruz; Rua Princesa Isabel,grau_num=2
+poligono 8 (grau Alto),poligono,carro,7,1674.2,100,29.0,411.9,411.9,1.43,1.43,Rua Santa Cruz; Rua Doutor Getúlio Vargas; Rua Princesa Isabel,grau_num=2
+poligono 8 (grau Alto),poligono,pedestre,7,1674.2,88,33.0,411.9,535.4,8.56,10.49,Rua Doutor Getúlio Vargas; Rua Princesa Isabel; Rua Santa Cruz,grau_num=2
+poligono 9 (grau Alto),poligono,carro,1,802.3,123,0.0,411.9,2574.9,1.43,4.67,Rua Santa Cruz; Rua Doutor Getúlio Vargas; Rua Princesa Isabel,grau_num=2
+poligono 9 (grau Alto),poligono,pedestre,1,802.3,110,0.0,535.4,2574.9,10.49,38.22,Rua Princesa Isabel; Rua Doutor Getúlio Vargas; Rua Santa Cruz,grau_num=2
+poligono 10 (grau Alto),poligono,carro,1,802.3,123,0.0,411.9,2574.9,1.43,4.67,Rua Santa Cruz; Rua Doutor Getúlio Vargas; Rua Princesa Isabel,grau_num=2
+poligono 10 (grau Alto),poligono,pedestre,1,802.3,110,0.0,535.4,2574.9,10.49,38.22,Rua Princesa Isabel; Rua Doutor Getúlio Vargas; Rua Santa Cruz,grau_num=2
+poligono 11 (grau MuitoAlto),poligono,carro,4,1490.6,1121,2.6,645.4,897.7,0.43,1.01,Rua Marquês do Herval; Rua Castro Alves; Rua Otto Jost; Rua Castro Alves,grau_num=3
+poligono 11 (grau MuitoAlto),poligono,pedestre,4,1490.6,1375,2.1,406.0,406.0,5.21,5.21,Rua José Bonifácio; Rua Dom Bosco; Rua Castro Alves,grau_num=3
+poligono 12 (grau Alto),poligono,carro,3,739.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 12 (grau Alto),poligono,pedestre,3,739.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 13 (grau Medio),poligono,carro,2,440.4,0,NaN,NaN,NaN,NaN,NaN,,grau_num=1
+poligono 13 (grau Medio),poligono,pedestre,2,440.4,0,NaN,NaN,NaN,NaN,NaN,,grau_num=1
+poligono 14 (grau Alto),poligono,carro,1,489.4,1163,0.0,816.0,2023.2,0.48,2.36,Rua Marquês do Herval; Rua Otto Jost; Rua Castro Alves; Rua Otto Jost,grau_num=2
+poligono 14 (grau Alto),poligono,pedestre,1,489.4,1394,0.0,647.8,1473.4,6.4,18.89,Rua Marquês do Herval; Rua Tiradentes; Rua Otto Jost; Rua Castro Alves,grau_num=2
+poligono 15 (grau MuitoAlto),poligono,carro,7,961.9,1163,0.0,816.0,2023.2,0.48,2.36,Rua Marquês do Herval; Rua Otto Jost; Rua Castro Alves; Rua Otto Jost,grau_num=3
+poligono 15 (grau MuitoAlto),poligono,pedestre,7,961.9,1394,0.0,647.8,1473.4,6.4,18.89,Rua Marquês do Herval; Rua Tiradentes; Rua Otto Jost; Rua Castro Alves,grau_num=3
+poligono 16 (grau MuitoAlto),poligono,carro,13,990.2,801,3.6,4254.7,7129.7,7.83,12.04,Rua Friedrich Schlegel; Rua Princesa Isabel; Rua Nereu Ramos,grau_num=3
+poligono 16 (grau MuitoAlto),poligono,pedestre,13,990.2,799,3.6,5120.7,7468.9,64.45,96.52,Rua Friedrich Schlegel; Rua Princesa Isabel; Rua Nereu Ramos,grau_num=3
+poligono 17 (grau Alto),poligono,carro,1,417.9,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 17 (grau Alto),poligono,pedestre,1,417.9,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 18 (grau Alto),poligono,carro,5,722.0,130,0.0,747.5,1280.6,1.12,2.19,Rua Lindolfo Koepsel; Rua Rodolfo Koepsel; Rua Rodolfo Koepsel; Rua Duque de Caxias,grau_num=2
+poligono 18 (grau Alto),poligono,pedestre,5,722.0,256,0.0,174.6,1269.1,2.24,16.12,Rua Lindolfo Koepsel; Rua Rodolfo Koepsel; Rua Rodolfo Koepsel; Rua Duque de Caxias,grau_num=2
+poligono 19 (grau Alto),poligono,carro,1,228.2,29,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 19 (grau Alto),poligono,pedestre,1,228.2,29,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 20 (grau Alto),poligono,carro,9,1812.7,153,37.9,744.1,1981.5,1.12,3.07,Rua Duque de Caxias; Rua Lindolfo Koepsel; Rua Rodolfo Koepsel; Rua Rodolfo Koepsel,grau_num=2
+poligono 20 (grau Alto),poligono,pedestre,9,1812.7,281,20.6,170.8,939.5,2.19,14.45,Rua Duque de Caxias; Rua Lindolfo Koepsel; Rua Rodolfo Koepsel; Rua Rodolfo Koepsel,grau_num=2
+poligono 21 (grau MuitoAlto),poligono,carro,1,818.3,44,0.0,821.5,1981.5,0.9,3.07,Rua Doutor Getúlio Vargas; Rua Duque de Caxias; Rua Santa Cruz,grau_num=3
+poligono 21 (grau MuitoAlto),poligono,pedestre,1,818.3,44,0.0,821.5,2056.0,10.53,31.51,Rua Doutor Getúlio Vargas; Rua Nereu Ramos; Rua Santa Cruz,grau_num=3
+poligono 22 (grau Alto),poligono,carro,2,898.3,71,40.8,821.5,1981.5,1.11,3.07,Rua Duque de Caxias; Rua Doutor Getúlio Vargas; Rua Franz Link,grau_num=2
+poligono 22 (grau Alto),poligono,pedestre,2,898.3,71,40.8,836.0,2056.0,10.72,31.51,Rua Doutor Getúlio Vargas; Rua Nereu Ramos; Rua Santa Cruz,grau_num=2
+poligono 23 (grau Alto),poligono,carro,4,1019.8,228,12.7,1463.5,1463.5,3.39,3.39,Rua Conrak Koepsel; Rua Julio Lunelli; Rua Sidhio Taschner,grau_num=2
+poligono 23 (grau Alto),poligono,pedestre,4,1019.8,189,15.3,1463.5,1463.5,18.76,18.76,Rua Julio Lunelli; Rua Sidhio Taschner; Rua Conrak Koepsel,grau_num=2
+poligono 24 (grau Alto),poligono,carro,5,698.9,501,5.8,1169.5,1443.4,2.94,3.25,Rua Nereu Ramos; Rua Doutor Getúlio Vargas; Rua Rodolfo Koepsel,grau_num=2
+poligono 24 (grau Alto),poligono,pedestre,5,698.9,360,8.1,1368.9,1782.5,16.0,22.85,Rua Nereu Ramos; Rua Rodolfo Koepsel; Rua Lindolfo Koepsel; Rua Rodolfo Koepsel,grau_num=2
+poligono 25 (grau Medio),poligono,carro,6,759.7,528,5.5,1169.5,1661.6,2.96,3.58,Rua Nereu Ramos; Rua Doutor Getúlio Vargas; Rua Rodolfo Koepsel,grau_num=1
+poligono 25 (grau Medio),poligono,pedestre,6,759.7,387,7.5,1368.9,1857.0,17.55,23.81,Rua Nereu Ramos; Rua Rodolfo Koepsel; Rua Lindolfo Koepsel; Rua Rodolfo Koepsel,grau_num=1
+poligono 26 (grau Alto),poligono,carro,1,718.7,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=2
+poligono 26 (grau Alto),poligono,pedestre,1,718.7,50,0.0,37.0,339.2,0.47,4.35,Rua Tiradentes; Rua 25 de Julho; Rua Blumenau,grau_num=2
+poligono 27 (grau Medio),poligono,carro,3,1207.7,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=1
+poligono 27 (grau Medio),poligono,pedestre,3,1207.7,50,0.0,37.0,339.2,0.47,4.35,Rua Tiradentes; Rua 25 de Julho; Rua Blumenau,grau_num=1
+poligono 28 (grau MuitoAlto),poligono,carro,1,347.5,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=3
+poligono 28 (grau MuitoAlto),poligono,pedestre,1,347.5,50,0.0,37.0,339.2,0.47,4.35,Rua Tiradentes; Rua 25 de Julho; Rua Blumenau,grau_num=3
+poligono 29 (grau MuitoAlto),poligono,carro,5,2173.5,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=3
+poligono 29 (grau MuitoAlto),poligono,pedestre,5,2173.5,58,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 30 (grau Alto),poligono,carro,5,2173.5,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=2
+poligono 30 (grau Alto),poligono,pedestre,5,2173.5,58,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 31 (grau MuitoAlto),poligono,carro,1,1628.2,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=3
+poligono 31 (grau MuitoAlto),poligono,pedestre,1,1628.2,58,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 32 (grau MuitoAlto),poligono,carro,1,1628.2,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=3
+poligono 32 (grau MuitoAlto),poligono,pedestre,1,1628.2,58,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 33 (grau MuitoAlto),poligono,carro,1,1628.2,1,0.0,1049.0,1049.0,0.24,0.24,Rua Blumenau; Rodovia Ingo Hering; Rua 25 de Julho,grau_num=3
+poligono 33 (grau MuitoAlto),poligono,pedestre,1,1628.2,58,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 34 (grau MuitoAlto),poligono,carro,58,6895.0,492,94.3,-490.5,3385.4,0.6,6.59,Rua Blumenau; Rua Tiradentes; Rua 11 de Março,grau_num=3
+poligono 34 (grau MuitoAlto),poligono,pedestre,58,6895.0,58,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 35 (grau MuitoAlto),poligono,carro,7,1407.2,699,4.1,-7.1,3582.4,0.89,6.72,Rua Blumenau; Rua Tiradentes; Rua 25 de Julho,grau_num=3
+poligono 35 (grau MuitoAlto),poligono,pedestre,7,1407.2,116,100.0,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 36 (grau Alto),poligono,carro,2,296.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 36 (grau Alto),poligono,pedestre,2,296.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 37 (grau MuitoAlto),poligono,carro,7,692.7,1823,1.6,240.5,962.4,0.29,0.7,Rua Marquês do Herval; Rua 3 de Maio; Rua Anita Garibaldi,grau_num=3
+poligono 37 (grau MuitoAlto),poligono,pedestre,7,692.7,1729,1.7,242.9,708.8,3.11,8.94,Rua 3 de Maio; Rua Anita Garibaldi; Rua Marquês do Herval,grau_num=3
+poligono 38 (grau Alto),poligono,carro,2,408.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 38 (grau Alto),poligono,pedestre,2,408.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 39 (grau Alto),poligono,carro,3,823.9,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 39 (grau Alto),poligono,pedestre,3,823.9,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 40 (grau Alto),poligono,carro,6,1078.1,1540,3.8,3589.4,5643.6,3.16,5.96,Rua 25 de Julho; Rodovia Ingo Hering; Rua Tiradentes,grau_num=2
+poligono 40 (grau Alto),poligono,pedestre,6,1078.1,1441,96.7,54.9,3499.9,3.4,48.4,Rua 25 de Julho; Rua Tiradentes; Rua Marquês do Herval,grau_num=2
+poligono 41 (grau Alto),poligono,carro,4,855.7,1530,1.9,3443.9,4916.4,3.16,5.96,Rua 25 de Julho; Rodovia Ingo Hering; Rua Tiradentes,grau_num=2
+poligono 41 (grau Alto),poligono,pedestre,4,855.7,1350,2.1,3714.9,4108.1,47.63,52.67,Rua 25 de Julho; Rua Adolfo Fiedler; Rua Tiradentes,grau_num=2
+poligono 42 (grau Alto),poligono,carro,5,3234.9,800,3.6,2096.4,3171.5,4.28,5.88,Rua das Flores; Avenida Castelo Branco; Rua Carlos Machota,grau_num=2
+poligono 42 (grau Alto),poligono,pedestre,5,3234.9,29,100.0,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 43 (grau Medio),poligono,carro,13,2287.5,800,3.6,2096.4,3171.5,4.28,5.88,Rua das Flores; Avenida Castelo Branco; Rua Carlos Machota,grau_num=1
+poligono 43 (grau Medio),poligono,pedestre,13,2287.5,29,100.0,NaN,NaN,NaN,NaN,,grau_num=1
+poligono 44 (grau Alto),poligono,carro,5,1051.2,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 44 (grau Alto),poligono,pedestre,5,1051.2,0,NaN,NaN,NaN,NaN,NaN,,grau_num=2
+poligono 45 (grau MuitoAlto),poligono,carro,8,1500.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 45 (grau MuitoAlto),poligono,pedestre,8,1500.3,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 46 (grau MuitoAlto),poligono,carro,3,700.6,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 46 (grau MuitoAlto),poligono,pedestre,3,700.6,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 47 (grau MuitoAlto),poligono,carro,2,740.8,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 47 (grau MuitoAlto),poligono,pedestre,2,740.8,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3
+poligono 48 (grau MuitoAlto),poligono,carro,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3; nenhum trecho usavel por este modal
+poligono 48 (grau MuitoAlto),poligono,pedestre,0,0.0,0,NaN,NaN,NaN,NaN,NaN,,grau_num=3; nenhum trecho usavel por este modal
+BR-470 / ponte Ibirama-Apiuna,br470,carro,50,10183.1,1496,52.3,460.5,2652.6,5.77,7.16,Avenida Castelo Branco; Rua XV de Novembro; Rua das Flores,pendente_geometria (vao exato sem geometria); sem alternativa proxima (Serra da Guaricana)
+BR-470 / ponte Ibirama-Apiuna,br470,pedestre,50,10183.1,0,NaN,NaN,NaN,NaN,NaN,,pendente_geometria (vao exato sem geometria); sem alternativa proxima (Serra da Guaricana); nenhum trecho usavel por este modal
