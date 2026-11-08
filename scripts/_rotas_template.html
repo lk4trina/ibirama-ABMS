@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ibirama - Mapa de rotas e desvios (planejamento)</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root{ --cinza:#555; --verde:#1b7a3d; --vermelho:#b30000; --azul:#1f5fb0; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:system-ui,Arial,sans-serif;color:#1a1a1a}
+  #app{display:flex;height:100%}
+  #lado{width:360px;max-width:92vw;overflow-y:auto;background:#fff;border-right:2px solid #ccc;padding:12px 14px}
+  #map{flex:1;min-height:0}
+  h1{font-size:17px;margin:0 0 6px}
+  .aviso{background:#fff3cd;border:1px solid #e0c200;border-radius:6px;padding:8px;font-size:12.5px;line-height:1.35;margin-bottom:10px}
+  fieldset{border:1px solid #ccc;border-radius:6px;margin:0 0 10px;padding:8px 10px}
+  legend{font-weight:700;font-size:13px;padding:0 4px}
+  label{font-size:13px}
+  input[type=text]{width:100%;padding:7px;border:1px solid #aaa;border-radius:5px;font-size:14px}
+  .linha{display:flex;gap:6px;align-items:center;margin:4px 0}
+  .btn{cursor:pointer;border:0;border-radius:6px;padding:8px 10px;font-size:13px;font-weight:600;color:#fff;background:var(--azul)}
+  .btn.sec{background:#5a5a5a}
+  .btn.verde{background:var(--verde)}
+  .btn:active{filter:brightness(.9)}
+  .pequeno{font-size:11.5px;color:#444}
+  .fechlist{max-height:170px;overflow-y:auto;border:1px solid #eee;border-radius:5px;padding:4px 6px}
+  .fechlist label{display:block;margin:3px 0;font-size:12.5px}
+  #resultado{font-size:13px;line-height:1.45;background:#f4f7fb;border:1px solid #cfe0f5;border-radius:6px;padding:9px;min-height:40px}
+  .pill{display:inline-block;width:14px;height:0;border-top-width:4px;border-top-style:solid;vertical-align:middle;margin-right:5px}
+  .legenda{background:rgba(255,255,255,.95);padding:7px 9px;border-radius:6px;border:1px solid #999;font-size:12px;line-height:1.5}
+  select{padding:6px;border:1px solid #aaa;border-radius:5px;font-size:13px}
+  .modo{margin-bottom:8px}
+  @media (max-width:760px){ #app{flex-direction:column} #lado{width:100%;max-width:100%;height:46%;border-right:0;border-bottom:2px solid #ccc} #map{height:54%} }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="lado">
+    <h1>Ibirama — rotas e desvios</h1>
+    <div class="aviso">
+      <b>Para planejamento — NÃO é alerta em tempo real.</b> Desvios pré-calculados sobre a rede do
+      OpenStreetMap, <b>sem sentido único</b>, <b>sem semáforos</b>, tempo em <b>fluxo livre</b>.
+      Fechamentos informados pela Defesa Civil e polígonos de risco. Trechos marcados como
+      <i>hipótese/pendente</i> estão sinalizados na lista.
+    </div>
+
+    <fieldset>
+      <legend>De onde / para onde</legend>
+      <div class="linha"><label style="width:58px">Origem</label>
+        <input type="text" id="inOrigem" list="lugares" placeholder="clique no mapa ou digite..."></div>
+      <div class="linha"><label style="width:58px">Destino</label>
+        <input type="text" id="inDestino" list="lugares" placeholder="clique no mapa ou digite..."></div>
+      <datalist id="lugares"></datalist>
+      <div class="linha">
+        <button class="btn" id="bClicOrigem">Definir origem no mapa</button>
+        <button class="btn sec" id="bClicDestino">Definir destino</button>
+      </div>
+      <div class="pequeno" id="assoc"></div>
+    </fieldset>
+
+    <fieldset class="modo">
+      <legend>Modal</legend>
+      <label><input type="radio" name="modal" value="carro" checked> carro</label>
+      &nbsp;<label><input type="radio" name="modal" value="moto"> moto</label>
+      &nbsp;<label><input type="radio" name="modal" value="pe"> a pé</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Fechamentos (Defesa Civil)</legend>
+      <div class="pequeno" style="margin-bottom:4px">
+        <label><input type="radio" name="fmodo" value="risco" checked> só trechos a ≤40 m do risco</label><br>
+        <label><input type="radio" name="fmodo" value="inteira"> rua/via inteira</label>
+      </div>
+      <div class="fechlist" id="fechlist"></div>
+      <div class="pequeno" style="margin-top:4px">Dica: clique num trecho no mapa para fechar/abrir à mão
+        (ative a camada <i>“rede (clicável)”</i> no controle de camadas).</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Ações</legend>
+      <div class="linha">
+        <button class="btn verde" id="bRota">Traçar rota</button>
+        <button class="btn sec" id="bLimpar">Limpar</button>
+      </div>
+      <div class="linha">
+        <button class="btn" id="bAbrigo">Ir ao abrigo mais próximo</button>
+        <button class="btn" id="bHospital">Ir ao hospital</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Resultado</legend>
+      <div id="resultado">Escolha origem e destino.</div>
+    </fieldset>
+
+    <div class="legenda">
+      <span class="pill" style="border-top-color:var(--cinza);border-top-style:dashed"></span>rota normal<br>
+      <span class="pill" style="border-top-color:var(--verde)"></span>rota com desvio<br>
+      <span class="pill" style="border-top-color:var(--vermelho)"></span>trecho fechado<br>
+      <span class="pequeno">Satélite: Esri, Maxar, Earthstar Geographics.</span>
+    </div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/*__ROUTER__*/
+</script>
+<script>
+const DATA = /*__DATA__*/;
+
+// ---------------- mapa e camadas ----------------
+// limites da rede (enquadra Ibirama; evita abrir em zoom mundial)
+const _lat = DATA.nodes.map(n => n[0]), _lon = DATA.nodes.map(n => n[1]);
+const bounds = L.latLngBounds(
+  [Math.min.apply(null, _lat), Math.min.apply(null, _lon)],
+  [Math.max.apply(null, _lat), Math.max.apply(null, _lon)]);
+const map = L.map("map", { zoomControl: true, minZoom: 12, maxZoom: 19,
+  maxBounds: bounds.pad(0.35), maxBoundsViscosity: 0.7 }).fitBounds(bounds.pad(0.05));
+map.createPane("rotas"); map.getPane("rotas").style.zIndex = 650;
+map.createPane("fech"); map.getPane("fech").style.zIndex = 655;
+
+// aviso discreto se um tile de fundo falhar (a rede vetorial continua visivel)
+let _avisoTimer = null;
+function avisoTile() {
+  let d = document.getElementById("avisoMapa");
+  if (!d) {
+    d = document.createElement("div"); d.id = "avisoMapa";
+    d.style.cssText = "position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:1000;" +
+      "background:#fff3cd;border:1px solid #e0c200;border-radius:6px;padding:5px 9px;" +
+      "font:12px/1.3 sans-serif;max-width:84%;box-shadow:0 1px 4px rgba(0,0,0,.25);text-align:center";
+    d.innerHTML = "Mapa de fundo indisponível (sem internet ou tile bloqueado). " +
+      "A rede e as rotas continuam funcionando — troque o fundo no controle de camadas.";
+    map.getContainer().appendChild(d);
+  }
+  clearTimeout(_avisoTimer);
+  _avisoTimer = setTimeout(() => { if (d.parentNode) d.parentNode.removeChild(d); }, 8000);
+}
+
+// Fundos que funcionam abrindo por file:// (satelite e ruas Esri; CARTO Voyager).
+// OpenStreetMap NAO e usado como padrao: a politica de tiles do OSM devolve 403 em file://.
+const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 19, attribution: "Tiles &copy; Esri — Esri, Maxar, Earthstar Geographics" }).addTo(map);
+const ruasEsri = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 19, attribution: "Tiles &copy; Esri — Esri, HERE, Garmin, &copy; OpenStreetMap contributors" });
+const carto = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  { maxZoom: 19, subdomains: "abcd", attribution: "&copy; OpenStreetMap contributors, &copy; CARTO" });
+[sat, ruasEsri, carto].forEach(t => t.on("tileerror", avisoTile));
+
+const CORR = { 1: "#f4d03f", 2: "#e67e22", 3: "#c0392b" };
+const camRiscos = L.geoJSON(DATA.riscos, { style: f => ({
+  color: CORR[f.properties.grau_num] || "#888", weight: 1,
+  fillColor: CORR[f.properties.grau_num] || "#888", fillOpacity: .30 }) }).addTo(map);
+
+const CORP = { hospital: "#d00", bombeiros: "#e67e22", abrigo: "#1b7a3d",
+  defesa_civil: "#7d3cb5", ubs: "#d63384", educacao: "#1f5fb0" };
+const camPontos = L.layerGroup();
+DATA.pontos.forEach(p => {
+  L.circleMarker([p.lat, p.lon], { radius: 5, color: CORP[p.grupo] || "#666",
+    fillColor: CORP[p.grupo] || "#666", fillOpacity: .9, weight: 1 })
+    .bindTooltip(p.nome + " (" + p.grupo + ")")
+    .on("click", () => { definir(alvoClique, p.nome + " (" + p.grupo + ")"); })
+    .addTo(camPontos);
+});
+camPontos.addTo(map);
+
+// camada "rede clicavel" (trechos finos; clique fecha/abre a mao) — fora do mapa por padrao
+const manuais = new Set();
+const polRede = {};
+const camRede = L.layerGroup();
+DATA.egeom.forEach((coords, e) => {
+  const pl = L.polyline(coords, { color: "#3388ff", weight: 2, opacity: .35 });
+  pl.on("click", () => { if (manuais.has(e)) manuais.delete(e); else manuais.add(e); recalcular(); });
+  polRede[e] = pl; pl.addTo(camRede);
+});
+
+const camNormal = L.layerGroup().addTo(map);
+const camDesvio = L.layerGroup().addTo(map);
+const camFech = L.layerGroup().addTo(map);
+
+L.control.layers(
+  { "Satélite (Esri)": sat, "Ruas (Esri)": ruasEsri, "Ruas (CARTO Voyager)": carto },
+  { "Áreas de risco": camRiscos, "Pontos críticos": camPontos, "Rede (clicável p/ fechar)": camRede },
+  { collapsed: false }).addTo(map);
+
+// reenquadra apos o layout do flex estar pronto (invalidateSize + fitBounds)
+map.whenReady(() => setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds.pad(0.05)); }, 0));
+window.addEventListener("resize", () => { map.invalidateSize(); });
+
+// ---------------- estado ----------------
+let origem = null, destino = null, modal = "carro", alvoClique = "origem";
+let mkOrigem = null, mkDestino = null;
+
+// lugares para busca (ruas + pontos criticos)
+const PLACES = new Map();
+DATA.ruas.forEach(r => PLACES.set(r.nome, { no: r.no, lat: DATA.nodes[r.no][0], lon: DATA.nodes[r.no][1], label: r.nome }));
+DATA.pontos.forEach(p => { const lb = p.nome + " (" + p.grupo + ")";
+  PLACES.set(lb, { no: p.no, lat: p.lat, lon: p.lon, label: lb, distNo: p.dist_no_m }); });
+const dl = document.getElementById("lugares");
+[...PLACES.keys()].sort((a, b) => a.localeCompare(b, "pt")).forEach(k => {
+  const o = document.createElement("option"); o.value = k; dl.appendChild(o); });
+
+// lista de fechamentos
+const fl = document.getElementById("fechlist");
+DATA.interd.forEach((it, i) => {
+  const hip = /pendente|parcial/i.test(it.obs) ? ' <span style="color:#b30000">(hipótese: ' + it.obs + ")</span>" : "";
+  fl.insertAdjacentHTML("beforeend",
+    '<label><input type="checkbox" class="fech" value="' + i + '"> ' + it.nome +
+    ' <span class="pequeno">[' + it.grupo + "]" + hip + "</span></label>");
+});
+
+// ---------------- helpers ----------------
+function fmtM(m) { return m >= 1000 ? (m / 1000).toFixed(2) + " km" : Math.round(m) + " m"; }
+function fmtMin(s) { return (s / 60).toFixed(1) + " min"; }
+function msg(h) { document.getElementById("resultado").innerHTML = h; }
+function marcados() { return [...document.querySelectorAll(".fech:checked")].map(c => +c.value); }
+function modoFech() { return document.querySelector('input[name=fmodo]:checked').value; }
+function fechadosAtual() { return ROTAS.conjuntoFechado(DATA, marcados(), modoFech(), manuais); }
+function resumo(t, r) { return "<b>" + t + ":</b> " + fmtM(r.dist_m) + ", " + fmtMin(r.tempo_s); }
+
+function limparRotas() { camNormal.clearLayers(); camDesvio.clearLayers(); }
+function desenhaRota(r, cor) {
+  const cam = cor === "verde" ? camDesvio : camNormal;
+  const op = cor === "verde" ? { color: "#1b7a3d", weight: 5, opacity: .9, pane: "rotas" }
+    : { color: "#555", weight: 4, opacity: .85, dashArray: "8,7", pane: "rotas" };
+  r.edges.forEach(e => L.polyline(DATA.egeom[e], op).addTo(cam));
+}
+function desenharFechados() {
+  camFech.clearLayers();
+  fechadosAtual().forEach(e => L.polyline(DATA.egeom[e],
+    { color: "#b30000", weight: 5, opacity: .9, pane: "fech" }).addTo(camFech));
+}
+
+function definir(tipo, label) {
+  const p = PLACES.get(label); if (!p) return;
+  porNo(tipo, p.no, p.lat, p.lon, label, p.distNo);
+}
+function porNo(tipo, no, lat, lon, label, distNo) {
+  const alvo = { no, lat, lon, label };
+  if (tipo === "origem") { origem = alvo; document.getElementById("inOrigem").value = label || "";
+    if (mkOrigem) map.removeLayer(mkOrigem);
+    mkOrigem = L.marker([lat, lon]).addTo(map).bindTooltip("Origem", { permanent: false });
+  } else { destino = alvo; document.getElementById("inDestino").value = label || "";
+    if (mkDestino) map.removeLayer(mkDestino);
+    mkDestino = L.marker([lat, lon]).addTo(map).bindTooltip("Destino", { permanent: false }); }
+  const nd = DATA.nodes[no];
+  const dnode = ROTAS.noMaisProximo(DATA, nd[0], nd[1]); // =0 se já é nó
+  const info = tipo === "origem" ? "Origem" : "Destino";
+  const extra = (distNo !== undefined) ? (" (ponto a " + Math.round(distNo) + " m do nó da rede)") : "";
+  document.getElementById("assoc").innerText = info + ": nó " + no + extra;
+  recalcular();
+}
+
+// clique no mapa -> nó mais proximo (rejeita associacao acima de 500 m)
+const MAX_ASSOC_M = 500;
+function cliqueMapa(e) {
+  const r = ROTAS.noMaisProximo(DATA, e.latlng.lat, e.latlng.lng);
+  if (r.dist_m > MAX_ASSOC_M) {
+    document.getElementById("assoc").innerText =
+      "Clique mais perto de uma rua (rua mais próxima a " + Math.round(r.dist_m) + " m).";
+    msg("Clique mais perto de uma rua.");
+    return;   // nao define origem/destino
+  }
+  const nd = DATA.nodes[r.no];
+  porNo(alvoClique, r.no, nd[0], nd[1], null, r.dist_m);
+  document.getElementById("assoc").innerText =
+    (alvoClique === "origem" ? "Origem" : "Destino") + ": nó " + r.no +
+    " (associação: " + Math.round(r.dist_m) + " m do clique)";
+  alvoClique = alvoClique === "origem" ? "destino" : "origem";
+}
+map.on("click", cliqueMapa);
+
+// ---------------- roteamento ----------------
+function recalcular() {
+  limparRotas(); desenharFechados();
+  if (!origem || !destino) { msg("Escolha origem e destino (clique no mapa ou use a busca)."); return; }
+  const fset = fechadosAtual();
+  const normal = ROTAS.rota(DATA, origem.no, destino.no, modal, new Set());
+  if (!normal.ok) { msg("Não há rota entre esses pontos na rede OSM, mesmo <u>sem</u> fechamentos (conectividade da rede). Veja as limitações."); return; }
+  const passaFech = normal.edges.some(e => fset.has(e));
+  if (fset.size === 0 || !passaFech) {
+    desenhaRota(normal, "verde");
+    msg(resumo("Rota", normal) + (fset.size ? " — a rota não passa por nenhum fechamento marcado." : ""));
+    return;
+  }
+  const desvio = ROTAS.rota(DATA, origem.no, destino.no, modal, fset);
+  desenhaRota(normal, "cinza");
+  if (!desvio.ok) {
+    msg(resumo("Rota normal", normal) +
+      '<br><b style="color:#b30000">SEM ROTA ALTERNATIVA na rede OSM</b> para este destino com os fechamentos marcados. Não desenhamos linha reta.');
+    return;
+  }
+  desenhaRota(desvio, "verde");
+  const dd = desvio.dist_m - normal.dist_m, dt = (desvio.tempo_s - normal.tempo_s) / 60;
+  msg(resumo("Normal (cinza)", normal) + "<br>" + resumo("Desvio (verde)", desvio) +
+    "<br><b>Acréscimo:</b> +" + fmtM(dd) + ", +" + dt.toFixed(1) + " min");
+}
+
+function irAoGrupo(grupo, titulo) {
+  if (!origem) { msg("Defina a origem primeiro."); return; }
+  const fset = fechadosAtual();
+  let best = null;
+  DATA.pontos.filter(p => p.grupo === grupo).forEach(p => {
+    const r = ROTAS.rota(DATA, origem.no, p.no, modal, fset.size ? fset : new Set());
+    if (r.ok && (!best || r.tempo_s < best.r.tempo_s)) best = { p, r };
+  });
+  if (!best) { // tenta sem fechamentos para pelo menos indicar o alvo
+    DATA.pontos.filter(p => p.grupo === grupo).forEach(p => {
+      const r = ROTAS.rota(DATA, origem.no, p.no, modal, new Set());
+      if (r.ok && (!best || r.tempo_s < best.r.tempo_s)) best = { p, r };
+    });
+    if (!best) { msg("Nenhum " + titulo + " alcançável na rede."); return; }
+  }
+  definir("destino", best.p.nome + " (" + best.p.grupo + ")");
+}
+
+// ---------------- eventos ----------------
+document.getElementById("bRota").onclick = recalcular;
+document.getElementById("bLimpar").onclick = () => {
+  origem = destino = null; limparRotas(); camFech.clearLayers(); manuais.clear();
+  if (mkOrigem) map.removeLayer(mkOrigem); if (mkDestino) map.removeLayer(mkDestino);
+  document.getElementById("inOrigem").value = ""; document.getElementById("inDestino").value = "";
+  document.getElementById("assoc").innerText = ""; msg("Escolha origem e destino.");
+};
+document.getElementById("bClicOrigem").onclick = () => { alvoClique = "origem"; msg("Clique no mapa para a ORIGEM."); };
+document.getElementById("bClicDestino").onclick = () => { alvoClique = "destino"; msg("Clique no mapa para o DESTINO."); };
+document.getElementById("bAbrigo").onclick = () => irAoGrupo("abrigo", "abrigo");
+document.getElementById("bHospital").onclick = () => irAoGrupo("hospital", "hospital");
+document.getElementById("inOrigem").addEventListener("change", e => { if (PLACES.has(e.target.value)) definir("origem", e.target.value); });
+document.getElementById("inDestino").addEventListener("change", e => { if (PLACES.has(e.target.value)) definir("destino", e.target.value); });
+document.querySelectorAll('input[name=modal]').forEach(r => r.addEventListener("change", e => { modal = e.target.value; recalcular(); }));
+document.querySelectorAll('input[name=fmodo]').forEach(r => r.addEventListener("change", recalcular));
+document.getElementById("fechlist").addEventListener("change", recalcular);
+
+// expoe para a verificacao headless (Playwright)
+window.__ROTAS_APP = { DATA, rota: (a, b, m, f) => ROTAS.rota(DATA, a, b, m, f || new Set()),
+  definir, porNo, recalcular, irAoGrupo, map, bases: { sat, ruasEsri, carto },
+  get origem() { return origem; }, get destino() { return destino; } };
+console.log("mapa_rotas pronto:", DATA.nodes.length, "nós,", DATA.edges.length, "trechos");
+</script>
+</body>
+</html>
