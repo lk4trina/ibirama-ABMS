@@ -114,14 +114,42 @@
 const DATA = /*__DATA__*/;
 
 // ---------------- mapa e camadas ----------------
-const map = L.map("map", { zoomControl: true }).setView(DATA.centro, 14);
+// limites da rede (enquadra Ibirama; evita abrir em zoom mundial)
+const _lat = DATA.nodes.map(n => n[0]), _lon = DATA.nodes.map(n => n[1]);
+const bounds = L.latLngBounds(
+  [Math.min.apply(null, _lat), Math.min.apply(null, _lon)],
+  [Math.max.apply(null, _lat), Math.max.apply(null, _lon)]);
+const map = L.map("map", { zoomControl: true, minZoom: 12, maxZoom: 19,
+  maxBounds: bounds.pad(0.35), maxBoundsViscosity: 0.7 }).fitBounds(bounds.pad(0.05));
 map.createPane("rotas"); map.getPane("rotas").style.zIndex = 650;
 map.createPane("fech"); map.getPane("fech").style.zIndex = 655;
 
-const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  { maxZoom: 19, attribution: "&copy; OpenStreetMap" }).addTo(map);
+// aviso discreto se um tile de fundo falhar (a rede vetorial continua visivel)
+let _avisoTimer = null;
+function avisoTile() {
+  let d = document.getElementById("avisoMapa");
+  if (!d) {
+    d = document.createElement("div"); d.id = "avisoMapa";
+    d.style.cssText = "position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:1000;" +
+      "background:#fff3cd;border:1px solid #e0c200;border-radius:6px;padding:5px 9px;" +
+      "font:12px/1.3 sans-serif;max-width:84%;box-shadow:0 1px 4px rgba(0,0,0,.25);text-align:center";
+    d.innerHTML = "Mapa de fundo indisponível (sem internet ou tile bloqueado). " +
+      "A rede e as rotas continuam funcionando — troque o fundo no controle de camadas.";
+    map.getContainer().appendChild(d);
+  }
+  clearTimeout(_avisoTimer);
+  _avisoTimer = setTimeout(() => { if (d.parentNode) d.parentNode.removeChild(d); }, 8000);
+}
+
+// Fundos que funcionam abrindo por file:// (satelite e ruas Esri; CARTO Voyager).
+// OpenStreetMap NAO e usado como padrao: a politica de tiles do OSM devolve 403 em file://.
 const sat = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  { maxZoom: 19, attribution: "Tiles &copy; Esri — Esri, Maxar, Earthstar Geographics" });
+  { maxZoom: 19, attribution: "Tiles &copy; Esri — Esri, Maxar, Earthstar Geographics" }).addTo(map);
+const ruasEsri = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+  { maxZoom: 19, attribution: "Tiles &copy; Esri — Esri, HERE, Garmin, &copy; OpenStreetMap contributors" });
+const carto = L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  { maxZoom: 19, subdomains: "abcd", attribution: "&copy; OpenStreetMap contributors, &copy; CARTO" });
+[sat, ruasEsri, carto].forEach(t => t.on("tileerror", avisoTile));
 
 const CORR = { 1: "#f4d03f", 2: "#e67e22", 3: "#c0392b" };
 const camRiscos = L.geoJSON(DATA.riscos, { style: f => ({
@@ -155,9 +183,13 @@ const camDesvio = L.layerGroup().addTo(map);
 const camFech = L.layerGroup().addTo(map);
 
 L.control.layers(
-  { "OpenStreetMap": osm, "Satélite (Esri)": sat },
+  { "Satélite (Esri)": sat, "Ruas (Esri)": ruasEsri, "Ruas (CARTO Voyager)": carto },
   { "Áreas de risco": camRiscos, "Pontos críticos": camPontos, "Rede (clicável p/ fechar)": camRede },
   { collapsed: false }).addTo(map);
+
+// reenquadra apos o layout do flex estar pronto (invalidateSize + fitBounds)
+map.whenReady(() => setTimeout(() => { map.invalidateSize(); map.fitBounds(bounds.pad(0.05)); }, 0));
+window.addEventListener("resize", () => { map.invalidateSize(); });
 
 // ---------------- estado ----------------
 let origem = null, destino = null, modal = "carro", alvoClique = "origem";
@@ -223,9 +255,16 @@ function porNo(tipo, no, lat, lon, label, distNo) {
   recalcular();
 }
 
-// clique no mapa -> nó mais proximo
+// clique no mapa -> nó mais proximo (rejeita associacao acima de 500 m)
+const MAX_ASSOC_M = 500;
 function cliqueMapa(e) {
   const r = ROTAS.noMaisProximo(DATA, e.latlng.lat, e.latlng.lng);
+  if (r.dist_m > MAX_ASSOC_M) {
+    document.getElementById("assoc").innerText =
+      "Clique mais perto de uma rua (rua mais próxima a " + Math.round(r.dist_m) + " m).";
+    msg("Clique mais perto de uma rua.");
+    return;   // nao define origem/destino
+  }
   const nd = DATA.nodes[r.no];
   porNo(alvoClique, r.no, nd[0], nd[1], null, r.dist_m);
   document.getElementById("assoc").innerText =
@@ -299,7 +338,8 @@ document.getElementById("fechlist").addEventListener("change", recalcular);
 
 // expoe para a verificacao headless (Playwright)
 window.__ROTAS_APP = { DATA, rota: (a, b, m, f) => ROTAS.rota(DATA, a, b, m, f || new Set()),
-  definir, porNo, recalcular, get origem() { return origem; }, get destino() { return destino; } };
+  definir, porNo, recalcular, irAoGrupo, map, bases: { sat, ruasEsri, carto },
+  get origem() { return origem; }, get destino() { return destino; } };
 console.log("mapa_rotas pronto:", DATA.nodes.length, "nós,", DATA.edges.length, "trechos");
 </script>
 </body>
