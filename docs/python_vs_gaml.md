@@ -29,7 +29,10 @@ Os parâmetros do Python usam os **mesmos nomes** do GAML e trazem, no topo de `
 | Origem/destino ponderados (PESO_VIA) | 88, 170-196 | `PESO_VIA`, `p_origem` | ✅ (regra) |
 | Velocidades por tipo / lentidão por densidade | 86, 89, 678-680 | `VEL_KMH`, `LENT_MIN`, expoente por modal | ✅ |
 | Perfis/espera/desfechos/aviso/visão/janela | 80-84, 52, 55, 50 | iguais | ✅ |
-| CSV de saída: 53 colunas, mesma ordem | 301-338 | `CABECALHO` (teste T10 confere) | ✅ |
+| Duração da chuva (HIPÓTESE) + perfil do alagamento com chuva longa | 65, 483-503 | `Params.duracao_chuva_min`, `np.interp` em `Eventos` | ✅ |
+| Início do deslizamento sorteado na chuva | 468 | `rng.uniform(0, chuva)` em `Eventos` | ✅ |
+| Momento da medição de acesso (`medicao_acesso_min`) | 68, 271 | `Params.medicao_acesso_min` | ✅ |
+| CSV de saída: 54 colunas, mesma ordem | 307-345 | `CABECALHO` (teste T10 confere) | ✅ |
 
 ## 2. Diferenças **intencionais** (não dá para igualar)
 
@@ -41,12 +44,23 @@ Os parâmetros do Python usam os **mesmos nomes** do GAML e trazem, no topo de `
 3. **Geração de números aleatórios.** Engines diferentes (GAML vs NumPy). Mesmo com as mesmas regras e
    semente, os sorteios (quais polígonos ativam, quando, pico) **não coincidem** — por isso comparamos
    médias/desvios, não execuções.
-4. **Construção do grafo.** O Python funde trechos paralelos (mantém o mais curto) e arredonda
-   coordenadas a 0,1 m; o GAMA usa cada `via` como está. Isso muda levemente a topologia e, sob muitos
-   bloqueios, **amplifica** as diferenças de conectividade.
+4. **Construção do grafo (verificado — NÃO é fonte de divergência).** A hipótese antiga (o Python funde
+   trechos paralelos e arredonda coordenadas, amplificando as diferenças de acesso) foi **testada por
+   execução e descartada**:
+   - Arredondar as coordenadas de 0,1 m até 1 m dá **exatamente o mesmo grafo** (1166 arestas, 1014 nós):
+     os extremos das vias do shapefile já são coincidentes nos cruzamentos, então o arredondamento não
+     funde nem separa nenhum cruzamento (só a 10 m começa a mudar).
+   - Dos 1182 trechos, o Python descarta 13 "paralelos" (mesmo par de nós) e 3 de comprimento zero.
+     Num **teste de réplica** (fechamentos, amostra e nó do hospital **exportados do GAMA** e recarregados
+     no Python), **manter ou não as paralelas dá o mesmo resultado** — elas ligam pares de nós já ligados.
+   - Associação via↔polígono (**buffer de 40 m**) e limiar de profundidade (0,30 m carro) são **idênticos**
+     nas duas ferramentas.
 5. **Medição de acesso.** Python usa componentes conexos (alcance não-direcionado); GAMA usa
-   `path_between`. Para um grafo não-direcionado dá o mesmo conceito, mas sobre conjuntos de arestas
-   um pouco diferentes (ver item 4).
+   `path_between` sobre `as_edge_graph`. São **equivalentes** (existir caminho ⟺ mesmo componente). No
+   teste de réplica, com os **mesmos fechamentos**, o Python reproduziu o `sem_acesso` do GAMA dentro de
+   ~4 pontos numa semente (dentro do desvio por semente). A divergência de acesso que sobra vem da
+   **realização aleatória dos fechamentos** (engines de RNG diferentes) e do **tamanho da amostra**
+   (10 sementes no GAMA, desvio ~12), **não** do grafo.
 
 ## 3. Comparação cruzada (Tarefa 6)
 
@@ -94,12 +108,15 @@ GAMA (experimento Interativo em headless, `finalStep=2881`, população padrão,
 - **Desfechos (concluiu/voltou/desistiu/preso), Gini e nº de polígonos: equivalência boa** (diferenças
   ~2 pontos ou menos). As regras de evento, ativação, duração/reabertura, `rede_energizada` e desfecho
   reproduzem bem. A pequena sobra de **desistência** no GAMA vem do movimento passo a passo (item 2.1).
-- **Acessibilidade: diferenças maiores**, especialmente **a pé** e no cenário **combinado/alta** (muitos
-  bloqueios). Causa: o indicador é **puramente topológico** e o Python funde trechos paralelos, ficando
-  com menos rotas alternativas quando muita coisa fecha → corta mais nós (item 2.4). Some-se a isso o
-  RNG diferente e só 10 sementes no GAMA (alto desvio). Portanto, **leia o acesso qualitativamente** (o
-  padrão — pior no combinado, pior a pé — é o mesmo nas duas ferramentas); os **números do artigo saem
-  do GAMA**.
+- **Acessibilidade: diferenças menores do que se pensava.** Repetindo a comparação no modelo atual
+  (combinado/alta, chuva 0, 10 sementes no GAMA × 30 no Python): `sem_acesso_hospital_carro`
+  **GAMA 30,0 × Python 34,8** (≈ 5 pontos) e **a pé 21,1 × 30,0** (≈ 9 pontos). O número antigo do GAMA
+  (24,7) era um **outlier de 10 sementes** (desvio ~12). A causa **não** é o grafo (item 2.4/2.5, testado
+  por execução): é a **realização aleatória dos fechamentos** entre os dois RNGs. Além disso, note que com
+  **chuva longa** o `sem_acesso` medido em +25 min **cai** (os deslizamentos espalham-se pela chuva e há
+  menos trechos fechados nesse instante) — medir no platô (`medicao_acesso_min` maior) seria mais
+  representativo. Portanto, **leia o acesso qualitativamente** (o padrão — pior no combinado, pior a pé —
+  é o mesmo nas duas ferramentas); os **números do artigo saem do GAMA**.
 
 ## 4. Conclusão
 O Python **reproduz as regras** do GAML e serve como **verificação cruzada** e para rodar **muitas

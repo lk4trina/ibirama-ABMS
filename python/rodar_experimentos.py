@@ -1,6 +1,6 @@
 """
 Roda os mesmos fatores do experimento Lote do GAML (tipo_evento x severidade x info_nivel x
-rede_energizada) com N repeticoes e grava um CSV com as MESMAS 53 colunas do GAMA.
+rede_energizada) com N repeticoes e grava um CSV com as MESMAS 54 colunas do GAMA.
 
     python python/rodar_experimentos.py                       # rede de teste (ficticia)
     python python/rodar_experimentos.py --reps 30 --rede real # rede real (para a verificacao cruzada)
@@ -48,7 +48,7 @@ for seed in range(1, a.reps + 1):
 
 saida = Path(a.saida) if a.saida else RAIZ / "resultados" / f"resultados_python_{a.rede}.csv"
 saida.parent.mkdir(exist_ok=True)
-# ordem: as 53 colunas do GAMA + a coluna de apoio 'cenario'; NaN gravado como "NaN" (igual ao GAMA)
+# ordem: as 54 colunas do GAMA + a coluna de apoio 'cenario'; NaN gravado como "NaN" (igual ao GAMA)
 df = pd.DataFrame(linhas)[CABECALHO + ["cenario"]]
 df.to_csv(saida, index=False, na_rep="NaN")
 print(f"{len(linhas)} execucoes gravadas em {saida}")
