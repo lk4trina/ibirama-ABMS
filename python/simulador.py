@@ -1,103 +1,137 @@
 """
-Simulador em Python do tráfego em Ibirama sob eventos adversos (alagamento, deslizamento e erosão).
+Simulador em Python do trafego em Ibirama sob eventos adversos (alagamento, deslizamento e erosao).
 
-Aplica as mesmas regras do modelo GAMA (agentes, eventos, parâmetros e métricas), mas roda mais
-rápido. A diferença é o movimento: aqui o agente leva um tempo para atravessar cada trecho,
-calculado na entrada dele; no GAMA ele anda passo a passo no mapa.
+A FONTE DA VERDADE e o modelo GAMA (models/ibirama.gaml). Este Python reproduz as MESMAS REGRAS,
+mas roda mais rapido. A diferenca de projeto e o movimento: aqui o agente leva um tempo para atravessar
+cada trecho (mesoscopico), calculado na entrada dele; no GAMA ele anda passo a passo no mapa. Por isso
+os numeros nao sao identicos (compare distribuicoes, nao uma execucao). Ver docs/python_vs_gaml.md.
 
-Resumo do modelo:
-  1. Cada agente (carro, moto ou pedestre) tem origem, destino, horário de partida e um perfil de
-     risco (cauteloso, normal ou arrojado), que define o quanto ele evita áreas de risco, quanto
-     espera quando fica sem rota e se aceita atravessar um trecho perigoso.
-  2. Cada polígono do mapa de risco pode virar um evento, com probabilidade que depende do grau e
-     da severidade. As ruas a até 40 m do polígono são afetadas.
-  3. Os agentes não sabem dos bloqueios de antemão: descobrem ao ver o trecho fechado ou ao
-     receber o aviso da Defesa Civil. Quem descobre refaz a rota.
-  4. Sem rota, o agente espera e depois volta para a origem. Se nunca saiu de casa, desiste; se
-     parou no meio do caminho, fica preso.
+======================================================================================================
+PARAMETROS ESPELHADOS DO GAML  (nome :: linha em models/ibirama.gaml)   -- para ressincronizar facil
+------------------------------------------------------------------------------------------------------
+  tipo_evento ........... 41        severidade ............ 42        info_nivel ............ 43
+  n_carro ............... 45        n_moto ................ 46        n_pedestre ............ 47
+  fracao_amostra ........ 48        od_ponderada .......... 49        janela_partida_min .... 50
+  inicio_evento_min ..... 51        atraso_aviso_min ...... 52        horizonte_min ......... 53
+  buffer_m .............. 54        raio_visao ............ 55
+  duracao_alagamento_min  57        duracao_deslizamento_min 58      rede_energizada ....... 59
+  duracao_desl_energ_min  60        duracao_desl_energ_max  61       duracao_erosao_min .... 62
+  LIMITE_PROF ........... 69        FATOR_ARRISCAR ........ 70        VEL_ARRISCAR .......... 71
+  BASE_ATIV ............. 72        SEV ................... 73        PROF_PICO ............. 74
+  FRAC_RAMPA ............ 77        FRAC_PLATO ............ 78        P_COLAPSO ............. 79
+  BETA .................. 80        OUSADIA ............... 81        ESPERA_MAX ............ 82
+  PERFIL_MODO ........... 83        COBERTURA ............. 84        VEL_MODO .............. 85
+  VEL_CLASSE_KMH ........ 86        PESO_VIA .............. 88        LENT_MIN .............. 89
+  VEL_PED ............... 90        COMP_VEICULO .......... 91        GRUPOS_ACESSO ......... 68
+  atualizacao do estado das vias: cycle mod 30 = 0 (5 min) -> GRID=300 s (linha 232)
+  medir_acesso: inicio_evento_min + 25 min, amostra 150 nos, carro+pedestre (linha 265)
+  perfil do alagamento: subida 1/3, plato 1/6, recessao no resto de duracao_alagamento_min (474-484)
+======================================================================================================
 
-Os valores marcados como HIPÓTESE ainda não foram calibrados.
+Os valores marcados HIPOTESE ainda nao foram calibrados.
 """
 from __future__ import annotations
 
 import heapq
 import itertools
 import math
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import dijkstra
+from scipy.sparse.csgraph import connected_components, dijkstra
 from shapely import STRtree
 
 RAIZ = Path(__file__).resolve().parent.parent
+CRS_METROS = "EPSG:31982"
 MODOS = ["carro", "moto", "pedestre"]
 PERFIS = ["cauteloso", "normal", "arrojado"]
-GRID = 300.0  # s (estado das vias atualizado a cada 5 min)
+GRUPOS_ACESSO = ["hospital", "bombeiros", "defesa_civil", "educacao", "ubs", "abrigo"]  # GAML 68
+GRID = 300.0  # s - estado das vias atualizado a cada 5 min (GAML: cycle mod 30 = 0, linha 232)
 
-# ------------------------------------------------------------------ PARÂMETROS (HIPÓTESES) ---
+# ------------------------------------------------------------ PARAMETROS (HIPOTESES, espelham o GAML) ---
 VEL_KMH = {"motorway": 80, "trunk": 60, "primary": 50, "secondary": 50, "tertiary": 40, "unclassified": 30,
-           "residential": 30, "living_street": 20, "service": 20, "track": 20}
+           "residential": 30, "living_street": 20, "service": 20, "track": 20}   # VEL_CLASSE_KMH, GAML 86
 VEL_PADRAO_KMH = 30
-VEL_FATOR_MODO = {"carro": 1.0, "moto": 1.1}      # moto um pouco mais rápida (HIPÓTESE)
-VEL_PEDESTRE = 1.3                                  # m/s
-LIMITE_PROF = {"carro": 0.30, "moto": 0.20, "pedestre": 0.40}   # m de lâmina d'água (HIPÓTESE)
-FATOR_ARRISCAR = 1.5            # quem arrisca passa se prof <= 1,5 x limite
-VEL_ARRISCAR = 0.20             # fração da velocidade ao atravessar trecho perigoso
-BASE_ATIVACAO = {1: 0.25, 2: 0.50, 3: 0.80}         # prob. de ativação por grau (HIPÓTESE)
-SEVERIDADE = {"baixa": 0.4, "media": 0.7, "alta": 1.0}
-PROF_PICO = {1: (0.2, 0.4), 2: (0.3, 0.7), 3: (0.5, 1.2)}        # m, sorteio por grau (HIPÓTESE)
-RAMPA_S, PLATO_S, RECESSO_S = 3600, 3600, 7200
-P_COLAPSO_EROSAO = 0.30
-FATOR_EROSAO = {"carro": 0.5, "moto": 0.5, "pedestre": 0.8}
-RISCO_GRAU = {0: 0.0, 1: 0.33, 2: 0.66, 3: 1.0}
-BETA = {"cauteloso": 2.0, "normal": 1.0, "arrojado": 0.3}        # peso do risco na escolha da rota
-OUSADIA = {"cauteloso": 0.0, "normal": 0.15, "arrojado": 0.70}   # prob. de aceitar atravessar
-ESPERA_MAX_S = {"cauteloso": 3600, "normal": 2400, "arrojado": 1200}
-PERFIL_POR_MODO = {                                              # (cauteloso, normal, arrojado)
+VEL_FATOR_MODO = {"carro": 1.0, "moto": 1.1}      # VEL_MODO, GAML 85 (moto um pouco mais rapida)
+VEL_PEDESTRE = 1.3                                  # VEL_PED, GAML 90 (m/s)
+LIMITE_PROF = {"carro": 0.30, "moto": 0.20, "pedestre": 0.40}   # GAML 69 (m de lamina d'agua)
+FATOR_ARRISCAR = 1.5            # GAML 70
+VEL_ARRISCAR = 0.20            # GAML 71
+BASE_ATIVACAO = {1: 0.25, 2: 0.50, 3: 0.80}         # BASE_ATIV, GAML 72
+SEVERIDADE = {"baixa": 0.4, "media": 0.7, "alta": 1.0}   # SEV, GAML 73
+PROF_PICO = {1: (0.2, 0.4), 2: (0.3, 0.7), 3: (0.5, 1.2)}        # GAML 74
+FRAC_RAMPA = 1.0 / 3.0         # GAML 77 (subida do alagamento)
+FRAC_PLATO = 1.0 / 6.0         # GAML 78 (pico do alagamento)
+P_COLAPSO_EROSAO = 0.30        # P_COLAPSO, GAML 79
+FATOR_EROSAO = {"carro": 0.5, "moto": 0.5, "pedestre": 0.8}      # GAML 398
+RISCO_GRAU = {0: 0.0, 1: 0.33, 2: 0.66, 3: 1.0}                  # GAML 152-153
+BETA = {"cauteloso": 2.0, "normal": 1.0, "arrojado": 0.3}        # GAML 80
+OUSADIA = {"cauteloso": 0.0, "normal": 0.15, "arrojado": 0.70}   # GAML 81
+ESPERA_MAX_S = {"cauteloso": 3600, "normal": 2400, "arrojado": 1200}   # ESPERA_MAX, GAML 82
+PERFIL_POR_MODO = {                                              # PERFIL_MODO, GAML 83
     "carro": (0.30, 0.55, 0.15),
     "moto": (0.15, 0.50, 0.35),
     "pedestre": (0.45, 0.45, 0.10),
 }
-COBERTURA_AVISO = {"local": 0.0, "parcial": 0.5, "amplo": 0.9}
-COMP_VEICULO_M = 8.0            # espaço por veículo na via (capacidade = comprimento / 8)
-# peso de cada tipo de via para sortear as origens (HIPÓTESE: mais fluxo nas vias principais)
-PESO_VIA = {"motorway": 10, "trunk": 10, "primary": 8, "secondary": 6, "tertiary": 4,
+COBERTURA_AVISO = {"local": 0.0, "parcial": 0.5, "amplo": 0.9}   # COBERTURA, GAML 84
+COMP_VEICULO_M = 8.0           # COMP_VEICULO, GAML 91
+PESO_VIA = {"motorway": 10, "trunk": 10, "primary": 8, "secondary": 6, "tertiary": 4,     # GAML 88
             "unclassified": 1.5, "residential": 1.5, "living_street": 1.0, "service": 0.5, "track": 0.2}
 PESO_VIA_PADRAO = 1.0
-LENT_MIN = 0.10                 # a fila nunca reduz a velocidade a menos de 10% (HIPÓTESE)
+LENT_MIN = 0.10                # GAML 89
+
+# Cabecalho de saida: MESMAS 53 colunas, na mesma ordem, que includes/resultados_gama_dc.csv (GAML 301-338)
+CABECALHO = ["tipo_evento", "severidade", "info_nivel", "rede_energizada",
+             "duracao_alagamento_min", "duracao_deslizamento_min", "duracao_erosao_min",
+             "seed", "n_poligonos_com_evento"]
+for _m in MODOS:
+    CABECALHO += [f"n_{_m}", f"pct_concluiu_{_m}", f"pct_voltou_{_m}", f"pct_desistiu_{_m}", f"pct_preso_{_m}",
+                  f"pct_em_andamento_{_m}", f"tempo_medio_{_m}_min", f"distancia_media_{_m}_m",
+                  f"travessias_perigosas_{_m}", f"replanejamentos_{_m}"]
+CABECALHO += ["gini_fluxo", "pct_fluxo_top10_vias"]
+for _g in GRUPOS_ACESSO:
+    CABECALHO += [f"sem_acesso_{_g}_carro_pct", f"sem_acesso_{_g}_pedestre_pct"]
+assert len(CABECALHO) == 53, len(CABECALHO)
 
 
 @dataclass
 class Params:
-    evento: str = "alagamento"      # nenhum | alagamento | deslizamento | erosao | combinado
-    severidade: str = "media"       # baixa | media | alta
-    info: str = "parcial"           # local | parcial | amplo
-    # amostra de ~10% da frota de Ibirama (Senatran, dez/2025): 12.733 carros e 4.203 motos
-    n_carro: int = 1270
-    n_moto: int = 420
-    n_pedestre: int = 250           # HIPÓTESE (sem contagem oficial)
-    fracao_amostra: float = 0.10    # cada agente representa 1/fracao veículos reais
-    od_ponderada: bool = True       # origens sorteadas pelo peso do tipo de via (False = uniforme)
-    janela_partida_min: float = 180.0
-    inicio_evento_min: float = 45.0
-    atraso_aviso_min: float = 10.0
-    horizonte_min: float = 480.0
-    buffer_m: float = 40.0
-    n_destinos: int = 30
+    """Mesmos nomes dos parametros do GAML (ver bloco 'PARAMETROS ESPELHADOS' no topo)."""
+    tipo_evento: str = "alagamento"     # nenhum | alagamento | deslizamento | erosao | combinado  (GAML 41)
+    severidade: str = "media"           # baixa | media | alta                                       (GAML 42)
+    info_nivel: str = "parcial"         # local | parcial | amplo                                    (GAML 43)
+    n_carro: int = 1270                 # GAML 45
+    n_moto: int = 420                   # GAML 46
+    n_pedestre: int = 250               # GAML 47 (HIPOTESE)
+    fracao_amostra: float = 0.10        # GAML 48
+    od_ponderada: bool = True           # GAML 49
+    janela_partida_min: float = 180.0   # GAML 50
+    inicio_evento_min: float = 45.0     # GAML 51
+    atraso_aviso_min: float = 10.0      # GAML 52
+    horizonte_min: float = 480.0        # GAML 53
+    buffer_m: float = 40.0              # GAML 54
+    # --- eventos (Defesa Civil) ---
+    duracao_alagamento_min: float = 30.0    # GAML 57
+    duracao_deslizamento_min: float = 30.0  # GAML 58
+    rede_energizada: bool = False           # GAML 59 (deslizamento leva 60-90 min)
+    duracao_desl_energ_min: float = 60.0    # GAML 60
+    duracao_desl_energ_max: float = 90.0    # GAML 61
+    duracao_erosao_min: float = 480.0       # GAML 62 (HIPOTESE)
+    # --- especifico do Python (nao existe no GAML) ---
+    n_destinos: int = 30                # quantos destinos sortear (o GAML usa pontos criticos + 20 extra)
 
 
 # ------------------------------------------------------------------------------------ MUNDO ---
 class Mundo:
-    """Rede viária, polígonos de risco e pontos críticos."""
+    """Rede viaria, poligonos de risco e pontos criticos (agrupados por GRUPO, como no GAML)."""
 
-    def __init__(self, vias_shp, riscos_shp, pontos_csv, buffer_m=40.0, seed_mundo=1):
+    def __init__(self, vias_shp, riscos_shp, pontos_arq, buffer_m=40.0, seed_mundo=1):
         vias = gpd.read_file(vias_shp)
         self.riscos = gpd.read_file(riscos_shp).to_crs(vias.crs)
-        pts = pd.read_csv(pontos_csv)
 
         ids, u, v, comp, hw, geoms = {}, [], [], [], [], []
         escolhido = {}
@@ -143,13 +177,12 @@ class Mundo:
         }
         self.peso_via = np.array([PESO_VIA.get(h, PESO_VIA_PADRAO) for h in hw], float)
 
-        from scipy.sparse.csgraph import connected_components
         uu, vv = self.u[self.veic_ok], self.v[self.veic_ok]
         gv = csr_matrix((np.ones(2 * len(uu)), (np.r_[uu, vv], np.r_[vv, uu])), shape=(self.n, self.n))
         _, lab = connected_components(gv, directed=False)
         grande = np.argmax(np.bincount(lab[np.unique(np.r_[uu, vv])]))
         self.nos_veic = np.where(lab == grande)[0]
-        # peso do nó = maior peso das vias de carro que chegam nele
+        # peso do no = maior peso das vias de carro que chegam nele
         peso_no = np.zeros(self.n)
         np.maximum.at(peso_no, uu, self.peso_via[self.veic_ok])
         np.maximum.at(peso_no, vv, self.peso_via[self.veic_ok])
@@ -157,7 +190,7 @@ class Mundo:
         w = peso_no[self.nos_veic]
         self.p_origem = w / w.sum()
 
-        # trechos a até buffer_m de cada polígono
+        # trechos a ate buffer_m de cada poligono
         arvore = STRtree(geoms)
         self.edges_poli, self.risco_edge = [], np.zeros(self.E)
         for _, r in self.riscos.iterrows():
@@ -166,25 +199,44 @@ class Mundo:
             self.risco_edge[idx] = np.maximum(self.risco_edge[idx], RISCO_GRAU[int(r.grau_num)])
         self.grau = self.riscos.grau_num.astype(int).values
 
-        # nó mais próximo de cada ponto crítico
-        self.criticos = {}
-        from pyproj import Transformer
-        px, py = Transformer.from_crs("EPSG:4326", str(vias.crs), always_xy=True).transform(pts.lon.values, pts.lat.values)
-        pts["x"], pts["y"] = px, py
+        # Pontos criticos: le o GEOJSON (28 pontos, WGS84) e agrupa por GRUPO, como o GAML (linha 141).
+        # Cada ponto vira o no da rede mais proximo entre os nos_veic (GAML: no_rede = nos_veic closest_to, 183).
+        pts = self._ler_pontos(pontos_arq, vias.crs)
+        self.criticos_grupo = {}       # grupo -> lista de ids de no
+        set_veic = set(int(x) for x in self.nos_veic)
         for _, r in pts.iterrows():
             d = np.hypot(self.xy[:, 0] - r.x, self.xy[:, 1] - r.y)
-            d[~np.isin(np.arange(self.n), self.nos_veic)] = np.inf
-            self.criticos.setdefault(r.tipo, []).append(int(np.argmin(d)))
+            d[~np.isin(np.arange(self.n), self.nos_veic)] = np.inf   # so nos_veic sao candidatos
+            self.criticos_grupo.setdefault(r.grupo, []).append(int(np.argmin(d)))
 
-        # destinos: pontos críticos, nós perto do centro dos alagamentos e nós aleatórios
+        # destinos: pontos criticos, nos perto do centro dos alagamentos e nos aleatorios
         rng = np.random.default_rng(seed_mundo)
         cx, cy = self.riscos[self.riscos.alaga == 1].geometry.centroid.x.mean(), \
             self.riscos[self.riscos.alaga == 1].geometry.centroid.y.mean()
         d_centro = np.hypot(self.xy[:, 0] - cx, self.xy[:, 1] - cy)
         d_centro[~np.isin(np.arange(self.n), self.nos_veic)] = np.inf
         self.centro_nos = np.argsort(d_centro)[:300]
-        self.pool_destinos = [n for lst in self.criticos.values() for n in lst]
+        self.pool_destinos = [n for lst in self.criticos_grupo.values() for n in lst]
         self.rng_destinos = rng
+
+    def _ler_pontos(self, pontos_arq, crs_vias):
+        """Le pontos criticos. .geojson (real): campos tipo/grupo/nome/precisao em WGS84.
+        .csv (TESTE): campos tipo/nome/lat/lon (sem grupo -> usa o tipo como grupo)."""
+        pontos_arq = Path(pontos_arq)
+        if pontos_arq.suffix.lower() == ".geojson":
+            g = gpd.read_file(pontos_arq)                 # WGS84 (EPSG:4326)
+            g = g.to_crs(crs_vias)                        # reprojeta para EPSG:31982 (como o GAML, linha 27)
+            out = pd.DataFrame({
+                "grupo": g["grupo"].astype(str) if "grupo" in g.columns else g.get("tipo", "x").astype(str),
+                "x": g.geometry.x.values, "y": g.geometry.y.values,
+            })
+        else:
+            from pyproj import Transformer
+            d = pd.read_csv(pontos_arq)
+            px, py = Transformer.from_crs("EPSG:4326", str(crs_vias), always_xy=True).transform(d.lon.values, d.lat.values)
+            grupo = d["grupo"].astype(str) if "grupo" in d.columns else d["tipo"].astype(str)
+            out = pd.DataFrame({"grupo": grupo.values, "x": px, "y": py})
+        return out
 
     def destinos(self, k, ponderada=True):
         rng = np.random.default_rng(99)
@@ -197,21 +249,29 @@ class Mundo:
 
 # ---------------------------------------------------------------------------------- EVENTOS ---
 class Eventos:
-    """Sorteia os polígonos ativados e calcula o estado de cada trecho por modal."""
+    """Sorteia os poligonos ativados e calcula o estado de cada trecho por modal, com inicio E FIM
+    (reabertura) de cada bloqueio, como no GAML (zona_risco.sortear / aplicar, linhas 444-506)."""
 
     def __init__(self, mundo: Mundo, p: Params, rng):
         self.m, self.p = mundo, p
         self.K = int(p.horizonte_min * 60 / GRID) + 2
         K, E = self.K, mundo.E
-        H = np.zeros((K, E), np.float32)            # lâmina d'água
-        desl = np.zeros((K, E), bool)               # deslizamento (bloqueio)
-        eros_deg = np.zeros((K, E), bool)           # erosão: degradação
-        eros_col = np.zeros((K, E), bool)           # erosão: colapso (bloqueio)
+        H = np.zeros((K, E), np.float32)            # lamina d'agua
+        desl = np.zeros((K, E), bool)               # deslizamento (bloqueio temporario)
+        eros_deg = np.zeros((K, E), bool)           # erosao: degradacao
+        eros_col = np.zeros((K, E), bool)           # erosao: colapso (bloqueio temporario)
         self.ativos = []
+        self.dur_desl = []     # duracoes de deslizamento sorteadas (para testes de rede_energizada)
+        self.dur_eros = []
+        # ordem das familias igual a do GAML (alaga, desl, eros; ver if's em sortear)
         fam = {"nenhum": [], "alagamento": ["alaga"], "deslizamento": ["desl"],
-               "erosao": ["eros"], "combinado": ["alaga", "eros", "desl"]}[p.evento]
+               "erosao": ["eros"], "combinado": ["alaga", "desl", "eros"]}[p.tipo_evento]
         mult = SEVERIDADE[p.severidade]
         t_ks = np.arange(K) * GRID
+        # perfil temporal do alagamento dentro de duracao_alagamento_min (GAML 474-484)
+        dur_al = p.duracao_alagamento_min * 60.0
+        rampa = dur_al * FRAC_RAMPA
+        plato = dur_al * FRAC_PLATO
         for i, r in mundo.riscos.iterrows():
             ed = mundo.edges_poli[i]
             if len(ed) == 0:
@@ -221,23 +281,32 @@ class Eventos:
                     continue
                 if rng.random() >= min(1.0, BASE_ATIVACAO[int(r.grau_num)] * mult):
                     continue
-                t0 = p.inicio_evento_min * 60 + rng.uniform(0, 1200)
+                t0 = p.inicio_evento_min * 60 + rng.uniform(0, 1200)   # GAML: t0 + rnd(1200)
                 self.ativos.append((i, f, t0))
                 if f == "alaga":
                     lo, hi = PROF_PICO[int(r.grau_num)]
                     pico = rng.uniform(lo, hi)
-                    d = np.interp(t_ks, [t0, t0 + RAMPA_S, t0 + RAMPA_S + PLATO_S, t0 + RAMPA_S + PLATO_S + RECESSO_S],
-                                  [0, pico, pico, 0], left=0, right=0)
+                    d = np.interp(t_ks, [t0, t0 + rampa, t0 + rampa + plato, t0 + dur_al],
+                                  [0, pico, pico, 0], left=0, right=0)   # 0 apos dur_al -> reabre
                     H[:, ed] = np.maximum(H[:, ed], d[:, None].astype(np.float32))
                 elif f == "desl":
-                    desl[np.ix_(t_ks >= t0, ed)] = True
-                else:
-                    if rng.random() < P_COLAPSO_EROSAO:
-                        eros_col[np.ix_(t_ks >= t0, ed)] = True
+                    # 30 min, ou 60-90 min (uniforme) se rede_energizada (GAML 461-463); depois reabre
+                    dur = ((p.duracao_desl_energ_min
+                            + rng.uniform(0, p.duracao_desl_energ_max - p.duracao_desl_energ_min)) * 60.0
+                           if p.rede_energizada else p.duracao_deslizamento_min * 60.0)
+                    self.dur_desl.append(dur)
+                    jan = (t_ks >= t0) & (t_ks < t0 + dur)
+                    desl[np.ix_(jan, ed)] = True
+                else:  # eros
+                    dur = p.duracao_erosao_min * 60.0           # GAML 468
+                    self.dur_eros.append(dur)
+                    jan = (t_ks >= t0) & (t_ks < t0 + dur)
+                    if rng.random() < P_COLAPSO_EROSAO:         # GAML 469: colapso <- flip(P_COLAPSO)
+                        eros_col[np.ix_(jan, ed)] = True
                     else:
-                        eros_deg[np.ix_(t_ks >= t0, ed)] = True
+                        eros_deg[np.ix_(jan, ed)] = True
         self.H = H
-        # estado por modal: fator de velocidade, bloqueio e se dá para atravessar
+        # estado por modal: fator de velocidade, bloqueio e se da para atravessar (GAML recalcular, 384-405)
         self.f, self.blk, self.cruza = {}, {}, {}
         for m in MODOS:
             th = LIMITE_PROF[m]
@@ -247,7 +316,6 @@ class Eventos:
             ped = m == "pedestre"
             f = np.where(eros_deg, f * FATOR_EROSAO[m], f)
             blk = blk_flood | desl | eros_col
-            # só alagamento raso (e, a pé, deslizamento/colapso) pode ser atravessado
             nao_cruza = (blk_flood & ~cruz_flood)
             if not ped:
                 nao_cruza = nao_cruza | desl | eros_col
@@ -257,7 +325,8 @@ class Eventos:
         self._versionar()
 
     def _versionar(self):
-        """Numera os mapas de bloqueio: a versão muda quando o conjunto de trechos fechados muda."""
+        """Numera os mapas de bloqueio: a versao muda quando o conjunto de trechos fechados muda
+        (agora pode mudar tambem na REABERTURA, nao so no fechamento)."""
         K = self.K
         self.ver_de_k = np.zeros(K, int)
         self.mask_ver = [{m: (self.blk[m][0].copy(), self.cruza[m][0].copy()) for m in MODOS}]
@@ -268,7 +337,7 @@ class Eventos:
             self.ver_de_k[k] = len(self.mask_ver) - 1
 
     def forcar_bloqueio(self, trechos, t_ini_s, atravessavel=False):
-        """Fecha trechos específicos a partir de t_ini_s (usado nos testes)."""
+        """Fecha trechos especificos a partir de t_ini_s ate o fim (usado nos testes)."""
         k0 = self.k(t_ini_s)
         trechos = np.array(trechos, dtype=int)
         for m in MODOS:
@@ -281,7 +350,7 @@ class Eventos:
         return min(int(t // GRID), self.K - 1)
 
 
-# ---------------------------------------------------------------------------------- SIMULAÇÃO ---
+# ---------------------------------------------------------------------------------- SIMULACAO ---
 class Agente:
     __slots__ = ("id", "modo", "perfil", "cruza", "origem", "destino", "dest_ini", "t_part", "u_aviso",
                  "kv", "vigilante", "no", "t_espera", "voltando", "resultado", "t_fim", "dist", "arriscou",
@@ -289,7 +358,7 @@ class Agente:
 
 
 def gerar_populacao(mundo: Mundo, p: Params, seed: int, destinos):
-    """A população depende só da semente, para poder comparar com a linha de base."""
+    """A populacao depende so da semente, para poder comparar com a linha de base."""
     rng = np.random.default_rng(seed)
     ags = []
     cont = itertools.count()
@@ -302,7 +371,7 @@ def gerar_populacao(mundo: Mundo, p: Params, seed: int, destinos):
             a.perfil = PERFIS[rng.choice(3, p=PERFIL_POR_MODO[modo])]
             a.cruza = bool(rng.random() < OUSADIA[a.perfil])
             a.destino = int(rng.choice(destinos))
-            if modo == "pedestre":   # pedestre: origem a até 1,5 km do destino
+            if modo == "pedestre":   # pedestre: origem a ate 1,5 km do destino
                 d = np.hypot(centro[:, 0] - centro[a.destino, 0], centro[:, 1] - centro[a.destino, 1])
                 cand = np.where((d < 1500) & (d > 100))[0]
                 a.origem = int(rng.choice(cand)) if len(cand) else int(rng.integers(mundo.n))
@@ -328,20 +397,19 @@ class Simulacao:
         self.ev = Eventos(mundo, p, np.random.default_rng(seed + 10_000))
         self.destinos = mundo.destinos(p.n_destinos, p.od_ponderada)
         self.ags = gerar_populacao(mundo, p, seed, self.destinos)
-        self.cov = COBERTURA_AVISO[p.info]
+        self.cov = COBERTURA_AVISO[p.info_nivel]
         self.t_aviso = (p.inicio_evento_min + p.atraso_aviso_min) * 60
         self._csr, self._arv = {}, {}
         self.ocup = np.zeros(mundo.E)
         self.passagens = np.zeros(mundo.E)
-        # capacidade em agentes (cada agente representa 1/fracao_amostra veículos)
         self.capac = np.maximum(1.0, mundo.comp / COMP_VEICULO_M * p.fracao_amostra)
-        self.cong_n = 0            # nº de entradas de veículos em trechos
-        self.cong_r50 = 0          # ... com ocupação >= 50% da capacidade
-        self.cong_fator = 0.0      # soma do fator de lentidão (1 = livre)
+        self.cong_n = 0
+        self.cong_r50 = 0
+        self.cong_fator = 0.0
         self.r_max = 0.0
-        self.log = None            # se for uma lista, registra (t, trecho, agente, atravessou_fechado)
+        self.log = None
 
-    # --- planejamento de rota (caminhos mínimos a partir do destino) ---
+    # --- planejamento de rota (caminhos minimos a partir do destino) ---
     def _grafo(self, ver, modo, perfil, cruza):
         chave = (ver, modo, perfil, cruza)
         if chave in self._csr:
@@ -362,7 +430,6 @@ class Simulacao:
         return g
 
     def _prox(self, a: Agente):
-        """Próximo nó da rota, segundo o mapa que o agente conhece (versão a.kv)."""
         chave = (a.kv, a.modo, a.perfil, a.cruza, a.destino)
         if chave not in self._arv:
             g = self._grafo(a.kv, a.modo, a.perfil, a.cruza)
@@ -372,7 +439,7 @@ class Simulacao:
             return None
         return int(pred[a.no])
 
-    # --- laço principal ---
+    # --- laco principal ---
     def rodar(self):
         m, p, ev = self.m, self.p, self.ev
         fila, cont = [], itertools.count()
@@ -393,7 +460,6 @@ class Simulacao:
                 continue
             k = ev.k(t)
             vig_atual = ev.ver_de_k[k]
-            # aviso oficial: quem é alcançado atualiza o mapa
             if t >= self.t_aviso and a.u_aviso < self.cov:
                 a.kv = vig_atual
             if a.vigilante:
@@ -402,7 +468,6 @@ class Simulacao:
             if prox is not None:
                 e = m.edge_id[(a.no, prox)]
                 if ev.blk[a.modo][k][e] and not (a.cruza and ev.cruza[a.modo][k][e]):
-                    # viu o trecho fechado: atualiza o mapa e refaz a rota
                     if a.kv != vig_atual or not a.vigilante:
                         a.kv, a.vigilante = vig_atual, True
                         a.replan += 1
@@ -419,7 +484,7 @@ class Simulacao:
                 if a.t_espera > ESPERA_MAX_S[a.perfil]:
                     if not a.voltando and a.no != a.origem:
                         a.voltando, a.destino, a.t_espera = True, a.origem, 0.0
-                    else:   # nunca saiu de casa: desistiu; parou no caminho: preso
+                    else:
                         a.resultado, a.t_fim = ("desistiu" if a.dist == 0 else "preso"), t
                         continue
                 heapq.heappush(fila, (t + 300, next(cont), "decide", a))
@@ -436,7 +501,7 @@ class Simulacao:
             else:
                 v = m.vel_via[e] * (VEL_FATOR_MODO[a.modo]) * fator
                 r = self.ocup[e] / self.capac[e]
-                expoente = 0.5 if a.modo == "moto" else 1.0      # moto sofre menos com fila (HIPÓTESE)
+                expoente = 0.5 if a.modo == "moto" else 1.0
                 lent = max(LENT_MIN, 1 / (1 + expoente * 0.15 * r ** 4))
                 v = v * lent
                 self.cong_n += 1
@@ -456,62 +521,77 @@ class Simulacao:
                 a.resultado = "em_viagem"
         return self
 
-    # --- acessibilidade a pontos críticos no pico do evento ---
+    # --- acessibilidade: inicio_evento_min + 25 min, amostra 150 nos, carro+pedestre (GAML medir_acesso, 265-293) ---
     def acessibilidade(self):
-        m, ev = self.m, self.ev
-        k = ev.k((self.p.inicio_evento_min + 90) * 60)
+        m, ev, p = self.m, self.ev, self.p
+        t_meas = (p.inicio_evento_min + 25.0) * 60.0
+        k = ev.k(t_meas)
+        rng = np.random.default_rng(self.seed + 20_000)
+        if len(m.nos_veic) <= 150:
+            amostra = np.asarray(m.nos_veic)
+        else:
+            amostra = rng.choice(m.nos_veic, size=150, replace=False)
         out = {}
-        for modo in ("carro", "pedestre"):
-            ok = ~ev.blk[modo][k]
-            if modo != "pedestre":
-                ok = ok & m.veic_ok
-            g = csr_matrix((np.r_[m.tempo[modo][ok], m.tempo[modo][ok]], (np.r_[m.u[ok], m.v[ok]], np.r_[m.v[ok], m.u[ok]])),
-                           shape=(m.n, m.n))
-            for tipo, nos in m.criticos.items():
-                d = dijkstra(g, indices=nos, min_only=True)
-                fin = np.isfinite(d)
-                out[f"acc_{tipo}_{modo}_sem_acesso_pct"] = round(100 * (1 - fin.mean()), 2)
-                out[f"acc_{tipo}_{modo}_tempo_medio_min"] = round(float(d[fin].mean() / 60), 2) if fin.any() else np.nan
+        for grupo in GRUPOS_ACESSO:
+            nos = m.criticos_grupo.get(grupo, [])
+            for modo in ("carro", "pedestre"):
+                col = f"sem_acesso_{grupo}_{modo}_pct"
+                if not nos:                    # grupo sem pontos (ex.: abrigo) -> NaN (GAML 272)
+                    out[col] = np.nan
+                    continue
+                ok = ~ev.blk[modo][k]
+                if modo != "pedestre":
+                    ok = ok & m.veic_ok
+                uu, vv = m.u[ok], m.v[ok]
+                adj = csr_matrix((np.ones(2 * len(uu)), (np.r_[uu, vv], np.r_[vv, uu])), shape=(m.n, m.n))
+                _, lab = connected_components(adj, directed=False)
+                rotulos = set(lab[np.array(nos, dtype=int)])
+                sem = int(sum(1 for nd in amostra if lab[nd] not in rotulos))
+                out[col] = round(100.0 * sem / len(amostra), 2)
         return out
 
-    # --- métricas ---
+    # --- metricas: linha com as MESMAS 53 colunas do CSV do GAMA, na mesma ordem ---
     def metricas(self, ref=None):
-        ags = self.ags
-        row = dict(asdict(self.p), seed=self.seed, polig_ativos=len(self.ev.ativos),
-                   trechos_fechados_pico_carro=int(self.ev.blk["carro"][self.ev.k((self.p.inicio_evento_min + 90) * 60)].sum()))
+        ags, p = self.ags, self.p
+        n_poli = len({i for (i, f, t0) in self.ev.ativos})
+        row = {
+            "tipo_evento": p.tipo_evento, "severidade": p.severidade, "info_nivel": p.info_nivel,
+            "rede_energizada": "true" if p.rede_energizada else "false",   # GAML grava string(rede_energizada)
+            "duracao_alagamento_min": p.duracao_alagamento_min,
+            "duracao_deslizamento_min": p.duracao_deslizamento_min,
+            "duracao_erosao_min": p.duracao_erosao_min,
+            "seed": self.seed, "n_poligonos_com_evento": n_poli,
+        }
         tempos = {}
         for modo in MODOS:
             s = [a for a in ags if a.modo == modo]
             c = [a for a in s if a.resultado == "concluiu"]
-            row[f"{modo}_n"] = len(s)
-            row[f"{modo}_concluiu_pct"] = round(100 * len(c) / len(s), 2) if s else np.nan
-            row[f"{modo}_voltou_pct"] = round(100 * sum(a.resultado == "voltou" for a in s) / len(s), 2) if s else np.nan
-            row[f"{modo}_desistiu_pct"] = round(100 * sum(a.resultado == "desistiu" for a in s) / len(s), 2) if s else np.nan
-            row[f"{modo}_preso_pct"] = round(100 * sum(a.resultado == "preso" for a in s) / len(s), 2) if s else np.nan
-            row[f"{modo}_emviagem_pct"] = round(100 * sum(a.resultado == "em_viagem" for a in s) / len(s), 2) if s else np.nan
-            row[f"{modo}_tempo_medio_min"] = round(float(np.mean([(a.t_fim - a.t_part) / 60 for a in c])), 3) if c else np.nan
-            row[f"{modo}_dist_media_m"] = round(float(np.mean([a.dist for a in c])), 1) if c else np.nan
-            row[f"{modo}_travessias_arriscadas"] = int(sum(a.arriscou for a in s))
-            row[f"{modo}_replanejamentos"] = int(sum(a.replan for a in s))
+            ns = len(s)
+            row[f"n_{modo}"] = ns
+            row[f"pct_concluiu_{modo}"] = round(100 * len(c) / ns, 2) if ns else 0.0
+            row[f"pct_voltou_{modo}"] = round(100 * sum(a.resultado == "voltou" for a in s) / ns, 2) if ns else 0.0
+            row[f"pct_desistiu_{modo}"] = round(100 * sum(a.resultado == "desistiu" for a in s) / ns, 2) if ns else 0.0
+            row[f"pct_preso_{modo}"] = round(100 * sum(a.resultado == "preso" for a in s) / ns, 2) if ns else 0.0
+            row[f"pct_em_andamento_{modo}"] = round(100 * sum(a.resultado == "em_viagem" for a in s) / ns, 2) if ns else 0.0
+            row[f"tempo_medio_{modo}_min"] = round(float(np.mean([(a.t_fim - a.t_part) / 60 for a in c])), 3) if c else 0.0
+            row[f"distancia_media_{modo}_m"] = round(float(np.mean([a.dist for a in c])), 1) if c else 0.0
+            row[f"travessias_perigosas_{modo}"] = int(sum(a.arriscou for a in s))
+            row[f"replanejamentos_{modo}"] = int(sum(a.replan for a in s))
             for a in c:
-                tempos[a.id] = (a.t_fim - a.t_part) / 60, a.dist
-            if ref is not None and c:
-                dif = [((a.t_fim - a.t_part) / 60 - ref[a.id][0]) for a in c if a.id in ref]
-                dd = [(a.dist - ref[a.id][1]) for a in c if a.id in ref]
-                row[f"{modo}_atraso_pareado_min"] = round(float(np.mean(dif)), 3) if dif else np.nan
-                row[f"{modo}_dist_extra_m"] = round(float(np.mean(dd)), 1) if dd else np.nan
-        if self.cong_n:
-            row["cong_entradas_r50_pct"] = round(100 * self.cong_r50 / self.cong_n, 2)
-            row["cong_fator_medio"] = round(self.cong_fator / self.cong_n, 4)
-            row["cong_ocupacao_max"] = round(float(self.r_max), 2)
+                tempos[a.id] = ((a.t_fim - a.t_part) / 60, a.dist)
+        # concentracao do fluxo (Gini e % das 10 vias mais usadas) - GAML 319-332
         pas = np.sort(self.passagens)
         tot = pas.sum()
         if tot > 0:
-            n = len(pas)
-            gini = (2 * np.sum((np.arange(1, n + 1)) * pas) / (n * tot)) - (n + 1) / n
-            row["fluxo_gini"] = round(float(gini), 4)
-            row["fluxo_top10_pct"] = round(float(100 * pas[-10:].sum() / tot), 2)
+            nn = len(pas)
+            gini = (2 * np.sum(np.arange(1, nn + 1) * pas) / (nn * tot)) - (nn + 1) / nn
+            row["gini_fluxo"] = round(float(gini), 4)
+            row["pct_fluxo_top10_vias"] = round(float(100 * pas[-10:].sum() / tot), 2)
+        else:
+            row["gini_fluxo"] = 0.0
+            row["pct_fluxo_top10_vias"] = 0.0
         row.update(self.acessibilidade())
+        row = {k: row[k] for k in CABECALHO}   # garante ordem e nomes exatos das 53 colunas
         return row, tempos
 
 
@@ -522,9 +602,14 @@ def carregar_mundo(rede="teste", buffer_m=40.0):
     if rede in _MUNDO_CACHE:
         return _MUNDO_CACHE[rede]
     d = RAIZ / "includes" / "dados"
-    vias = d / ("vias_teste_SINTETICO.shp" if rede == "teste" else "vias.shp")
-    pts = d / ("pontos_criticos_TESTE.csv" if rede == "teste" else "pontos_criticos.csv")
-    _MUNDO_CACHE[rede] = Mundo(vias, d / "riscos.shp", pts, buffer_m)
+    if rede == "teste":
+        print(">> ATENCAO: usando a rede *_TESTE/_SINTETICO (ficticia). Resultados NAO valem para o artigo.")
+        vias = d / "vias_teste_SINTETICO.shp"
+        pontos = d / "pontos_criticos_TESTE.csv"
+    else:
+        vias = d / "vias.shp"
+        pontos = d / "pontos_criticos.geojson"     # 28 pontos reais (o simulador usa o geojson, nao o CSV antigo)
+    _MUNDO_CACHE[rede] = Mundo(vias, d / "riscos.shp", pontos, buffer_m)
     return _MUNDO_CACHE[rede]
 
 
@@ -536,16 +621,17 @@ def rodar_um(p: Params, seed: int, rede="teste", ref=None):
 if __name__ == "__main__":
     import argparse
     import time
-    ap = argparse.ArgumentParser(description="Roda uma simulação e mostra o resumo")
+    ap = argparse.ArgumentParser(description="Roda uma simulacao e mostra o resumo (53 colunas do GAMA)")
     ap.add_argument("--evento", default="alagamento")
     ap.add_argument("--severidade", default="media")
     ap.add_argument("--info", default="parcial")
+    ap.add_argument("--rede_energizada", action="store_true")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--rede", default="teste", choices=["teste", "real"])
     a = ap.parse_args()
     t0 = time.time()
-    base, tb = rodar_um(Params(evento="nenhum", info=a.info), a.seed, a.rede)
-    row, _ = rodar_um(Params(evento=a.evento, severidade=a.severidade, info=a.info), a.seed, a.rede, ref=tb)
-    for k, v in row.items():
-        print(f"{k:38s} {v}")
+    row, _ = rodar_um(Params(tipo_evento=a.evento, severidade=a.severidade, info_nivel=a.info,
+                             rede_energizada=a.rede_energizada), a.seed, a.rede)
+    for k in CABECALHO:
+        print(f"{k:34s} {row[k]}")
     print(f"\n({time.time()-t0:.1f} s)")
