@@ -84,7 +84,7 @@ PESO_VIA = {"motorway": 10, "trunk": 10, "primary": 8, "secondary": 6, "tertiary
 PESO_VIA_PADRAO = 1.0
 LENT_MIN = 0.10                # GAML 89
 
-# Cabecalho de saida: MESMAS 53 colunas, na mesma ordem, que includes/resultados_gama_dc.csv (GAML 301-338)
+# Cabecalho de saida: MESMAS 54 colunas, na mesma ordem, que includes/resultados_gama_dc.csv (GAML 301-338)
 CABECALHO = ["tipo_evento", "severidade", "info_nivel", "rede_energizada",
              "duracao_alagamento_min", "duracao_deslizamento_min", "duracao_erosao_min",
              "duracao_chuva_min", "seed", "n_poligonos_com_evento"]
@@ -562,7 +562,7 @@ class Simulacao:
                 out[col] = round(100.0 * sem / len(amostra), 2)
         return out
 
-    # --- metricas: linha com as MESMAS 53 colunas do CSV do GAMA, na mesma ordem ---
+    # --- metricas: linha com as MESMAS 54 colunas do CSV do GAMA, na mesma ordem ---
     def metricas(self, ref=None):
         ags, p = self.ags, self.p
         n_poli = len({i for (i, f, t0) in self.ev.ativos})
@@ -603,7 +603,7 @@ class Simulacao:
             row["gini_fluxo"] = 0.0
             row["pct_fluxo_top10_vias"] = 0.0
         row.update(self.acessibilidade())
-        row = {k: row[k] for k in CABECALHO}   # garante ordem e nomes exatos das 53 colunas
+        row = {k: row[k] for k in CABECALHO}   # garante ordem e nomes exatos das 54 colunas
         return row, tempos
 
 
@@ -633,7 +633,7 @@ def rodar_um(p: Params, seed: int, rede="teste", ref=None):
 if __name__ == "__main__":
     import argparse
     import time
-    ap = argparse.ArgumentParser(description="Roda uma simulacao e mostra o resumo (53 colunas do GAMA)")
+    ap = argparse.ArgumentParser(description="Roda uma simulacao e mostra o resumo (54 colunas do GAMA)")
     ap.add_argument("--evento", default="alagamento")
     ap.add_argument("--severidade", default="media")
     ap.add_argument("--info", default="parcial")

@@ -2,7 +2,7 @@
 PASSO 3 - Analise estatistica e graficos a partir do CSV de resultados.
 
 Funciona com o CSV do simulador Python (python/rodar_experimentos.py) e com o CSV do experimento
-batch do GAMA (includes/resultados_gama_dc.csv), que tem as MESMAS 53 colunas.
+batch do GAMA (includes/resultados_gama_dc.csv), que tem as MESMAS 54 colunas.
 
     python scripts/03_analise.py resultados/resultados_python_real.csv
 
@@ -25,7 +25,7 @@ import pandas as pd
 from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
-from simulador import CABECALHO  # noqa: E402  (as 53 colunas, na ordem do GAMA)
+from simulador import CABECALHO  # noqa: E402  (as 54 colunas, na ordem do GAMA)
 
 MODOS = ("carro", "moto", "pedestre")
 arq = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "resultados" / "resultados_python_real.csv"
@@ -36,7 +36,7 @@ with open(arq, encoding="utf8") as f:
     primeira = f.readline()
 if primeira.lstrip().lower().startswith("tipo_evento"):
     df = pd.read_csv(arq)
-else:  # CSV do GAMA sem cabecalho: usa as 53 colunas na ordem conhecida
+else:  # CSV do GAMA sem cabecalho: usa as 54 colunas na ordem conhecida
     df = pd.read_csv(arq, header=None, names=CABECALHO)
 
 # fatores (mesmos nomes do GAML)

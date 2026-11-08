@@ -104,7 +104,7 @@ checa("T9 acesso: grupo sem pontos vira NaN (educacao/ubs/defesa_civil na rede T
 checa("T9 acesso: grupo com pontos NAO e NaN (hospital)", not math.isnan(row["sem_acesso_hospital_carro_pct"]))
 print("      (obs.: na rede REAL o grupo sem pontos e 'abrigo' -> NaN)")
 
-# T10 - cabecalho: as 53 colunas do Python sao iguais, na mesma ordem, as do CSV do GAMA
+# T10 - cabecalho: as 54 colunas do Python sao iguais, na mesma ordem, as do CSV do GAMA
 gama_header = (RAIZ / "includes" / "resultados_gama_dc.csv").read_text(encoding="utf8").splitlines()[0].split(",")
 checa("T10 cabecalho de 54 colunas igual ao includes/resultados_gama_dc.csv",
       CABECALHO == gama_header, f"py={len(CABECALHO)} gama={len(gama_header)}")

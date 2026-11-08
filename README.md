@@ -31,16 +31,28 @@ A pasta `python/` traz uma versão do modelo em Python (`simulador.py`), além d
 O simulador em Python **reproduz as regras** do modelo GAMA (`models/ibirama.gaml`): perfil e duração do
 alagamento (subida 1/3, platô 1/6, recessão), deslizamento com reabertura e `rede_energizada` (60–90 min),
 erosão com colapso e reabertura, ativação por grau×severidade, pontos críticos do `pontos_criticos.geojson`
-agrupados por grupo, os 6 grupos de acesso (com NaN no abrigo), a medição de acesso em `início + 25 min` e
-o CSV com as **mesmas 53 colunas** do GAMA (um teste automático confere o cabeçalho).
+agrupados por grupo, os 6 grupos de acesso (com NaN no abrigo), a medição de acesso em
+`início + medicao_acesso_min` (padrão 25 min) e o CSV com as **mesmas 54 colunas** do GAMA (um teste
+automático confere o cabeçalho).
 
 > **Atenção:** o Python é **mesoscópico** (o agente atravessa cada trecho de uma vez) e o GAMA move o
 > agente **passo a passo**, com geração de números aleatórios diferente. Então os números **não são
 > idênticos**. Uma verificação cruzada (ver [`docs/python_vs_gaml.md`](docs/python_vs_gaml.md)) mostrou
-> **boa equivalência nos desfechos** (% que conclui/volta/desiste/fica preso, Gini) e **diferenças maiores
-> na acessibilidade** (sobretudo a pé e no cenário combinado, por ser um indicador topológico). Por isso,
-> **os resultados do artigo vêm do GAMA**; o Python serve como **verificação cruzada** e para rodar muitas
-> repetições rápido. Rode `python python/testes_logica.py` e, para os cenários, `python python/rodar_experimentos.py --rede real` (grava em `resultados/`, nunca em `includes/resultados_gama_dc.csv`).
+> **boa equivalência nos desfechos** (% que conclui/volta/desiste/fica preso, Gini) e **diferenças menores
+> na acessibilidade** do que se pensava (≈ 5 pontos no carro, ≈ 9 a pé no combinado/alta). A explicação
+> antiga (o Python fundir trechos paralelos / arredondar coordenadas) foi **testada e descartada**: o grafo
+> é topologicamente idêntico; a diferença vem do **sorteio dos fechamentos** (RNGs diferentes) e do tamanho
+> da amostra no GAMA. Por isso, **os resultados do artigo vêm do GAMA**; o Python serve como **verificação
+> cruzada** e para rodar muitas repetições rápido. Rode `python python/testes_logica.py` e, para os
+> cenários, `python python/rodar_experimentos.py --rede real` (grava em `resultados/`, nunca em
+> `includes/resultados_gama_dc.csv`).
+
+## Duração da chuva (hipótese)
+
+O parâmetro **`duracao_chuva_min`** (HIPÓTESE, padrão **0** = comportamento anterior) faz os eventos
+durarem enquanto chove, em vez de caberem na travessia da cidade. Com ele, os cenários passam a se
+diferenciar (com chuva 0, ~98% concluem em qualquer cenário). É uma hipótese a calibrar — a lógica, a
+tabela de sensibilidade (GAMA × Python) e a recomendação estão em [`docs/chuva.md`](docs/chuva.md).
 
 ## Desvios (rotas alternativas)
 
