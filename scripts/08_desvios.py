@@ -33,7 +33,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components, dijkstra
 from shapely import STRtree
-from shapely.geometry import LineString, mapping
+from shapely.geometry import MultiLineString, mapping
 
 RAIZ = Path(__file__).resolve().parent.parent
 DADOS = RAIZ / "includes" / "dados"
@@ -292,14 +292,14 @@ print("Gravado includes/dados/desvios_sugeridos.csv")
 to4326 = gpd.GeoSeries([], crs=vias.crs)
 
 
-def edges_to_line4326(edges):
-    pts = []
-    for e in edges:
-        pts.append(tuple(xy[u[e]])); pts.append(tuple(xy[v[e]]))
-    if len(pts) < 2:
+def edges_to_multiline4326(edges):
+    """Uma LineString por trecho (geometria REAL da via), reunidas num MultiLineString.
+    Nunca liga trechos desconexos (o bug antigo concatenava tudo num LineString -> retas gigantes)."""
+    linhas = [geoms[e] for e in edges if geoms[e] is not None and not geoms[e].is_empty]
+    if not linhas:
         return None
-    ls = LineString(pts)
-    return gpd.GeoSeries([ls], crs=vias.crs).to_crs(4326).iloc[0]
+    ml = linhas[0] if len(linhas) == 1 else MultiLineString(linhas)
+    return gpd.GeoSeries([ml], crs=vias.crs).to_crs(4326).iloc[0]
 
 
 feats = []
@@ -307,7 +307,7 @@ for (nome, di, o, dd, dt, orig_ed, det_ed, S) in exemplos_geo:
     for rotulo, edges, cor in (("trecho_fechado", list(S), "#c0392b"),
                                ("caminho_original", orig_ed, "#888888"),
                                ("desvio", det_ed, "#2e8b57")):
-        geom = edges_to_line4326(edges)
+        geom = edges_to_multiline4326(edges)
         if geom is None:
             continue
         feats.append({"type": "Feature",
@@ -340,7 +340,7 @@ try:
         edges = [e for e in info["S"]]
         if not edges:
             continue
-        geom = edges_to_line4326(edges)
+        geom = edges_to_multiline4326(edges)
         if geom is None:
             continue
         top = info["top3"] or "sem nome no OSM"
@@ -357,7 +357,7 @@ try:
     fg_des = folium.FeatureGroup(name="Desvio sugerido (verde)")
     fg_ori = folium.FeatureGroup(name="Caminho original (cinza tracejado)")
     for (nome, di, o, dd, dt, orig_ed, det_ed, S) in exemplos_geo:
-        g1 = edges_to_line4326(det_ed); g2 = edges_to_line4326(orig_ed)
+        g1 = edges_to_multiline4326(det_ed); g2 = edges_to_multiline4326(orig_ed)
         if g1 is not None:
             folium.GeoJson(mapping(g1), style_function=lambda f: {"color": "#2e8b57", "weight": 4, "opacity": 0.9},
                            tooltip=f"Desvio: {nome} (+{round(dd)} m, +{round(dt,1)} min)").add_to(fg_des)
