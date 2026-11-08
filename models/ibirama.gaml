@@ -789,42 +789,46 @@ experiment Interativo type: gui {
 			species zona_risco;
 			species ponto_critico;
 			species viajante;
-			overlay position: {5, 5} size: {260 #px, 368 #px} background: #black transparency: 0.35 border: #black rounded: true {
+			overlay position: {5, 5} size: {260 #px, 388 #px} background: #black transparency: 0.35 border: #black rounded: true {
 				int h <- int(time / 3600);
 				int mi <- (int(time) mod 3600) div 60;
 				draw "Tempo simulado: " + h + " h " + mi + " min" at: {10 #px, 20 #px} color: #white font: font("SansSerif", 12, #bold);
 				draw "Em viagem: " + (viajante count (each.estado = "viajando")) at: {10 #px, 40 #px} color: #white font: font("SansSerif", 11, #plain);
 				draw "Concluíram: " + (viajante count (each.estado = "concluiu")) at: {10 #px, 58 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw rectangle(22 #px, 10 #px) at: {24 #px, 83 #px} color: rgb(30, 100, 220) border: #white;
+				// Agentes: as MESMAS imagens desenhadas no mapa (species viajante, aspect default).
+				// A variante/cor do ícone é aleatória (variante <- rnd(0,11)), só para variedade visual;
+				// NÃO codifica perfil, estado nem informação (ver viajante linhas 580 e 744-749).
+				draw image_file(pasta_dados + "icones/carro_1.png") at: {23 #px, 83 #px} size: {32 #px, 15 #px};
 				draw "Carro" at: {44 #px, 87 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw rectangle(22 #px, 6 #px) at: {24 #px, 101 #px} color: #magenta border: #white;
+				draw image_file(pasta_dados + "icones/moto_3.png") at: {23 #px, 101 #px} size: {32 #px, 13 #px};
 				draw "Moto" at: {44 #px, 105 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw circle(5 #px) at: {24 #px, 119 #px} color: rgb(30, 170, 60) border: #white;
+				draw image_file(pasta_dados + "icones/pedestre_1.png") at: {23 #px, 119 #px} size: {18 #px, 18 #px};
 				draw "Pedestre" at: {44 #px, 123 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw line([{14 #px, 138 #px}, {34 #px, 138 #px}]) color: rgb(232, 130, 0) width: 3;
-				draw "Rua em área de risco" at: {44 #px, 142 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw line([{14 #px, 156 #px}, {34 #px, 156 #px}]) color: #deepskyblue width: 3;
-				draw "Rua alagada" at: {44 #px, 160 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw line([{14 #px, 174 #px}, {34 #px, 174 #px}]) color: #red width: 3;
-				draw "Rua fechada (carro)" at: {44 #px, 178 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw "Halo vermelho = parado esperando rota" at: {10 #px, 198 #px} color: #lightgray font: font("SansSerif", 10, #plain);
+				draw "(cores variam só por estética)" at: {10 #px, 139 #px} color: #lightgray font: font("SansSerif", 9, #plain);
+				draw line([{14 #px, 155 #px}, {34 #px, 155 #px}]) color: rgb(232, 130, 0) width: 3;
+				draw "Rua em área de risco" at: {44 #px, 159 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw line([{14 #px, 173 #px}, {34 #px, 173 #px}]) color: #deepskyblue width: 3;
+				draw "Rua alagada" at: {44 #px, 177 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw line([{14 #px, 191 #px}, {34 #px, 191 #px}]) color: #red width: 3;
+				draw "Rua fechada (carro)" at: {44 #px, 195 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw "Halo vermelho = parado esperando rota" at: {10 #px, 215 #px} color: #lightgray font: font("SansSerif", 10, #plain);
 				// Legenda dos pontos críticos (mesmas cores do triângulo no mapa)
-				draw "Pontos críticos:" at: {10 #px, 222 #px} color: #white font: font("SansSerif", 11, #bold);
-				draw triangle(13 #px) at: {24 #px, 238 #px} color: #red border: #black;
-				draw "Hospital" at: {44 #px, 242 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw triangle(13 #px) at: {24 #px, 256 #px} color: #orangered border: #black;
-				draw "Bombeiros" at: {44 #px, 260 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw triangle(13 #px) at: {24 #px, 274 #px} color: #purple border: #black;
-				draw "Defesa Civil" at: {44 #px, 278 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw triangle(13 #px) at: {24 #px, 292 #px} color: rgb(0, 110, 220) border: #black;
-				draw "Educação (escolas, CEIs, universidade)" at: {44 #px, 296 #px} color: #white font: font("SansSerif", 10, #plain);
-				draw triangle(13 #px) at: {24 #px, 310 #px} color: #magenta border: #black;
-				draw "UBS" at: {44 #px, 314 #px} color: #white font: font("SansSerif", 11, #plain);
-				draw triangle(13 #px) at: {24 #px, 328 #px} color: #green border: #black;
-				draw "Abrigo" at: {44 #px, 332 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw "Pontos críticos:" at: {10 #px, 239 #px} color: #white font: font("SansSerif", 11, #bold);
+				draw triangle(13 #px) at: {24 #px, 255 #px} color: #red border: #black;
+				draw "Hospital" at: {44 #px, 259 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 273 #px} color: #orangered border: #black;
+				draw "Bombeiros" at: {44 #px, 277 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 291 #px} color: #purple border: #black;
+				draw "Defesa Civil" at: {44 #px, 295 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 309 #px} color: rgb(0, 110, 220) border: #black;
+				draw "Educação (escolas, CEIs, universidade)" at: {44 #px, 313 #px} color: #white font: font("SansSerif", 10, #plain);
+				draw triangle(13 #px) at: {24 #px, 327 #px} color: #magenta border: #black;
+				draw "UBS" at: {44 #px, 331 #px} color: #white font: font("SansSerif", 11, #plain);
+				draw triangle(13 #px) at: {24 #px, 345 #px} color: #green border: #black;
+				draw "Abrigo" at: {44 #px, 349 #px} color: #white font: font("SansSerif", 11, #plain);
 				// Só aparece quando a chuva (hipótese) está ligada
 				draw (duracao_chuva_min > 0.0 ? ("Chuva até o min " + int(inicio_evento_min + duracao_chuva_min)) : "")
-					at: {10 #px, 352 #px} color: #deepskyblue font: font("SansSerif", 11, #bold);
+					at: {10 #px, 369 #px} color: #deepskyblue font: font("SansSerif", 11, #bold);
 			}
 		}
 		// Atualiza a cada 60 ciclos (= 10 min simulados) para não travar nem criar escala gigante ao acelerar.
