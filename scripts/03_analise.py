@@ -2,7 +2,7 @@
 PASSO 3 - Analise estatistica e graficos a partir do CSV de resultados.
 
 Funciona com o CSV do simulador Python (python/rodar_experimentos.py) e com o CSV do experimento
-batch do GAMA (includes/resultados_gama_dc.csv), que tem as MESMAS 54 colunas.
+batch do GAMA (includes/resultados_gama_dc.csv), que tem as MESMAS 69 colunas.
 
     python scripts/03_analise.py resultados/resultados_python_real.csv
 
@@ -25,7 +25,7 @@ import pandas as pd
 from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "python"))
-from simulador import CABECALHO  # noqa: E402  (as 54 colunas, na ordem do GAMA)
+from simulador import CABECALHO  # noqa: E402  (as 69 colunas, na ordem do GAMA)
 
 MODOS = ("carro", "moto", "pedestre")
 arq = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "resultados" / "resultados_python_real.csv"
@@ -36,16 +36,18 @@ with open(arq, encoding="utf8") as f:
     primeira = f.readline()
 if primeira.lstrip().lower().startswith("tipo_evento"):
     df = pd.read_csv(arq)
-else:  # CSV do GAMA sem cabecalho: usa as 54 colunas na ordem conhecida
+else:  # CSV do GAMA sem cabecalho: usa as 69 colunas na ordem conhecida
     df = pd.read_csv(arq, header=None, names=CABECALHO)
 
 # fatores (mesmos nomes do GAML)
 if "cenario" not in df:
     df["cenario"] = (df["tipo_evento"] + "|" + df["severidade"].astype(str) + "|" + df["info_nivel"]
                      + "|" + df.get("rede_energizada", "normal").astype(str)
-                     + "|chuva" + df.get("duracao_chuva_min", 0).astype(str))
+                     + "|chuva" + df.get("duracao_chuva_min", 0).astype(str)
+                     + "|inicio" + df.get("inicio_evento_min", 0).astype(str))
 # fatores de cenario presentes (inclui a duracao da chuva quando o CSV varia esse campo)
-FATORES = [c for c in ("tipo_evento", "severidade", "info_nivel", "duracao_chuva_min") if c in df.columns]
+FATORES = [c for c in ("tipo_evento", "severidade", "info_nivel", "duracao_chuva_min", "inicio_evento_min")
+           if c in df.columns]
 # atraso pareado = tempo medio do cenario - tempo medio da linha de base (tipo_evento = nenhum), mesma semente
 base = df[df.tipo_evento == "nenhum"]
 for m in MODOS:
@@ -64,9 +66,12 @@ CANDIDATAS = []
 for m in MODOS:
     CANDIDATAS += [f"atraso_pareado_{m}_min", f"pct_concluiu_{m}", f"pct_voltou_{m}", f"pct_desistiu_{m}",
                    f"pct_preso_{m}", f"distancia_media_{m}_m", f"travessias_perigosas_{m}"]
+for m in MODOS:
+    CANDIDATAS += [f"pct_em_andamento_{m}"]
 CANDIDATAS += ["gini_fluxo", "pct_fluxo_top10_vias"]
 for g in ("hospital", "bombeiros", "defesa_civil", "educacao", "ubs", "abrigo"):
-    CANDIDATAS += [f"sem_acesso_{g}_carro_pct", f"sem_acesso_{g}_pedestre_pct"]
+    CANDIDATAS += [f"sem_acesso_{g}_carro_pct", f"sem_acesso_{g}_pedestre_pct",
+                   f"sem_acesso_{g}_carro_plato_pct", f"sem_acesso_{g}_pedestre_plato_pct"]
 # ignora colunas ausentes ou totalmente vazias (ex.: abrigo sem pontos na rede real)
 METRICAS = [c for c in CANDIDATAS if c in df and df[c].notna().any()]
 

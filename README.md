@@ -9,7 +9,15 @@ O modelo compara cenários. Ele não prevê chuva, nível do rio nem eventos rea
 Abra `models/ibirama.gaml` no GAMA e execute:
 
 - `Interativo`, para configurar e observar uma simulação;
-- `Lote`, para executar combinações de evento, severidade, informação e presença de rede energizada.
+- `Lote`, para executar combinações de evento, severidade, informação e presença de rede energizada;
+- `LoteChuva`, sensibilidade da duração da chuva (0, 60, 120, 240, 780 min);
+- `LoteHorario`, efeito de quando começa o evento (06:30, 10:30, 16:30) em relação aos picos.
+
+O dia simulado é o **dia útil, 06:00–19:00 (780 min)**, com saídas em três picos (7–8 h, 11–12 h, 17–18 h,
+informados pela Defesa Civil; **pesos e fração nos picos são hipótese**). Cada agente faz **uma** viagem no dia.
+Detalhes, fontes da duração da chuva (GCD e ND Mais, setembro/2026) e limitações em
+[`docs/chuva.md`](docs/chuva.md). Em lote, rode **uma simulação por vez** (ou um processo por vez): várias
+simulações concorrentes na mesma execução do GAMA apresentaram erros esporádicos nos testes.
 
 Os resultados novos são acrescentados a `includes/resultados_gama_dc.csv`, que já contém o cabeçalho compatível com os indicadores ampliados. O arquivo `includes/resultados_gama.csv` foi preservado como histórico do modelo anterior.
 
@@ -32,7 +40,7 @@ O simulador em Python **reproduz as regras** do modelo GAMA (`models/ibirama.gam
 alagamento (subida 1/3, platô 1/6, recessão), deslizamento com reabertura e `rede_energizada` (60–90 min),
 erosão com colapso e reabertura, ativação por grau×severidade, pontos críticos do `pontos_criticos.geojson`
 agrupados por grupo, os 6 grupos de acesso (com NaN no abrigo), a medição de acesso em
-`início + medicao_acesso_min` (padrão 25 min) e o CSV com as **mesmas 54 colunas** do GAMA (um teste
+`início + medicao_acesso_min` (padrão 25 min) e o CSV com as **mesmas 69 colunas** do GAMA (um teste
 automático confere o cabeçalho).
 
 > **Atenção:** o Python é **mesoscópico** (o agente atravessa cada trecho de uma vez) e o GAMA move o
@@ -49,10 +57,11 @@ automático confere o cabeçalho).
 
 ## Duração da chuva (hipótese)
 
-O parâmetro **`duracao_chuva_min`** (HIPÓTESE, padrão **0** = comportamento anterior) faz os eventos
-durarem enquanto chove, em vez de caberem na travessia da cidade. Com ele, os cenários passam a se
-diferenciar (com chuva 0, ~98% concluem em qualquer cenário). É uma hipótese a calibrar — a lógica, a
-tabela de sensibilidade (GAMA × Python) e a recomendação estão em [`docs/chuva.md`](docs/chuva.md).
+O parâmetro **`duracao_chuva_min`** (padrão **60 min**, 0 = perfil antigo de 30 min) faz os eventos
+durarem enquanto chove. **60 min** (fase intensa) e **780 min** (a chuva não para no dia) estão ancorados
+nas matérias GCD (12/09/2026) e ND Mais (11/09/2026); 120 e 240 são sensibilidade. A relação chuva →
+alagamento segue sendo **hipótese** (as matérias não dizem por quanto tempo as ruas alagaram). Lógica,
+fontes e limitações em [`docs/chuva.md`](docs/chuva.md).
 
 ## Desvios (rotas alternativas)
 
