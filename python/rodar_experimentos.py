@@ -1,6 +1,7 @@
 """
-Roda os mesmos fatores do experimento Lote do GAML (tipo_evento x severidade x info_nivel x
-rede_energizada) com N repeticoes e grava um CSV com as MESMAS 54 colunas do GAMA.
+Roda os mesmos fatores dos experimentos do GAML com N repeticoes. --experimento: Lote (padrao; tipo_evento x
+severidade x info_nivel x rede_energizada), LoteChuva (duracao_chuva_min 0/60/120/240/780) ou LoteHorario
+(inicio_evento_min 30/270/630 x chuva 60/780), com N repeticoes e grava um CSV com as MESMAS 69 colunas do GAMA.
 
     python python/rodar_experimentos.py                       # rede de teste (ficticia)
     python python/rodar_experimentos.py --reps 30 --rede real # rede real (para a verificacao cruzada)
@@ -24,6 +25,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--reps", type=int, default=5)
 ap.add_argument("--rede", default="teste", choices=["teste", "real"])
 ap.add_argument("--saida", default=None)
+ap.add_argument("--experimento", default="Lote", choices=["Lote", "LoteChuva", "LoteHorario"])
 a = ap.parse_args()
 
 # Mesmos fatores do experimento Lote do GAML (models/ibirama.gaml, experiment Lote)
@@ -34,21 +36,28 @@ REDE = [False, True]
 
 carregar_mundo(a.rede)
 linhas, t0 = [], time.time()
-combos = list(itertools.product(EVENTOS, SEVER, INFO, REDE))
+if a.experimento == "Lote":
+    combos = [dict(tipo_evento=e, severidade=s, info_nivel=i, rede_energizada=r)
+              for e, s, i, r in itertools.product(EVENTOS, SEVER, INFO, REDE)]
+elif a.experimento == "LoteChuva":     # 0/60/120/240/780 (60 e 780 ancorados nas materias; resto = sensibilidade)
+    combos = [dict(tipo_evento=e, duracao_chuva_min=c, severidade="alta", info_nivel="parcial")
+              for e, c in itertools.product(["combinado", "alagamento"], [0.0, 60.0, 120.0, 240.0, 780.0])]
+else:                                  # LoteHorario
+    combos = [dict(tipo_evento=e, inicio_evento_min=i, duracao_chuva_min=c, severidade="alta", info_nivel="parcial")
+              for e, i, c in itertools.product(["combinado", "alagamento"], [30.0, 270.0, 630.0], [60.0, 780.0])]
 total = a.reps * len(combos)
 feito = 0
 for seed in range(1, a.reps + 1):
-    for ev, sv, inf, rede in combos:
-        row, _ = rodar_um(Params(tipo_evento=ev, severidade=sv, info_nivel=inf, rede_energizada=rede),
-                          seed, a.rede)
-        row["cenario"] = f"{ev}|{sv}|{inf}|{'energizada' if rede else 'normal'}"
+    for kw in combos:
+        row, _ = rodar_um(Params(**kw), seed, a.rede)
+        row["cenario"] = "|".join(f"{k}={v}" for k, v in kw.items())
         linhas.append(row)
         feito += 1
     print(f"semente {seed}/{a.reps} concluida  ({feito}/{total}, {time.time()-t0:.0f} s)", flush=True)
 
 saida = Path(a.saida) if a.saida else RAIZ / "resultados" / f"resultados_python_{a.rede}.csv"
 saida.parent.mkdir(exist_ok=True)
-# ordem: as 54 colunas do GAMA + a coluna de apoio 'cenario'; NaN gravado como "NaN" (igual ao GAMA)
+# ordem: as 69 colunas do GAMA + a coluna de apoio 'cenario'; NaN gravado como "NaN" (igual ao GAMA)
 df = pd.DataFrame(linhas)[CABECALHO + ["cenario"]]
 df.to_csv(saida, index=False, na_rep="NaN")
 print(f"{len(linhas)} execucoes gravadas em {saida}")

@@ -12,6 +12,10 @@
  *  - Sem rota: espera; esgotada a paciência, volta; quem nunca saiu de casa "desiste"; quem para no
  *    meio do caminho e não consegue voltar fica "preso".
  *
+ * O DIA: a simulação cobre o dia útil das 06:00 às 19:00. Tempo 0 = 06:00; horizonte_min = 780 = 19:00.
+ * Demanda (HIPÓTESE): cada agente faz UMA viagem no dia; a saída é sorteada em três picos (7-8 h, 11-12 h e
+ * 17-18 h, informados pela Defesa Civil) ou em todo o horizonte (ver usar_picos / frac_pico).
+ *
  * Todos os valores marcados HIPÓTESE são pontos de partida, não dados medidos.
  */
 model ibirama
@@ -47,10 +51,19 @@ global {
 	int n_pedestre <- 250;                // HIPÓTESE (não há contagem oficial de pedestres)
 	float fracao_amostra <- 0.10;         // cada agente representa 1/fracao veículos reais (ajusta a capacidade das vias)
 	bool od_ponderada <- true;            // true: origens sorteadas com peso pelo tipo de via; false: uniforme
-	float janela_partida_min <- 180.0;    // minutos em que as viagens começam
-	float inicio_evento_min <- 45.0;
+	// ---- Demanda ao longo do dia (HIPÓTESE: a Defesa Civil informou só QUAIS são os picos, não a proporção) ----
+	// usar_picos = false: janela única (as viagens saem em [0, janela_partida_min]; comportamento da versão anterior).
+	// usar_picos = true : com probabilidade frac_pico a saída cai num dos 3 picos (PICOS_MIN, pesos PESO_PICOS);
+	//                     senão, uniforme em todo o horizonte.
+	bool usar_picos <- true;              // HIPÓTESE (decisão da equipe)
+	float frac_pico <- 0.6;               // HIPÓTESE: fração das viagens que saem nos picos
+	float janela_partida_min <- 180.0;    // minutos em que as viagens começam (só vale com usar_picos = false)
+	// HIPÓTESE: hora de início do evento (min após as 06:00). 60 = 07:00, começo do pico da manhã.
+	float inicio_evento_min <- 60.0;
 	float atraso_aviso_min <- 10.0;       // demora do aviso oficial após o início do evento
-	float horizonte_min <- 480.0;         // duração da simulação (min). Se mudar, ajuste o `until` do batch
+	// Duração da simulação (min). 0 = 06:00. 780 = 19:00 (dia útil). Os `until` dos experimentos em lote
+	// usam esta variável, então nunca ficam fora de sincronia.
+	float horizonte_min <- 780.0;
 	float buffer_m <- 40.0;               // distância polígono-rua para a rua ser afetada
 	float raio_visao <- 60.0;             // distância (m) em que o agente vê um trecho fechado à frente
 	// Tempos informados pela Defesa Civil de Ibirama (reunião do projeto).
@@ -59,17 +72,33 @@ global {
 	bool rede_energizada <- false;         // true: deslizamento leva entre 60 e 90 min para liberação
 	float duracao_desl_energ_min <- 60.0;
 	float duracao_desl_energ_max <- 90.0;
-	float duracao_erosao_min <- 480.0;     // HIPÓTESE: ainda não informada pela Defesa Civil
-	// HIPÓTESE (não informada pela Defesa Civil): quanto a CHUVA dura. 0 = comportamento atual (perfil de 30 min).
+	// HIPÓTESE (a Defesa Civil não informou). DECISÃO: a erosão dura até o fim da simulação, então é igual
+	// ao horizonte (780). Antes era 480 = o horizonte antigo; deixar 480 faria a erosão "reabrir" às 14:00
+	// sem motivo. Se o horizonte mudar, mude este valor junto.
+	float duracao_erosao_min <- 780.0;
+	// Duração da CHUVA (min). Ancorada nas matérias jornalísticas, não em palpite:
+	//  - GCD, 12/09/2026: Ibirama decretou emergência; ~80 mm em 24 h, >120 mm em ~48 h, ~30 mm em 1 h no pico (sexta 11/09);
+	//  - ND Mais, 11/09/2026: Rua Tiradentes alagada pela chuva forte da manhã; Defesa Civil: ~33 mm em apenas 1 h.
+	// Dois valores documentados: fase intensa de ~1 h (60 min = PADRÃO, cenário de referência) e episódio
+	// persistente de 24-48 h, que no dia de 13 h equivale a "a chuva não para" (780). 0 = perfil antigo de 30 min;
+	// 120 e 240 são só SENSIBILIDADE (hipótese). As matérias NÃO informam por quanto tempo as ruas ficaram
+	// alagadas: o vínculo chuva -> alagamento continua uma INFERÊNCIA (HIPÓTESE).
 	// > 0: a água sobe em 10 min, fica no pico enquanto chove e desce em duracao_alagamento_min após a chuva.
-	float duracao_chuva_min <- 0.0;
-	// Momento da medição de acessibilidade, em min após inicio_evento_min. 25 = comportamento atual.
-	// Com chuva longa, medir mais tarde (no platô) é mais representativo (não mudo o padrão).
+	float duracao_chuva_min <- 60.0;
+	// Medição de acessibilidade, em min após inicio_evento_min. 25 = medida original ("pontual").
 	float medicao_acesso_min <- 25.0;
+	// Segunda medição, no platô da chuva (inicio_evento_min + 60). Colunas novas *_plato_pct no CSV; a medida
+	// original continua. Usa a MESMA amostra de nós da primeira.
+	float medicao_acesso_plato_min <- 60.0;
 
 	// ================================ HIPÓTESES (calibrar) ===================================
 	list<string> MODOS <- ["carro", "moto", "pedestre"];
 	list<string> PERFIS <- ["cauteloso", "normal", "arrojado"];
+	// Picos de saída informados pela Defesa Civil (min após as 06:00): 7-8 h, 11-12 h e 17-18 h.
+	// Sexta e segunda foram citadas como mais intensas (não modelado: o dia simulado é um só).
+	list<point> PICOS_MIN <- [{60.0, 120.0}, {300.0, 360.0}, {660.0, 720.0}];
+	list<float> PESO_PICOS <- [1.0, 1.0, 1.0];   // HIPÓTESE: pesos iguais (a Defesa Civil não informou a proporção)
+	float HORA_BASE_MIN <- 360.0;                 // tempo 0 da simulação = 06:00 (360 min do dia)
 	// Grupos medidos separadamente; "abrigo" permanece NaN até haver um endereço oficial.
 	list<string> GRUPOS_ACESSO <- ["hospital", "bombeiros", "defesa_civil", "educacao", "ubs", "abrigo"];
 	map<string, float> LIMITE_PROF <- ["carro"::0.30, "moto"::0.20, "pedestre"::0.40];   // m de lâmina d'água
@@ -108,8 +137,23 @@ global {
 	map<point, float> peso_no <- [];      // peso de cada nó da rede (maior peso entre as vias de carro que chegam nele)
 	list<float> pesos_origem <- [];       // peso dos nós de nos_veic, na mesma ordem
 	bool acesso_medido <- false;
+	bool acesso_plato_medido <- false;
 	bool finalizado <- false;
 	map<string, float> acesso <- [];
+	map<string, float> acesso_plato <- [];
+	list<point> amostra_acesso <- [];     // amostra de nós sorteada UMA vez e usada nas duas medições
+	// Textos de horário (HH:MM = 06:00 + tempo) para o overlay e os rótulos
+	string hora_txt <- "06:00";
+	string hora_evento_txt <- "";
+	string hora_fim_chuva_txt <- "";
+
+	// Horário do dia (HH:MM) para um instante da simulação em segundos (0 = 06:00)
+	string hora_do_dia (float t_seg) {
+		int m <- (int(t_seg / 60.0) + int(HORA_BASE_MIN)) mod 1440;
+		int hh <- m div 60;
+		int mm <- m mod 60;
+		return (hh < 10 ? "0" : "") + hh + ":" + (mm < 10 ? "0" : "") + mm;
+	}
 
 	// ---------------------------------------------------------------- funções de rota ---------
 	bool usavel (via v, string m, bool cruza) {
@@ -141,6 +185,8 @@ global {
 	init {
 		cobertura_aviso <- COBERTURA[info_nivel];
 		t_aviso <- (inicio_evento_min + atraso_aviso_min) * 60.0;
+		hora_evento_txt <- hora_do_dia(inicio_evento_min * 60.0);
+		hora_fim_chuva_txt <- hora_do_dia((inicio_evento_min + duracao_chuva_min) * 60.0);
 
 		create via from: shape_vias with: [highway::string(read("highway")), veic::int(read("carro"))];
 		create zona_risco from: shape_riscos with: [zid::int(read("id")), grau_num::int(read("grau_num")), alaga::int(read("alaga")), eros::int(read("eros")), desl::int(read("desl")), tipo_txt::string(read("tipo_txt"))];
@@ -221,7 +267,19 @@ global {
 				}
 				origem_fixa <- origem;
 				location <- origem;
-				t_partida <- rnd(janela_partida_min * 60.0);
+				// Hora de saída. usar_picos = false: mesma chamada de antes (rnd na janela) -> mesmos números
+				// com a mesma semente. usar_picos = true (HIPÓTESE): com prob. frac_pico cai num dos 3 picos
+				// (pesos PESO_PICOS); senão, uniforme em todo o horizonte.
+				if (usar_picos) {
+					if (flip(frac_pico)) {
+						point pico_escolhido <- PICOS_MIN[rnd_choice(PESO_PICOS)];
+						t_partida <- (pico_escolhido.x + rnd(pico_escolhido.y - pico_escolhido.x)) * 60.0;
+					} else {
+						t_partida <- rnd(horizonte_min * 60.0);
+					}
+				} else {
+					t_partida <- rnd(janela_partida_min * 60.0);
+				}
 				u_aviso <- rnd(1.0);
 			}
 		}
@@ -258,6 +316,11 @@ global {
 		}
 	}
 
+	// Relógio em horário (HH:MM = 06:00 + tempo), lido pelo overlay do mapa
+	reflex atualizar_relogio {
+		hora_txt <- hora_do_dia(time);
+	}
+
 	reflex zerar_ocupacao {
 		ask via {
 			ocup_ant <- ocup;
@@ -265,18 +328,52 @@ global {
 		}
 	}
 
-	// Acessibilidade 25 min após o início-base do evento (amostra de nós).
-	// Como cada zona pode começar até 20 min depois, este indicador representa uma janela do evento,
-	// não um pico simultâneo. Educação reúne escolas, CEIs, IFC e UDESC; UBS reúne UBSs/ESFs.
+	// Acessibilidade (amostra de nós). Duas medições: a original em inicio_evento_min + medicao_acesso_min (25) e
+	// uma segunda no platô da chuva, em + medicao_acesso_plato_min (60). Como cada zona pode começar até 20 min
+	// depois, é uma janela do evento, não um pico simultâneo. Educação reúne escolas, CEIs, IFC e UDESC; UBS
+	// reúne UBSs/ESFs. A amostra é sorteada na PRIMEIRA medição e reaproveitada na segunda (sem sorteio extra:
+	// a medição original continua idêntica à versão anterior com a mesma semente).
 	reflex medir_acesso when: (!acesso_medido and time >= (inicio_evento_min + medicao_acesso_min) * 60.0) {
 		acesso_medido <- true;
-		list<point> amostra <- (min(150, length(nos_veic))) among nos_veic;
+		do medir_acesso_agora eh_plato: false;
+	}
+
+	reflex medir_acesso_plato when: (!acesso_plato_medido and time >= (inicio_evento_min + medicao_acesso_plato_min) * 60.0) {
+		acesso_plato_medido <- true;
+		do medir_acesso_agora eh_plato: true;
+	}
+
+	action medir_acesso_agora (bool eh_plato) {
+		if (empty(amostra_acesso)) {
+			amostra_acesso <- (min(150, length(nos_veic))) among nos_veic;
+		}
+		list<point> amostra <- amostra_acesso;
+		// A medição do platô NÃO usa path_between: verificado por execução que chamar path_between uma 2ª vez
+		// no meio da simulação altera a viagem dos agentes (colunas antigas deixam de ser idênticas). Ela usa
+		// componentes conexas de um grafo PRÓPRIO (existe caminho <=> mesmo componente, grafo não direcionado;
+		// é o mesmo critério do Python). A medição original segue com path_between, como antes.
+		map<string, map<point, int>> comps_plato <- [];
+		if (eh_plato) {
+			loop mm over: ["carro", "pedestre"] {
+				graph gp <- construir_grafo(mm, "normal", false);
+				map<point, int> cm <- [];
+				int k <- 0;
+				loop comp over: connected_components_of(gp) {
+					loop vv over: comp {
+						cm[point(vv)] <- k;
+					}
+					k <- k + 1;
+				}
+				comps_plato[mm] <- cm;
+			}
+		}
 		loop tp over: GRUPOS_ACESSO {
 			list<ponto_critico> pcs <- ponto_critico where (each.grupo = tp);
 			// sem ponto desse tipo (ex.: abrigo ainda não informado): não mede, e o CSV recebe NaN
 			loop m over: ["carro", "pedestre"] {
 				if (empty(pcs)) { continue; }
-				graph g <- grafo_atual(m, "normal", false);
+				graph g <- eh_plato ? nil : grafo_atual(m, "normal", false);
+				map<point, int> cm_m <- eh_plato ? comps_plato[m] : [];
 				int sem <- 0;
 				loop pt over: amostra {
 					bool alcanca <- false;
@@ -284,6 +381,10 @@ global {
 						if (!alcanca) {
 							if (pt = pc.no_rede) {
 								alcanca <- true;
+							} else if (eh_plato) {
+								if ((cm_m contains_key pt) and (cm_m contains_key pc.no_rede) and cm_m[pt] = cm_m[pc.no_rede]) {
+									alcanca <- true;
+								}
 							} else {
 								path p <- path_between(g, pt, pc.no_rede);
 								if (p != nil and !empty(p.edges)) {
@@ -296,7 +397,12 @@ global {
 						sem <- sem + 1;
 					}
 				}
-				acesso[tp + "|" + m] <- empty(amostra) ? 0.0 : 100.0 * sem / length(amostra);
+				float pct <- empty(amostra) ? 0.0 : 100.0 * sem / length(amostra);
+				if (eh_plato) {
+					acesso_plato[tp + "|" + m] <- pct;
+				} else {
+					acesso[tp + "|" + m] <- pct;
+				}
 			}
 		}
 	}
@@ -306,7 +412,7 @@ global {
 		finalizado <- true;
 		string linha <- tipo_evento + "," + severidade + "," + info_nivel + "," + string(rede_energizada)
 			+ "," + duracao_alagamento_min + "," + duracao_deslizamento_min + "," + duracao_erosao_min
-			+ "," + duracao_chuva_min
+			+ "," + duracao_chuva_min + "," + string(usar_picos) + "," + frac_pico
 			+ "," + seed + "," + length(zona_risco where each.ativa);
 		loop m over: MODOS {
 			list<viajante> s <- viajante where (each.modo = m);
@@ -343,6 +449,13 @@ global {
 				linha <- linha + "," + (acesso contains_key (tp + "|" + m) ? string(acesso[tp + "|" + m]) : "NaN");
 			}
 		}
+		// segunda medição (platô da chuva) e o início do evento, que o LoteHorario varia (colunas novas, no fim)
+		loop tp over: GRUPOS_ACESSO {
+			loop m over: ["carro", "pedestre"] {
+				linha <- linha + "," + (acesso_plato contains_key (tp + "|" + m) ? string(acesso_plato[tp + "|" + m]) : "NaN");
+			}
+		}
+		linha <- linha + "," + inicio_evento_min;
 		save (linha + "\n") to: "../includes/resultados_gama_dc.csv" format: "text" rewrite: false;
 		write "Simulação concluída. Linha gravada em includes/resultados_gama_dc.csv";
 		if (pausar_no_fim) { do pause; }   // só no Interativo (no Lote, pausar_no_fim fica false)
@@ -763,16 +876,20 @@ experiment Interativo type: gui {
 	parameter "Pedestres" var: n_pedestre <- 250 min: 0 max: 3000 category: "População";
 	parameter "Fração da frota simulada" var: fracao_amostra <- 0.10 min: 0.01 max: 1.0 category: "População";
 	parameter "Origens ponderadas por tipo de via" var: od_ponderada <- true category: "População";
-	parameter "Janela de partida (min)" var: janela_partida_min <- 180.0 min: 10.0 max: 480.0 category: "População";
-	parameter "Início do evento (min)" var: inicio_evento_min <- 45.0 min: 0.0 max: 300.0 category: "Evento";
+	parameter "Saídas em 3 picos: 7-8h, 11-12h, 17-18h (HIPÓTESE)" var: usar_picos <- true category: "População";
+	parameter "Fração das viagens nos picos (HIPÓTESE)" var: frac_pico <- 0.6 min: 0.0 max: 1.0 category: "População";
+	parameter "Janela de partida (min; só sem picos)" var: janela_partida_min <- 180.0 min: 10.0 max: 780.0 category: "População";
+	parameter "Horizonte da simulação (min; 0 = 06:00, 780 = 19:00)" var: horizonte_min <- 780.0 min: 60.0 max: 1080.0 category: "Cenário";
+	parameter "Início do evento (min após 06:00; HIPÓTESE)" var: inicio_evento_min <- 60.0 min: 0.0 max: 780.0 category: "Evento";
 	parameter "Duração do alagamento (min)" var: duracao_alagamento_min <- 30.0 min: 5.0 max: 240.0 category: "Evento";
 	parameter "Duração do deslizamento (min)" var: duracao_deslizamento_min <- 30.0 min: 5.0 max: 240.0 category: "Evento";
 	parameter "Há rede energizada" var: rede_energizada <- false category: "Evento";
-	parameter "Duração da erosão (min, hipótese)" var: duracao_erosao_min <- 480.0 min: 5.0 max: 480.0 category: "Evento";
-	parameter "Duração da chuva (min, HIPÓTESE; 0 = perfil de 30 min)" var: duracao_chuva_min <- 0.0 min: 0.0 max: 480.0 category: "Evento";
-	parameter "Medição do acesso (min após início)" var: medicao_acesso_min <- 25.0 min: 0.0 max: 480.0 category: "Evento";
+	parameter "Duração da erosão (min, hipótese; 780 = o dia todo)" var: duracao_erosao_min <- 780.0 min: 5.0 max: 780.0 category: "Evento";
+	parameter "Duração da chuva (min). 60 e 780 ancorados nas matérias GCD/ND Mais; HIPÓTESE quanto à relação com o alagamento (0 = perfil de 30 min)" var: duracao_chuva_min <- 60.0 min: 0.0 max: 780.0 category: "Evento";
+	parameter "Medição do acesso (min após início)" var: medicao_acesso_min <- 25.0 min: 0.0 max: 780.0 category: "Evento";
+	parameter "Medição do acesso no platô (min após início)" var: medicao_acesso_plato_min <- 60.0 min: 0.0 max: 780.0 category: "Evento";
 	parameter "Raio de visão (m)" var: raio_visao <- 60.0 min: 10.0 max: 300.0 category: "Agentes";
-	parameter "Pausar no fim (480 min)" var: pausar_no_fim <- true category: "Agentes";
+	parameter "Pausar no fim (horizonte)" var: pausar_no_fim <- true category: "Agentes";
 
 	output {
 		display "Mapa" type: 3d axes: false background: rgb(232, 240, 222) {
@@ -789,10 +906,9 @@ experiment Interativo type: gui {
 			species zona_risco;
 			species ponto_critico;
 			species viajante;
-			overlay position: {5, 5} size: {260 #px, 388 #px} background: #black transparency: 0.35 border: #black rounded: true {
-				int h <- int(time / 3600);
-				int mi <- (int(time) mod 3600) div 60;
-				draw "Tempo simulado: " + h + " h " + mi + " min" at: {10 #px, 20 #px} color: #white font: font("SansSerif", 12, #bold);
+			overlay position: {5, 5} size: {260 #px, 410 #px} background: #black transparency: 0.35 border: #black rounded: true {
+				// Horário = 06:00 + tempo (hora_txt é atualizado pelo reflex atualizar_relogio)
+				draw "Horário " + hora_txt + "  (t = " + int(time / 60.0) + " min)" at: {10 #px, 20 #px} color: #white font: font("SansSerif", 12, #bold);
 				draw "Em viagem: " + (viajante count (each.estado = "viajando")) at: {10 #px, 40 #px} color: #white font: font("SansSerif", 11, #plain);
 				draw "Concluíram: " + (viajante count (each.estado = "concluiu")) at: {10 #px, 58 #px} color: #white font: font("SansSerif", 11, #plain);
 				// Agentes: as MESMAS imagens desenhadas no mapa (species viajante, aspect default).
@@ -827,19 +943,21 @@ experiment Interativo type: gui {
 				draw triangle(13 #px) at: {24 #px, 345 #px} color: #green border: #black;
 				draw "Abrigo" at: {44 #px, 349 #px} color: #white font: font("SansSerif", 11, #plain);
 				// Só aparece quando a chuva (hipótese) está ligada
-				draw (duracao_chuva_min > 0.0 ? ("Chuva até o min " + int(inicio_evento_min + duracao_chuva_min)) : "")
+				draw (duracao_chuva_min > 0.0 ? ("Chuva " + hora_evento_txt + " a " + hora_fim_chuva_txt + " (hipótese)") : "")
 					at: {10 #px, 369 #px} color: #deepskyblue font: font("SansSerif", 11, #bold);
+				draw (usar_picos ? "Saídas: 3 picos (hipótese)" : "Saídas: janela única")
+					at: {10 #px, 389 #px} color: #lightgray font: font("SansSerif", 10, #plain);
 			}
 		}
 		// Atualiza a cada 60 ciclos (= 10 min simulados) para não travar nem criar escala gigante ao acelerar.
 		display "Desfechos" type: 2d background: #white refresh: every(60 #cycles) {
 			// Em cima: os três estados principais, em % do total de agentes, escala fixa 0–100.
-			// type: xy com value: [x, y] = [minutos, %] -> eixo X em minutos de verdade (0 a 480),
+			// type: xy com value: [x, y] = [minutos, %] -> eixo X em minutos de verdade (0 até o horizonte),
 			// crescendo da esquerda para a direita. (x_serie com escalar nao funciona de forma confiavel.)
 			chart "Situação dos agentes (%)" type: xy
 				size: {1.0, 0.55} position: {0.0, 0.0}
-				x_range: {0, 480} x_tick_unit: 60
-				x_label: "tempo simulado (min) · evento começa aos " + int(inicio_evento_min) + " min"
+				x_range: {0, horizonte_min} x_tick_unit: 60
+				x_label: "tempo simulado (min; 0 = 06:00, 780 = 19:00) · evento às " + hora_evento_txt + " (t = " + int(inicio_evento_min) + " min)"
 				y_range: {0, 100} y_label: "% dos agentes"
 				series_label_position: legend
 				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
@@ -851,8 +969,8 @@ experiment Interativo type: gui {
 			// Embaixo: desfechos menos frequentes, com escala própria (automática), para não ficarem colados no zero.
 			chart "Voltaram / desistiram / presos (%)" type: xy
 				size: {1.0, 0.45} position: {0.0, 0.55}
-				x_range: {0, 480} x_tick_unit: 60
-				x_label: "tempo simulado (min)" y_label: "% dos agentes"
+				x_range: {0, horizonte_min} x_tick_unit: 60
+				x_label: "tempo simulado (min; 0 = 06:00)" y_label: "% dos agentes"
 				series_label_position: legend
 				tick_font: font("SansSerif", 10) label_font: font("SansSerif", 12, #bold) legend_font: font("SansSerif", 11)
 			{
@@ -868,8 +986,10 @@ experiment Interativo type: gui {
 }
 
 // 2) Em lote: todos os cenários x repetições; grava em includes/resultados_gama_dc.csv (uma linha por execução).
-//    Se mudar `horizonte_min`, mude também o número abaixo (480 min = 28800 s).
-experiment Lote type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) {
+//    O `until` usa horizonte_min (780 = 19:00), então não precisa ser ajustado à mão. ATENÇÃO: é `>` e não `>=`:
+//    com `>=` o lote para ANTES de o reflex `finalizar` (que dispara em time >= horizonte) rodar, e NENHUMA linha é
+//    gravada (verificado por execução; a versão-final tinha o mesmo defeito com 28800).
+experiment Lote type: batch repeat: 10 keep_seed: true until: (time > horizonte_min * 60.0) {
 	parameter "Tipo de evento" var: tipo_evento among: ["nenhum", "alagamento", "deslizamento", "erosao", "combinado"];
 	parameter "Severidade" var: severidade among: ["baixa", "media", "alta"];
 	parameter "Nível de informação" var: info_nivel among: ["local", "parcial", "amplo"];
@@ -878,9 +998,24 @@ experiment Lote type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) 
 
 // 3) Sensibilidade da DURAÇÃO DA CHUVA (HIPÓTESE, não informada pela Defesa Civil). Separado do Lote
 //    principal para não multiplicar execuções inúteis. Varia só a chuva e o tipo de evento.
-experiment LoteChuva type: batch repeat: 10 keep_seed: true until: (time >= 28800.0) {
+//    ANCORADOS nas matérias (GCD 12/09/2026 e ND Mais 11/09/2026): 60 (fase intensa de ~1 h) e 780 (episódio de
+//    24-48 h = a chuva não para no dia de 13 h). SENSIBILIDADE (hipótese): 0 (perfil antigo de 30 min), 120 e 240.
+//    A relação chuva -> alagamento é inferência: as matérias não dizem quanto tempo as ruas ficaram alagadas.
+experiment LoteChuva type: batch repeat: 10 keep_seed: true until: (time > horizonte_min * 60.0) {
 	parameter "Tipo de evento" var: tipo_evento among: ["combinado", "alagamento"];
-	parameter "Duração da chuva (min, HIPÓTESE)" var: duracao_chuva_min among: [60.0, 120.0, 240.0];
+	parameter "Duração da chuva (min, HIPÓTESE)" var: duracao_chuva_min among: [0.0, 60.0, 120.0, 240.0, 780.0];
+	parameter "Severidade" var: severidade <- "alta";
+	parameter "Nível de informação" var: info_nivel <- "parcial";
+	parameter "Rede energizada" var: rede_energizada <- false;
+}
+
+// 4) QUANDO chove em relação a cada pico (HIPÓTESE): início do evento às 06:30, 10:30 e 16:30 (t = 30, 270, 630),
+//    com chuva de 60 e 780 min (as duas ancoradas nas matérias). O pico da manhã é 7-8 h (t 60-120), o do meio-dia 11-12 h (t 300-360) e o da
+//    tarde 17-18 h (t 660-720). A coluna inicio_evento_min do CSV identifica cada linha.
+experiment LoteHorario type: batch repeat: 10 keep_seed: true until: (time > horizonte_min * 60.0) {
+	parameter "Tipo de evento" var: tipo_evento among: ["combinado", "alagamento"];
+	parameter "Início do evento (min após 06:00, HIPÓTESE)" var: inicio_evento_min among: [30.0, 270.0, 630.0];
+	parameter "Duração da chuva (min, HIPÓTESE)" var: duracao_chuva_min among: [60.0, 780.0];
 	parameter "Severidade" var: severidade <- "alta";
 	parameter "Nível de informação" var: info_nivel <- "parcial";
 	parameter "Rede energizada" var: rede_energizada <- false;

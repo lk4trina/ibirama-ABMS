@@ -10,8 +10,8 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from simulador import (CABECALHO, RAIZ, Eventos, MODOS, Params, Simulacao,  # noqa: E402
-                       carregar_mundo)
+from simulador import (CABECALHO, PICOS_MIN, RAIZ, Eventos, MODOS, Params, Simulacao,  # noqa: E402
+                       carregar_mundo, hora_do_dia)
 
 mundo = carregar_mundo("teste")
 ok = True
@@ -32,7 +32,10 @@ def resumo(sim):
 
 # T1 - sem evento: todos chegam, ninguem replaneja nem arrisca
 s = Simulacao(mundo, Params(tipo_evento="nenhum"), 1).rodar()
-checa("T1 sem evento: 100% concluem", resumo(s) == {"concluiu": len(s.ags)}, str(resumo(s)))
+r1_ = resumo(s)
+tardios = [a for a in s.ags if a.resultado == "em_viagem"]
+checa("T1 sem evento: so ha 'concluiu' ou 'em_viagem' (quem saiu tarde, perto das 19:00)",
+      set(r1_) <= {"concluiu", "em_viagem"} and all(a.t_part > (780 - 60) * 60 for a in tardios), str(r1_))
 checa("T1 sem evento: nenhum replanejamento/travessia arriscada", sum(a.replan + a.arriscou for a in s.ags) == 0)
 
 # T2 - mesma semente, mesmo resultado (determinismo)
@@ -97,16 +100,16 @@ checa("T8 rede_energizada=true  -> deslizamento entre 60 e 90 min", ok_e,
 
 # T9 - 6 grupos de acesso (x2 modais = 12 colunas) e NaN quando o grupo nao tem pontos
 row, _ = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta"), 1).rodar().metricas()
-cols_acc = [c for c in row if c.startswith("sem_acesso_")]
+cols_acc = [c for c in row if c.startswith("sem_acesso_") and not c.endswith("_plato_pct")]
 checa("T9 acesso: 12 colunas (6 grupos x 2 modais)", len(cols_acc) == 12, str(len(cols_acc)))
 nan_ok = all(math.isnan(row[f"sem_acesso_{g}_carro_pct"]) for g in ("educacao", "ubs", "defesa_civil"))
 checa("T9 acesso: grupo sem pontos vira NaN (educacao/ubs/defesa_civil na rede TESTE)", nan_ok)
 checa("T9 acesso: grupo com pontos NAO e NaN (hospital)", not math.isnan(row["sem_acesso_hospital_carro_pct"]))
 print("      (obs.: na rede REAL o grupo sem pontos e 'abrigo' -> NaN)")
 
-# T10 - cabecalho: as 54 colunas do Python sao iguais, na mesma ordem, as do CSV do GAMA
+# T10 - cabecalho: as 69 colunas do Python sao iguais, na mesma ordem, as do CSV do GAMA
 gama_header = (RAIZ / "includes" / "resultados_gama_dc.csv").read_text(encoding="utf8").splitlines()[0].split(",")
-checa("T10 cabecalho de 54 colunas igual ao includes/resultados_gama_dc.csv",
+checa("T10 cabecalho de 69 colunas igual ao includes/resultados_gama_dc.csv",
       CABECALHO == gama_header, f"py={len(CABECALHO)} gama={len(gama_header)}")
 
 # T11 - compatibilidade: com duracao_chuva_min = 0 o perfil do alagamento e EXATAMENTE o de antes (10/5/15)
@@ -130,10 +133,52 @@ cnt = ev120.blk["carro"].sum(axis=1)
 checa("T12 reabertura: inunda durante e ZERA depois (chuva 120 min)", cnt.max() > 0 and cnt[ev120.k(300 * 60)] == 0,
       f"max={int(cnt.max())}, em_300min={int(cnt[ev120.k(300*60)])}")
 
-# T13 - compatibilidade no resultado: chuva=0 da o MESMO que o padrao (mesma semente)
+# T13 - os padroes sao 60 min de chuva (ancorada nas materias); informar 60 explicitamente da o mesmo
 m_pad = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta"), 7).rodar().metricas()[0]
-m_ch0 = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta", duracao_chuva_min=0.0), 7).rodar().metricas()[0]
-checa("T13 duracao_chuva_min=0 reproduz a versao anterior (mesma semente)", m_pad == m_ch0)
+m_60 = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta", duracao_chuva_min=60.0), 7).rodar().metricas()[0]
+checa("T13 padrao = duracao_chuva_min 60 (mesma semente)", m_pad == m_60)
+# T13b - padroes ANTIGOS ligados explicitamente: 480 min, janela unica de 180, evento aos 45, chuva 0, erosao 480.
+# (A prova de que as colunas antigas ficam IDENTICAS as da versao anterior e feita por execucao no GAMA e,
+#  no Python, comparando com a copia do simulador antigo - ver docs/python_vs_gaml.md.)
+p_antigo = Params(tipo_evento="combinado", severidade="alta", horizonte_min=480.0, usar_picos=False, janela_partida_min=180.0,
+                  inicio_evento_min=45.0, duracao_chuva_min=0.0, duracao_erosao_min=480.0)
+s_ant = Simulacao(mundo, p_antigo, 7).rodar()
+checa("T13b padroes antigos: saidas na janela de 180 min e simulacao de 480 min",
+      max(a.t_part for a in s_ant.ags) < 180 * 60 and s_ant.p.horizonte_min == 480.0)
+
+# T14 - picos de saida (HIPOTESE): fracao nos picos coerente com frac_pico; nada fora do horizonte
+p_pic = Params(tipo_evento="nenhum")
+checa("T14 padroes novos: horizonte 780, picos ligados, frac_pico 0.6, chuva 60, inicio 60, erosao 780",
+      (p_pic.horizonte_min, p_pic.usar_picos, p_pic.frac_pico, p_pic.duracao_chuva_min,
+       p_pic.inicio_evento_min, p_pic.duracao_erosao_min) == (780.0, True, 0.6, 60.0, 60.0, 780.0))
+ts = np.array([a.t_part for a in Simulacao(mundo, p_pic, 11).ags]) / 60.0
+dentro = np.zeros(len(ts), bool)
+for lo, hi in PICOS_MIN:
+    dentro |= (ts >= lo) & (ts < hi)
+esperado = 0.6 + 0.4 * (3 * 60.0 / 780.0)          # nos picos de proposito + uniforme que cai num pico por acaso
+checa("T14 saidas em [0, 780) min", ts.min() >= 0 and ts.max() < 780.0, f"min={ts.min():.1f} max={ts.max():.1f}")
+checa("T14 fracao de saidas dentro dos picos ~ 0,6 + 0,4*180/780", abs(dentro.mean() - esperado) < 0.04,
+      f"obs={dentro.mean():.3f} esp={esperado:.3f}")
+cont = [int(((ts >= lo) & (ts < hi)).sum()) for lo, hi in PICOS_MIN]
+checa("T14 os 3 picos recebem quantidades parecidas (pesos iguais)", max(cont) / min(cont) < 1.35, str(cont))
+p_old = Params(tipo_evento="nenhum", usar_picos=False, janela_partida_min=180.0)
+ts0 = np.array([a.t_part for a in Simulacao(mundo, p_old, 11).ags]) / 60.0
+checa("T14 usar_picos=False: saidas so na janela de 180 min (versao anterior)", ts0.max() < 180.0, f"max={ts0.max():.1f}")
+
+# T15 - horario do dia e horizonte: 06:00 = tempo 0; 19:00 = 780 min
+checa("T15 hora_do_dia: 0 -> 06:00, 60 min -> 07:00, 780 min -> 19:00",
+      (hora_do_dia(0), hora_do_dia(3600), hora_do_dia(780 * 60)) == ("06:00", "07:00", "19:00"))
+ev780 = Eventos(mundo, Params(tipo_evento="erosao", severidade="alta"), np.random.default_rng(4))
+checa("T15 horizonte 780: o estado das vias cobre ate 19:00", ev780.K >= 780 * 60 / 300, f"K={ev780.K}")
+checa("T15 erosao dura 780 min (o dia todo)", len(ev780.dur_eros) > 0 and all(d == 780 * 60.0 for d in ev780.dur_eros))
+
+# T16 - colunas novas: usar_picos, frac_pico, inicio_evento_min e a medicao no plato
+row, _ = Simulacao(mundo, Params(tipo_evento="combinado", severidade="alta"), 3).rodar().metricas()
+i_ch = CABECALHO.index("duracao_chuva_min")
+checa("T16 usar_picos/frac_pico logo depois de duracao_chuva_min", CABECALHO[i_ch + 1:i_ch + 3] == ["usar_picos", "frac_pico"])
+checa("T16 12 colunas *_plato_pct + inicio_evento_min", len([c for c in row if c.endswith("_plato_pct")]) == 12
+      and row["inicio_evento_min"] == 60.0)
+print("      pct_em_andamento (carro) com picos, combinado/alta:", row["pct_em_andamento_carro"], "%")
 
 print("\nTODOS OS TESTES PASSARAM" if ok else "\nHA TESTES FALHANDO")
 sys.exit(0 if ok else 1)

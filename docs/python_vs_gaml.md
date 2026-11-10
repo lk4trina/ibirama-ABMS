@@ -32,7 +32,21 @@ Os parâmetros do Python usam os **mesmos nomes** do GAML e trazem, no topo de `
 | Duração da chuva (HIPÓTESE) + perfil do alagamento com chuva longa | 65, 483-503 | `Params.duracao_chuva_min`, `np.interp` em `Eventos` | ✅ |
 | Início do deslizamento sorteado na chuva | 468 | `rng.uniform(0, chuva)` em `Eventos` | ✅ |
 | Momento da medição de acesso (`medicao_acesso_min`) | 68, 271 | `Params.medicao_acesso_min` | ✅ |
-| CSV de saída: 54 colunas, mesma ordem | 307-345 | `CABECALHO` (teste T10 confere) | ✅ |
+| CSV de saída: **69 colunas**, mesma ordem (54 + `usar_picos`, `frac_pico` + 12 `*_plato_pct` + `inicio_evento_min`) | reflex `finalizar` | `CABECALHO` (teste T10 confere) | ✅ |
+| Dia de 780 min (`horizonte_min`), erosão de 780 min, início do evento aos 60 min | 66, 78, 62 | `Params` | ✅ |
+| Saída em 3 picos (`usar_picos`, `frac_pico`, `PICOS_MIN`, `PESO_PICOS`) — **HIPÓTESE** | 58-59, 99-100, init | `Params`, `PICOS_MIN`, `gerar_populacao` | ✅ (regra; sorteios diferem) |
+| Chuva padrão 60 min (ancorada nas matérias) | 87 | `Params.duracao_chuva_min` | ✅ |
+| 2ª medição de acesso no platô (`medicao_acesso_plato_min`, +60 min) | 92, 341-346 | `Simulacao.acessibilidade` | ✅ (no GAMA usa componentes conexas, como o Python) |
+
+### Compatibilidade com a versão anterior (verificado por execução)
+Com `horizonte_min=480`, `usar_picos=false`, `janela_partida_min=180`, `inicio_evento_min=45`,
+`duracao_chuva_min=0` (e `duracao_erosao_min=480`, que tem novo padrão 780):
+
+- **GAMA** (gama-headless, 10 sementes × 2 cenários, em cópia fora do repositório): as **54 colunas antigas
+  saíram idênticas** à `versao-final` — 540 de 540 valores iguais em cada cenário
+  (A: combinado/alta/parcial/rede energizada/chuva 0; B: alagamento/média/local/chuva 120).
+- **Python** (rede real, 10 sementes × 3 cenários): as colunas antigas são idênticas às do simulador antigo
+  (30 execuções, 0 diferenças).
 
 ## 2. Diferenças **intencionais** (não dá para igualar)
 
@@ -55,7 +69,8 @@ Os parâmetros do Python usam os **mesmos nomes** do GAML e trazem, no topo de `
      no Python), **manter ou não as paralelas dá o mesmo resultado** — elas ligam pares de nós já ligados.
    - Associação via↔polígono (**buffer de 40 m**) e limiar de profundidade (0,30 m carro) são **idênticos**
      nas duas ferramentas.
-5. **Medição de acesso.** Python usa componentes conexos (alcance não-direcionado); GAMA usa
+5. **Medição de acesso.** (Medição original no GAMA com `path_between`; a medição do platô, nova, usa
+   componentes conexas nos dois lados.) Python usa componentes conexos (alcance não-direcionado); GAMA usa
    `path_between` sobre `as_edge_graph`. São **equivalentes** (existir caminho ⟺ mesmo componente). No
    teste de réplica, com os **mesmos fechamentos**, o Python reproduziu o `sem_acesso` do GAMA dentro de
    ~4 pontos numa semente (dentro do desvio por semente). A divergência de acesso que sobra vem da
