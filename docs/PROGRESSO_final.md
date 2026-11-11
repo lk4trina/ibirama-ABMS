@@ -5,18 +5,18 @@ Arquivo mantido durante o trabalho. Entrega: 12/11/2026. Branch: `dia-completo`.
 ## Status das execuções no GAMA
 
 <!-- STATUS:INICIO -->
-Atualizado em: 2026-11-11 08:21:39  |  estado: RODANDO
+Atualizado em: 2026-11-11 13:18:16  |  estado: RODANDO
 
 | Experimento | Feitas (arquivo valido) | Esperado | Falta |
 |---|---|---|---|
-| A_principal | 15 | 550 | 535 |
-| B_chuva | 0 | 100 | 100 |
-| C_horario | 0 | 120 | 120 |
+| A_principal | 550 | 550 | 0 |
+| B_chuva | 100 | 100 | 0 |
+| C_horario | 69 | 120 | 51 |
 | D_persistente | 0 | 275 | 275 |
-| **Total** | **15** | **1045** | **1030** |
+| **Total** | **719** | **1045** | **326** |
 
 Linhas em falhas.log: 0 (desistidos nesta sessao: 0).
-Tempo medio por execucao (ultimas 15): 80 s; com 5 em paralelo, faltam ~4,6 h.
+Tempo medio por execucao (ultimas 50): 130 s; com 5 em paralelo, faltam ~2,4 h.
 <!-- STATUS:FIM -->
 
 ## Como retomar (PowerShell, na raiz do repositório)
