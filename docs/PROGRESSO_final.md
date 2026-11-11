@@ -1,50 +1,60 @@
 # Progresso dos resultados finais (artigo 5OPMSA)
 
-Arquivo mantido durante o trabalho. Entrega: 12/11/2026. Branch: `dia-completo`. Sem push.
+Entrega: 12/11/2026. Branch: `dia-completo`. Sem push. Atualizado em 11/11/2026, ~16:30.
 
-## Status das execuções no GAMA
+## Status
 
 <!-- STATUS:INICIO -->
-Atualizado em: 2026-11-11 13:18:16  |  estado: RODANDO
+Atualizado em: 2026-11-11 15:47:14  |  estado: CONCLUIDO
 
 | Experimento | Feitas (arquivo valido) | Esperado | Falta |
 |---|---|---|---|
 | A_principal | 550 | 550 | 0 |
 | B_chuva | 100 | 100 | 0 |
-| C_horario | 69 | 120 | 51 |
-| D_persistente | 0 | 275 | 275 |
-| **Total** | **719** | **1045** | **326** |
+| C_horario | 120 | 120 | 0 |
+| D_persistente | 275 | 275 | 0 |
+| **Total** | **1045** | **1045** | **0** |
 
-Linhas em falhas.log: 0 (desistidos nesta sessao: 0).
-Tempo medio por execucao (ultimas 50): 130 s; com 5 em paralelo, faltam ~2,4 h.
+Falhas: 0 (nao existe `falhas.log`). Verificacao extra `V_equivalencia`: 8 de 8.
 <!-- STATUS:FIM -->
 
-## Como retomar (PowerShell, na raiz do repositório)
+## Etapas
+
+- [x] Etapa 0: conferência, ambiente Python (numpy 2.3.5, matplotlib 3.11.2), `testes_logica.py`, `until` nos 3 experimentos.
+- [x] Etapa 1: lotes A, B, C e D no GAMA headless; consolidação e validação; CSV final em `includes/resultados_gama_dc.csv` (1015 linhas únicas).
+- [x] Etapa 2: tabelas T1-T6 (CSV e LaTeX) e testes em `docs/tabelas/`; verificação cruzada com o Python.
+- [x] Etapa 3: figuras A-F em `docs/figuras/`.
+- [x] Etapa 4: `docs/resultados_para_artigo.md` e `docs/lote_principal_equivalencia.md`.
+
+## Como refazer / retomar (PowerShell, na raiz do repositório)
 
 ```powershell
+# lotes (pula o que já tem arquivo válido; crie C:\Temp\ibirama_final\PARAR para parar com segurança)
 powershell -ExecutionPolicy Bypass -File scripts\rodar_final.ps1
 ```
 
-- O script pula as execuções que já têm arquivo válido em `C:\Temp\ibirama_final\runs\<experimento>\`.
-- Para parar com segurança: crie o arquivo `C:\Temp\ibirama_final\PARAR` (ele termina as execuções em curso e não inicia outras).
-- Falhas ficam em `C:\Temp\ibirama_final\falhas.log` (cada execução é repetida até 2 vezes).
+Python (ambiente fora do repositório, `numpy<2.4`):
 
-## Onde fica cada coisa
+```bash
+python scripts/10_consolidar.py --final     # valida os 4 experimentos e grava includes/resultados_gama_dc.csv
+python scripts/11_tabelas.py                # docs/tabelas/
+python scripts/12_figuras.py                # docs/figuras/ (a E precisa de C:\Temp\ibirama_final\diag\agentes_*_s1.csv)
+python scripts/03_analise.py resultados/resultados_gama_dc.csv   # copie o CSV para resultados/ antes: a saída vai para resultados/analise/ (ignorado pelo Git)
+```
 
-- GAMA instalado só para este trabalho: `C:\Temp\ibirama_final\GAMA` (instalador de `Downloads`, instalação silenciosa).
-- Cópias do projeto (uma por processo): `C:\Temp\ibirama_final\slots\s1..s5`. O `models\ibirama.gaml` é cópia exata do repositório (SHA-256 em `runs\modelo_sha256.txt`).
-- Resultados: `C:\Temp\ibirama_final\runs\<experimento>\<cenario>_<semente>.csv` (fora do repositório).
+## Onde fica cada coisa (fora do repositório)
 
-## Feito
+- GAMA 2025.06.4: `C:\Temp\ibirama_final\GAMA` (instalado em silêncio a partir do instalador em Downloads; `Gama.ini` com `-Xms512m`
+  e sem `AlwaysPreTouch` por falta de memória; original em `Gama.ini.original`).
+- Cópias do projeto: `...\slots\s1..s5`. Linhas: `...\runs\<experimento>\<cenario>_<semente>.csv`. Consolidados: `...\consolidados\`.
+- Diagnóstico da Figura E: `...\diag\`. Verificação cruzada: `...\xcheck\py_lotechuva_real.csv`.
+- SHA-256 do modelo: `...\runs\modelo_sha256.txt` (F1320D4F...). `models/ibirama.gaml` não foi alterado.
 
-### (a) Verificado por execução
-- Etapa 0 (parcial): ver seção abaixo, preenchida durante o trabalho.
+## (a) Verificado por execução
+Ver seção 0 de `docs/resultados_para_artigo.md`.
 
-### (b) Por leitura
-- `until: (time > horizonte_min * 60.0)` nos três experimentos em lote (linhas 992, 1004 e 1015 de `models/ibirama.gaml`).
+## (b) Por leitura
+`until` com `>` nos três experimentos; explicação da anomalia dos destinos iguais (hospital, bombeiros, Defesa Civil, abrigo).
 
-### (c) Não verificado
-- (a preencher)
-
-## Falta
-- Lotes A, B, C e D (1045 execuções), consolidação e validação, análise, figuras e texto-base.
+## (c) Não verificado
+Relação chuva → alagamento; causa do "sem acesso" > 0 sem evento; mecanismo pelo qual mais informação não melhora a conclusão.

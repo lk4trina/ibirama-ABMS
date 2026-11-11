@@ -203,15 +203,15 @@ if "E" in a.so:
         bins = np.arange(0, 781, 15)
         for p0, p1 in PICOS:
             ax.axvspan(p0, p1, color=OI["amarelo"], alpha=0.35, lw=0)
-        ax.hist(base.t_partida / 60.0, bins=bins, color=OI["azul"], edgecolor="white", lw=0.4)
+        ax.hist(base.t_partida, bins=bins, color=OI["azul"], edgecolor="white", lw=0.4)
         ax.set_ylabel("saídas por 15 min (agentes)")
         ax.set_title(f"Horário de saída dos {len(base)} agentes (GAMA, semente 1)", fontsize=9)
         ax = axs[1]
         tt = np.arange(0, 781, 5.0)
         estilos = [(OI["cinza"], "--"), (OI["verm"], "-")]
         for (nome, d), (cor, ls) in zip(dados.items(), estilos):
-            ini = d.t_partida.values / 60.0
-            fim = np.where(d.estado.isin(["concluiu", "voltou", "desistiu", "preso"]), d.t_chegada.values / 60.0, np.inf)
+            ini = d.t_partida.values   # o diagnostico ja grava em minutos
+            fim = np.where(d.estado.isin(["concluiu", "voltou", "desistiu", "preso"]), d.t_chegada.values, np.inf)
             emv = [int(((ini <= t) & (fim > t)).sum()) for t in tt]
             ax.plot(tt, emv, color=cor, ls=ls, lw=1.4, label=nome)
         for p0, p1 in PICOS:
