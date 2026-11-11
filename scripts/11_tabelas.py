@@ -265,6 +265,22 @@ for rotulo, D in (("60", P60), ("780", P780)):
                   f"tab:t1_{rotulo}_{m}", tamanho="\\scriptsize")
         md(f"T1 - {MOD_PT[m]}, chuva {rotulo} min (média ± dp entre sementes)", md_tabela(t))
 T1 = pd.concat(T1_linhas)
+# testes T1: cada evento x severidade contra "sem evento" (mesmas sementes). Familia de Holm = as 3 severidades de um
+# mesmo evento, por modal e desfecho (com n=5 sementes, no bloco 780, o menor p exato do Mann-Whitney e 0,0079; Holm sobre
+# 12 testes nunca daria p < 0,05, entao a familia e menor e isso e dito no texto).
+for rot_, D_ in (("60", P60), ("780", P780)):
+    base_ = D_[D_.tipo_evento == "nenhum"].groupby("seed")
+    for m in MODOS:
+        for dsf in ("concluiu", "desistiu"):
+            met = f"pct_{dsf}_{m}"
+            b = base_[met].mean().sort_index()
+            for e in EV[1:]:
+                for sv in SEV:
+                    x = D_[(D_.tipo_evento == e) & (D_.severidade == sv)].groupby("seed")[met].mean().sort_index()
+                    U, p, A12 = mwu(x.values, b.values)
+                    reg("T1", f"T1|chuva{rot_}|{e}|{met}", met, m, f"{e}/{sv} (chuva {rot_})", "Mann-Whitney", "cenário x sem evento", len(x), len(b), U, p, A12, "A12", magn(A12))
+                    W, pw, rb = wilc(x.values, b.values)
+                    reg("T1", f"T1w|chuva{rot_}|{e}|{met}", met, m, f"{e}/{sv} (chuva {rot_})", "Wilcoxon pareado (sensibilidade)", "cenário x sem evento", len(x), len(b), W, pw, rb, "rank-biserial", "")
 T1.to_csv(SAIDA / "T1_desfechos.csv", index=False, float_format="%.4f")
 
 # ------------------------------------------------------------------------------------------ T2
