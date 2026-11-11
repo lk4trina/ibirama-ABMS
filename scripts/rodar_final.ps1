@@ -13,6 +13,7 @@ Experimentos (sementes 1..10, as mesmas em todos os cenarios; D usa 1..5):
   B_chuva        100  combinado e alagamento, alta, parcial, rede=falso, chuva 0/60/120/240/780
   C_horario      120  combinado e alagamento, alta, parcial, chuva 60 e 780, inicio 30/270/630
   D_persistente  275  os 55 cenarios de A com chuva 780, sementes 1..5
+  V_equivalencia   8  (so verificacao; opcional) 4 cenarios 'redundantes' do Lote completo x sementes 1..2
 
 Uso (PowerShell):
   powershell -ExecutionPolicy Bypass -File scripts\rodar_final.ps1
@@ -36,7 +37,7 @@ $TemposCsv = Join-Path $Raiz 'runs\tempos.csv'
 $Parar = Join-Path $Raiz 'PARAR'
 $Progresso = Join-Path $Repo 'docs\PROGRESSO_final.md'
 $NCampos = 69
-$TotalEsperado = @{ A_principal = 550; B_chuva = 100; C_horario = 120; D_persistente = 275 }
+$TotalEsperado = @{ A_principal = 550; B_chuva = 100; C_horario = 120; D_persistente = 275; V_equivalencia = 8 }
 
 function Log($msg) { $l = '{0} {1}' -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $msg; Write-Host $l; Add-Content -Path (Join-Path $Raiz 'orquestrador.log') -Value $l -Encoding UTF8 }
 
@@ -60,6 +61,13 @@ function Jobs-Do-Experimento($exp) {
         'B_chuva' { foreach ($e in 'combinado', 'alagamento') { foreach ($c in 0, 60, 120, 240, 780) { $cen += Cenario $e 'alta' 'parcial' $false $c 60 } } }
         'C_horario' { foreach ($e in 'combinado', 'alagamento') { foreach ($i in 30, 270, 630) { foreach ($c in 60, 780) { $cen += Cenario $e 'alta' 'parcial' $false $c $i } } } }
         'D_persistente' { $cen = Cenarios-A 780; $sementes = 1..5 }
+        # verificacao do argumento "o Lote completo de 900 repete valores": fatores que NAO deveriam mudar o resultado
+        # (severidade/informacao sem evento; rede energizada fora do deslizamento/combinado). Sementes 1 e 2.
+        'V_equivalencia' {
+            $cen = @((Cenario 'nenhum' 'alta' 'amplo' $false 60 60), (Cenario 'nenhum' 'media' 'parcial' $true 60 60),
+                     (Cenario 'alagamento' 'media' 'parcial' $true 60 60), (Cenario 'erosao' 'alta' 'amplo' $true 60 60))
+            $sementes = 1..2
+        }
         default { throw "experimento desconhecido: $exp" }
     }
     $jobs = @()
