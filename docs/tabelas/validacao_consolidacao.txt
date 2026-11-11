@@ -1,0 +1,66 @@
+== A_principal: 550 linhas lidas (esperado 550) ==
+colunas: 69 (cabecalho do repo) | campos por linha conferidos: ok
+duplicatas (cenario+semente): 0
+cenario x semente: esperados 550, obtidos 550, faltando 0, a mais 0
+colunas com NaN: nenhuma
+colunas do abrigo (4) sem NaN: True
+duracao_chuva_min encontrados: [60.0]
+inicio_evento_min encontrados: [60.0]
+sementes encontradas: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+usar_picos: ['true'] | frac_pico: [0.6]
+percentuais fora de [0,100]: 0
+soma dos desfechos != 100 (carro): 0 linhas
+soma dos desfechos != 100 (moto): 0 linhas
+soma dos desfechos != 100 (pedestre): 0 linhas
+RESULTADO A_principal: VALIDO
+
+== B_chuva: 100 linhas lidas (esperado 100) ==
+colunas: 69 (cabecalho do repo) | campos por linha conferidos: ok
+duplicatas (cenario+semente): 0
+cenario x semente: esperados 100, obtidos 100, faltando 0, a mais 0
+colunas com NaN: nenhuma
+colunas do abrigo (4) sem NaN: True
+duracao_chuva_min encontrados: [0.0, 60.0, 120.0, 240.0, 780.0]
+inicio_evento_min encontrados: [60.0]
+sementes encontradas: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+usar_picos: ['true'] | frac_pico: [0.6]
+percentuais fora de [0,100]: 0
+soma dos desfechos != 100 (carro): 0 linhas
+soma dos desfechos != 100 (moto): 0 linhas
+soma dos desfechos != 100 (pedestre): 0 linhas
+RESULTADO B_chuva: VALIDO
+
+== C_horario: 120 linhas lidas (esperado 120) ==
+colunas: 69 (cabecalho do repo) | campos por linha conferidos: ok
+duplicatas (cenario+semente): 0
+cenario x semente: esperados 120, obtidos 120, faltando 0, a mais 0
+colunas com NaN: nenhuma
+colunas do abrigo (4) sem NaN: True
+duracao_chuva_min encontrados: [60.0, 780.0]
+inicio_evento_min encontrados: [30.0, 270.0, 630.0]
+sementes encontradas: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+usar_picos: ['true'] | frac_pico: [0.6]
+percentuais fora de [0,100]: 0
+soma dos desfechos != 100 (carro): 0 linhas
+soma dos desfechos != 100 (moto): 0 linhas
+soma dos desfechos != 100 (pedestre): 0 linhas
+RESULTADO C_horario: VALIDO
+
+== D_persistente: 275 linhas lidas (esperado 275) ==
+colunas: 69 (cabecalho do repo) | campos por linha conferidos: ok
+duplicatas (cenario+semente): 0
+cenario x semente: esperados 275, obtidos 275, faltando 0, a mais 0
+colunas com NaN: nenhuma
+colunas do abrigo (4) sem NaN: True
+duracao_chuva_min encontrados: [780.0]
+inicio_evento_min encontrados: [60.0]
+sementes encontradas: [1.0, 2.0, 3.0, 4.0, 5.0]
+usar_picos: ['true'] | frac_pico: [0.6]
+percentuais fora de [0,100]: 0
+soma dos desfechos != 100 (carro): 0 linhas
+soma dos desfechos != 100 (moto): 0 linhas
+soma dos desfechos != 100 (pedestre): 0 linhas
+RESULTADO D_persistente: VALIDO
+
+== Reprodutibilidade: 30 celulas (cenario+semente) aparecem em mais de um experimento; 30 identicas byte a byte, 0 diferentes ==
+linhas unicas no conjunto final: 1015 (soma dos experimentos: 1045)
