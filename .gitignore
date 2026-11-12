@@ -17,3 +17,16 @@ resultados/analise/
 *.log
 .workspace/
 cache/
+
+# lixo de sistema e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.bak
+*.tmp
+
+# entregas compactadas e itens a apagar
+*.zip
+_to_delete/
