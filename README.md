@@ -80,9 +80,6 @@ Os arquivos com `_TESTE` ou `_SINTETICO` no nome (por exemplo `vias_teste_SINTET
 1. Rode os lotes no GAMA sem interface com `scripts/rodar_final.ps1` (um processo por simulação).
 2. `python scripts/10_consolidar.py` consolida o CSV e remove repetições (1.015 execuções distintas).
 3. `python scripts/03_analise.py`, `scripts/11_tabelas.py` e `scripts/12_figuras.py` geram testes, tabelas e figuras.
-4. As figuras do artigo: `python scripts/13_figuras_artigo.py includes/resultados_gama_dc.csv docs/hist_saidas.svg artigo`.
-
-O artigo (LaTeX, modelo COTB 2027) está em `artigo/`.
 
 ## Fontes dos dados
 
