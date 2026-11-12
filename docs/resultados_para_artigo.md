@@ -142,9 +142,9 @@ demanda sai durante a chuva, não o horário em si. A coluna "saídas na chuva" 
 1. **Erosão ≡ sem evento.** Em 100 % das sementes a % que conclui (carro e moto) e a desistência (carro) da erosão são **idênticas** às do
    cenário sem evento (97,65 %, 2,21 %); o pedestre difere em 2 % das linhas. Só o Gini muda um pouco. A erosão ativa em média 0,8 a 1,9 dos 49
    polígonos (alagamento alto: 8,8; deslizamento alto: 21,9; combinado alto: 29,4). Este modelo não distingue erosão de um dia normal.
-2. **Hospital = bombeiros = Defesa Civil = abrigo.** Os quatro dão o mesmo "sem acesso" nas 1.015 linhas, nas quatro medidas, embora os pontos
-   fiquem em nós diferentes. Leitura (não verificada no GAMA): a medida só detecta nós amostrados isolados da componente principal da rede, e os quatro
-   destinos estão nela. Então a medida não separa esses destinos; só educação e UBS (vários pontos) diferem.
+2. **Hospital = bombeiros = Defesa Civil = abrigo.** Os quatro dão o mesmo "sem acesso" nas 1.015 linhas, nas quatro medidas, embora os pontos fiquem em nós diferentes. Leitura Causa não investigada. A hipótese de que a medida só detectaria nós isolados não se sustenta:
+   verificamos que a rede é uma única componente conexa. A medida não separa esses quatro destinos;
+   só educação e UBS (vários pontos) diferem.
 3. **Sem evento, já há 1,3 a 3,3 % de carros sem acesso** em +25 min (2,0 a 4,7 % no platô) e 0 % a pé. O Python dá 0,0 % neste cenário (3 sementes).
    Sem evento as duas medidas deveriam ser iguais e zero. Causa não investigada. Isso desloca todos os valores de acesso do carro em cerca de 3 pontos.
 4. **Cerca de 2 % dos carros e motos "desistem" mesmo sem evento** (2,2 e 2,1 %), e 1,3 % dos pedestres ainda estão em andamento às 19:00 (saem tarde e levam ~20 min). A linha de base não é 100 %.
@@ -155,15 +155,3 @@ demanda sai durante a chuva, não o horário em si. A coluna "saídas na chuva" 
 8. Os cenários de chuva 780 x deslizamento ficam muito perto do sem evento (97,7 %), enquanto alagamento chega a 78,6 %: o deslizamento aparece nos dados como pouco relevante nesse desenho,
    porque (por leitura de `docs/chuva.md`) ele só é sorteado dentro da janela de chuva e fecha por 30 a 90 min.
 9. Efeito de medição: o acesso em +25 min cai quando a chuva é mais longa (T4).
-
-## 6. Perguntas em aberto para a Defesa Civil
-
-1. Qual é a proporção das viagens em cada pico (7-8, 11-12, 17-18 h) e em dia útil comum, e quanto sai fora deles?
-2. Por quanto tempo as ruas ficaram alagadas depois da chuva de 11 e 12/09? Isso decide se chuva de 60 min ou de 780 min é a referência.
-3. A erosão chega a fechar vias de uso diário em Ibirama? O modelo só ativa 1 a 2 polígonos de erosão e não gera efeito mensurável.
-4. O Ginásio de Esportes João Moretti é o abrigo oficial, e há outros? Hoje há um só.
-5. Como a população realmente recebe o aviso e com que atraso? No modelo, mais informação não aumentou quem conclui; vale testar com dados reais.
-6. Há pedestres em número relevante nas vias afetadas (hoje 250 por hipótese)?
-7. Quais vias têm sentido único ou restrição que a rede do OSM não mostra?
-8. Quanto tempo as pessoas esperam antes de voltar ou desistir de uma viagem?
-9. A ponte Ibirama-Apiúna fecha por quanto tempo, e há travessia alternativa? É o desvio de maior custo (cerca de 2 km a mais).
